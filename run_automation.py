@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-proDemoA 全链路自动化测试平台 - 运行脚本
+proDemoA 全链路自动化测试平台 - 主入口
+
+使用方法:
+    python run_automation.py
+
+测试人员只需修改 config/project_config.py 文件即可开始测试
 """
 
 import json
@@ -10,6 +16,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+# 确保可以导入automation模块
 script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, script_dir)
 sys.path.insert(0, os.path.join(script_dir, 'automation'))
@@ -17,23 +24,102 @@ sys.path.insert(0, os.path.join(script_dir, 'automation'))
 from workflow.engine import WorkflowEngine, WorkflowContext, create_workflow
 
 
-class AutomationTestPlatform:
-    def __init__(self, config_path: str = "automation/config/config.json"):
-        self.config = self._load_config(config_path)
-        self.workflow = create_workflow(self.config)
-        
-    def _load_config(self, config_path: str) -> dict:
-        if os.path.exists(config_path):
-            with open(config_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        return {}
+def load_project_config():
+    """加载项目配置文件"""
+    config_file = os.path.join(script_dir, 'config', 'project_config.py')
     
-    def run(self, input_data: dict) -> dict:
+    if not os.path.exists(config_file):
+        raise FileNotFoundError(f"配置文件不存在: {config_file}")
+    
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("project_config", config_file)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    
+    return module.PROJECT_CONFIG
+
+
+def load_requirement_doc(config):
+    """加载需求文档"""
+    # 优先从文件读取
+    if config.get("requirement_doc_path"):
+        doc_path = os.path.join(script_dir, config["requirement_doc_path"])
+        if os.path.exists(doc_path):
+            with open(doc_path, 'r', encoding='utf-8') as f:
+                return f.read()
+    
+    # 其次使用直接填写的内容
+    if config.get("requirement_doc"):
+        return config["requirement_doc"]
+    
+    return ""
+
+
+def prepare_input_data(config):
+    """准备输入数据"""
+    # 加载需求文档
+    requirement_doc = load_requirement_doc(config)
+    
+    # 准备数据库结构
+    database_schema = {}
+    if config.get("database", {}).get("enabled"):
+        db_config = config["database"]
+        database_schema = {
+            "type": db_config.get("type", "mysql"),
+            "host": db_config.get("host", "localhost"),
+            "port": db_config.get("port", 3306),
+            "database": db_config.get("database", ""),
+            "tables": db_config.get("tables", [])
+        }
+    
+    # 准备代码仓库信息
+    code_info = {"frontend": {}, "backend": {}}
+    
+    if config.get("frontend_repo", {}).get("enabled"):
+        code_info["frontend"] = config["frontend_repo"]
+    
+    if config.get("backend_repo", {}).get("enabled"):
+        code_info["backend"] = config["backend_repo"]
+    
+    return {
+        "project_name": config.get("project_name", "未命名项目"),
+        "project_code": config.get("project_code", ""),
+        "test_type": config.get("test_type", "功能测试"),
+        "test_environment": config.get("test_environment", "test"),
+        "requirement_doc": requirement_doc,
+        "database_schema": database_schema,
+        "code_info": code_info
+    }
+
+
+def ensure_output_dir():
+    """确保输出目录存在"""
+    output_dir = Path(os.path.join(script_dir, 'output'))
+    output_dir.mkdir(exist_ok=True)
+    return output_dir
+
+
+class AutomationTestPlatform:
+    """全链路自动化测试平台主类"""
+    
+    def __init__(self):
+        self.config = load_project_config()
+        self.workflow = create_workflow(self.config)
+        self.output_dir = ensure_output_dir()
+        
+    def run(self, input_data: dict = None) -> dict:
+        """运行全链路自动化测试"""
+        if input_data is None:
+            input_data = prepare_input_data(self.config)
+        
         run_id = f"RUN-{datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}"
         
         print(f"\n{'='*60}")
         print(f"🚀 proDemoA 全链路自动化测试平台")
         print(f"{'='*60}")
+        print(f"📋 项目名称: {input_data.get('project_name', 'N/A')}")
+        print(f"📋 项目代码: {input_data.get('project_code', 'N/A')}")
+        print(f"📋 测试类型: {input_data.get('test_type', 'N/A')}")
         print(f"📋 运行ID: {run_id}")
         print(f"📅 开始时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"{'='*60}\n")
@@ -68,68 +154,78 @@ class AutomationTestPlatform:
         print(f"🐛 缺陷数: {results['summary']['defects_count']}")
         print(f"{'='*60}\n")
         
+        output_files = self.config.get("output", {})
+        
         output_info = {
             "run_id": run_id,
             "status": results['status'],
             "test_cases": context.test_cases,
             "defects": context.defects,
             "execution_results": context.execution_results,
-            "report_path": context.metadata.get("report_path", "output/test_report.html"),
+            "report_path": context.metadata.get("report_path", output_files.get("report_file", "output/test_report.html")),
             "output_files": {
-                "test_cases": "output/test_cases.csv",
-                "defects": "output/defects.csv",
-                "report": "output/test_report.html"
+                "test_cases": output_files.get("test_cases_file", "output/test_cases.csv"),
+                "defects": output_files.get("defects_file", "output/defects.csv"),
+                "report": output_files.get("report_file", "output/test_report.html")
             },
             "summary": results['summary']
         }
         
         self._save_results(output_info)
+        self._print_output_files(output_info)
+        
         return output_info
     
     def _save_results(self, results: dict):
-        output_dir = Path("output")
-        output_dir.mkdir(exist_ok=True)
+        """保存结果到文件"""
+        output_files = self.config.get("output", {})
         
-        results_file = f"output/results_{results['run_id']}.json"
+        results_file = os.path.join(script_dir, output_files.get("results_file", "output/results.json"))
         with open(results_file, 'w', encoding='utf-8') as f:
             json.dump(results, f, ensure_ascii=False, indent=2)
         
-        print(f"📁 结果已保存到: {results_file}")
+        print(f"📁 结果已保存")
+    
+    def _print_output_files(self, results: dict):
+        """打印输出文件信息"""
+        print("📄 输出文件:")
+        for name, path in results.get("output_files", {}).items():
+            full_path = os.path.join(script_dir, path)
+            if os.path.exists(full_path):
+                size = os.path.getsize(full_path)
+                print(f"   - {name}: {path} ({size} bytes)")
 
 
 def main():
+    """主入口函数"""
     print("""
     ╔══════════════════════════════════════════════════════════╗
     ║         proDemoA 全链路自动化测试平台                    ║
     ║                                                          ║
-    ║  输入：需求文档 + 数据库信息 + 代码仓库地址               ║
-    ║  输出：测试用例 + 缺陷清单 + 测试报告                    ║
+    ║  配置: config/project_config.py                          ║
+    ║  运行: python run_automation.py                         ║
     ╚══════════════════════════════════════════════════════════╝
     """)
     
-    if len(sys.argv) > 1:
-        input_file = sys.argv[1]
-        if os.path.exists(input_file):
-            with open(input_file, 'r', encoding='utf-8') as f:
-                input_data = json.load(f)
-        else:
-            print(f"❌ 输入文件不存在: {input_file}")
-            return
-    else:
-        input_data = {
-            "project_name": "演示项目",
-            "project_code": "DEMO-001",
-            "test_type": "功能测试",
-            "test_environment": "test"
-        }
-    
-    platform = AutomationTestPlatform()
-    results = platform.run(input_data)
-    
-    print("\n📊 测试结果摘要:")
-    print(f"   - 测试用例总数: {results['summary']['test_cases_count']}")
-    print(f"   - 缺陷总数: {results['summary']['defects_count']}")
-    print(f"   - 报告路径: {results['report_path']}")
+    try:
+        platform = AutomationTestPlatform()
+        results = platform.run()
+        
+        print("\n" + "="*60)
+        print("📊 测试结果摘要")
+        print("="*60)
+        print(f"   测试用例总数: {results['summary']['test_cases_count']}")
+        print(f"   缺陷总数: {results['summary']['defects_count']}")
+        
+    except FileNotFoundError as e:
+        print(f"\n❌ 错误: {e}")
+        print("\n请确保配置文件存在: config/project_config.py")
+        sys.exit(1)
+    except Exception as e:
+        print(f"\n❌ 执行错误: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,2363 @@
+{
+  "run_id": "RUN-20260506074529-3070b1",
+  "status": "completed",
+  "test_cases": [
+    {
+      "id": "TC-API-001",
+      "type": "API",
+      "module": "auth",
+      "name": "POST /api/auth/login - 正常",
+      "description": "API接口 POST /api/auth/login 的正常测试",
+      "priority": "high",
+      "preconditions": [
+        "API服务正常运行"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 POST 请求到 /api/auth/login",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回200/201，响应数据正确",
+      "test_data": {
+        "username": "testuser",
+        "password": "Test123456"
+      },
+      "tags": [
+        "POST",
+        "auth",
+        "正常"
+      ]
+    },
+    {
+      "id": "TC-API-002",
+      "type": "API",
+      "module": "auth",
+      "name": "POST /api/auth/login - 参数为空",
+      "description": "API接口 POST /api/auth/login 的参数为空测试",
+      "priority": "medium",
+      "preconditions": [
+        "API服务正常运行"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 POST 请求到 /api/auth/login，参数为空",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回400，提示参数不能为空",
+      "test_data": {
+        "username": "testuser",
+        "password": "Test123456"
+      },
+      "tags": [
+        "POST",
+        "auth",
+        "参数为空"
+      ]
+    },
+    {
+      "id": "TC-API-003",
+      "type": "API",
+      "module": "auth",
+      "name": "POST /api/auth/login - 参数错误",
+      "description": "API接口 POST /api/auth/login 的参数错误测试",
+      "priority": "medium",
+      "preconditions": [
+        "API服务正常运行"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 POST 请求到 /api/auth/login，使用错误参数",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回400，提示参数错误",
+      "test_data": {
+        "username": "testuser",
+        "password": "Test123456"
+      },
+      "tags": [
+        "POST",
+        "auth",
+        "参数错误"
+      ]
+    },
+    {
+      "id": "TC-API-004",
+      "type": "API",
+      "module": "auth",
+      "name": "POST /api/auth/login - 权限验证",
+      "description": "API接口 POST /api/auth/login 的权限验证测试",
+      "priority": "high",
+      "preconditions": [
+        "API服务正常运行"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 POST 请求到 /api/auth/login，无认证信息",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回401，未授权访问",
+      "test_data": {
+        "username": "testuser",
+        "password": "Test123456"
+      },
+      "tags": [
+        "POST",
+        "auth",
+        "权限验证"
+      ]
+    },
+    {
+      "id": "TC-API-005",
+      "type": "API",
+      "module": "auth",
+      "name": "POST /api/auth/register - 正常",
+      "description": "API接口 POST /api/auth/register 的正常测试",
+      "priority": "high",
+      "preconditions": [
+        "API服务正常运行"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 POST 请求到 /api/auth/register",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回200/201，响应数据正确",
+      "test_data": {
+        "username": "testuser4a876cb9",
+        "email": "test32a34f64@example.com",
+        "password": "Test123456"
+      },
+      "tags": [
+        "POST",
+        "auth",
+        "正常"
+      ]
+    },
+    {
+      "id": "TC-API-006",
+      "type": "API",
+      "module": "auth",
+      "name": "POST /api/auth/register - 参数为空",
+      "description": "API接口 POST /api/auth/register 的参数为空测试",
+      "priority": "medium",
+      "preconditions": [
+        "API服务正常运行"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 POST 请求到 /api/auth/register，参数为空",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回400，提示参数不能为空",
+      "test_data": {
+        "username": "testuser6c801f89",
+        "email": "test3575e846@example.com",
+        "password": "Test123456"
+      },
+      "tags": [
+        "POST",
+        "auth",
+        "参数为空"
+      ]
+    },
+    {
+      "id": "TC-API-007",
+      "type": "API",
+      "module": "auth",
+      "name": "POST /api/auth/register - 参数错误",
+      "description": "API接口 POST /api/auth/register 的参数错误测试",
+      "priority": "medium",
+      "preconditions": [
+        "API服务正常运行"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 POST 请求到 /api/auth/register，使用错误参数",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回400，提示参数错误",
+      "test_data": {
+        "username": "testuserde247b02",
+        "email": "testc0057ff5@example.com",
+        "password": "Test123456"
+      },
+      "tags": [
+        "POST",
+        "auth",
+        "参数错误"
+      ]
+    },
+    {
+      "id": "TC-API-008",
+      "type": "API",
+      "module": "auth",
+      "name": "POST /api/auth/register - 权限验证",
+      "description": "API接口 POST /api/auth/register 的权限验证测试",
+      "priority": "high",
+      "preconditions": [
+        "API服务正常运行"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 POST 请求到 /api/auth/register，无认证信息",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回401，未授权访问",
+      "test_data": {
+        "username": "testusercefaf827",
+        "email": "test8428ff51@example.com",
+        "password": "Test123456"
+      },
+      "tags": [
+        "POST",
+        "auth",
+        "权限验证"
+      ]
+    },
+    {
+      "id": "TC-API-009",
+      "type": "API",
+      "module": "users",
+      "name": "GET /api/users - 正常",
+      "description": "API接口 GET /api/users 的正常测试",
+      "priority": "high",
+      "preconditions": [
+        "API服务正常运行",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 GET 请求到 /api/users",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回200/201，响应数据正确",
+      "test_data": {
+        "username": "newuser",
+        "email": "newbb7f520f@example.com"
+      },
+      "tags": [
+        "GET",
+        "users",
+        "正常"
+      ]
+    },
+    {
+      "id": "TC-API-010",
+      "type": "API",
+      "module": "users",
+      "name": "GET /api/users - 无数据",
+      "description": "API接口 GET /api/users 的无数据测试",
+      "priority": "medium",
+      "preconditions": [
+        "API服务正常运行",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "按预期返回相应状态码",
+      "test_data": {
+        "username": "newuser",
+        "email": "newb6e2be73@example.com"
+      },
+      "tags": [
+        "GET",
+        "users",
+        "无数据"
+      ]
+    },
+    {
+      "id": "TC-API-011",
+      "type": "API",
+      "module": "users",
+      "name": "GET /api/users - 权限验证",
+      "description": "API接口 GET /api/users 的权限验证测试",
+      "priority": "high",
+      "preconditions": [
+        "API服务正常运行",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 GET 请求到 /api/users，无认证信息",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回401，未授权访问",
+      "test_data": {
+        "username": "newuser",
+        "email": "new998a70d5@example.com"
+      },
+      "tags": [
+        "GET",
+        "users",
+        "权限验证"
+      ]
+    },
+    {
+      "id": "TC-API-012",
+      "type": "API",
+      "module": "users",
+      "name": "GET /api/users - 分页",
+      "description": "API接口 GET /api/users 的分页测试",
+      "priority": "medium",
+      "preconditions": [
+        "API服务正常运行",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 GET 请求到 /api/users?page=1&page_size=10",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回200，分页数据正确",
+      "test_data": {
+        "username": "newuser",
+        "email": "newefafef88@example.com"
+      },
+      "tags": [
+        "GET",
+        "users",
+        "分页"
+      ]
+    },
+    {
+      "id": "TC-API-013",
+      "type": "API",
+      "module": "users",
+      "name": "POST /api/users - 正常",
+      "description": "API接口 POST /api/users 的正常测试",
+      "priority": "high",
+      "preconditions": [
+        "API服务正常运行",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 POST 请求到 /api/users",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回200/201，响应数据正确",
+      "test_data": {
+        "username": "newuser",
+        "email": "newc817660a@example.com"
+      },
+      "tags": [
+        "POST",
+        "users",
+        "正常"
+      ]
+    },
+    {
+      "id": "TC-API-014",
+      "type": "API",
+      "module": "users",
+      "name": "POST /api/users - 参数为空",
+      "description": "API接口 POST /api/users 的参数为空测试",
+      "priority": "medium",
+      "preconditions": [
+        "API服务正常运行",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 POST 请求到 /api/users，参数为空",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回400，提示参数不能为空",
+      "test_data": {
+        "username": "newuser",
+        "email": "newcc42eb91@example.com"
+      },
+      "tags": [
+        "POST",
+        "users",
+        "参数为空"
+      ]
+    },
+    {
+      "id": "TC-API-015",
+      "type": "API",
+      "module": "users",
+      "name": "POST /api/users - 参数错误",
+      "description": "API接口 POST /api/users 的参数错误测试",
+      "priority": "medium",
+      "preconditions": [
+        "API服务正常运行",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 POST 请求到 /api/users，使用错误参数",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回400，提示参数错误",
+      "test_data": {
+        "username": "newuser",
+        "email": "newe8d93a18@example.com"
+      },
+      "tags": [
+        "POST",
+        "users",
+        "参数错误"
+      ]
+    },
+    {
+      "id": "TC-API-016",
+      "type": "API",
+      "module": "users",
+      "name": "POST /api/users - 权限验证",
+      "description": "API接口 POST /api/users 的权限验证测试",
+      "priority": "high",
+      "preconditions": [
+        "API服务正常运行",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 POST 请求到 /api/users，无认证信息",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回401，未授权访问",
+      "test_data": {
+        "username": "newuser",
+        "email": "new3a822f6e@example.com"
+      },
+      "tags": [
+        "POST",
+        "users",
+        "权限验证"
+      ]
+    },
+    {
+      "id": "TC-API-017",
+      "type": "API",
+      "module": "users",
+      "name": "GET /api/users/{id} - 正常",
+      "description": "API接口 GET /api/users/{id} 的正常测试",
+      "priority": "high",
+      "preconditions": [
+        "API服务正常运行",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 GET 请求到 /api/users/{id}",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回200/201，响应数据正确",
+      "test_data": {
+        "username": "newuser",
+        "email": "new0e2f5dd1@example.com"
+      },
+      "tags": [
+        "GET",
+        "users",
+        "正常"
+      ]
+    },
+    {
+      "id": "TC-API-018",
+      "type": "API",
+      "module": "users",
+      "name": "GET /api/users/{id} - 无数据",
+      "description": "API接口 GET /api/users/{id} 的无数据测试",
+      "priority": "medium",
+      "preconditions": [
+        "API服务正常运行",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "按预期返回相应状态码",
+      "test_data": {
+        "username": "newuser",
+        "email": "newf84a94dc@example.com"
+      },
+      "tags": [
+        "GET",
+        "users",
+        "无数据"
+      ]
+    },
+    {
+      "id": "TC-API-019",
+      "type": "API",
+      "module": "users",
+      "name": "GET /api/users/{id} - 权限验证",
+      "description": "API接口 GET /api/users/{id} 的权限验证测试",
+      "priority": "high",
+      "preconditions": [
+        "API服务正常运行",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 GET 请求到 /api/users/{id}，无认证信息",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回401，未授权访问",
+      "test_data": {
+        "username": "newuser",
+        "email": "newf5b860a3@example.com"
+      },
+      "tags": [
+        "GET",
+        "users",
+        "权限验证"
+      ]
+    },
+    {
+      "id": "TC-API-020",
+      "type": "API",
+      "module": "users",
+      "name": "GET /api/users/{id} - 分页",
+      "description": "API接口 GET /api/users/{id} 的分页测试",
+      "priority": "medium",
+      "preconditions": [
+        "API服务正常运行",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 GET 请求到 /api/users/{id}?page=1&page_size=10",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回200，分页数据正确",
+      "test_data": {
+        "username": "newuser",
+        "email": "new24439b5d@example.com"
+      },
+      "tags": [
+        "GET",
+        "users",
+        "分页"
+      ]
+    },
+    {
+      "id": "TC-API-021",
+      "type": "API",
+      "module": "users",
+      "name": "PUT /api/users/{id} - 正常",
+      "description": "API接口 PUT /api/users/{id} 的正常测试",
+      "priority": "high",
+      "preconditions": [
+        "API服务正常运行",
+        "测试数据已创建",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 PUT 请求到 /api/users/{id}",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回200/201，响应数据正确",
+      "test_data": {
+        "username": "newuser",
+        "email": "newb9ce98bf@example.com"
+      },
+      "tags": [
+        "PUT",
+        "users",
+        "正常"
+      ]
+    },
+    {
+      "id": "TC-API-022",
+      "type": "API",
+      "module": "users",
+      "name": "PUT /api/users/{id} - 不存在",
+      "description": "API接口 PUT /api/users/{id} 的不存在测试",
+      "priority": "medium",
+      "preconditions": [
+        "API服务正常运行",
+        "测试数据已创建",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 PUT 请求到 /api/users/{id}，使用不存在的ID",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回404，资源不存在",
+      "test_data": {
+        "username": "newuser",
+        "email": "new230f1060@example.com"
+      },
+      "tags": [
+        "PUT",
+        "users",
+        "不存在"
+      ]
+    },
+    {
+      "id": "TC-API-023",
+      "type": "API",
+      "module": "users",
+      "name": "PUT /api/users/{id} - 参数错误",
+      "description": "API接口 PUT /api/users/{id} 的参数错误测试",
+      "priority": "medium",
+      "preconditions": [
+        "API服务正常运行",
+        "测试数据已创建",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 PUT 请求到 /api/users/{id}，使用错误参数",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回400，提示参数错误",
+      "test_data": {
+        "username": "newuser",
+        "email": "new89551421@example.com"
+      },
+      "tags": [
+        "PUT",
+        "users",
+        "参数错误"
+      ]
+    },
+    {
+      "id": "TC-API-024",
+      "type": "API",
+      "module": "users",
+      "name": "PUT /api/users/{id} - 权限验证",
+      "description": "API接口 PUT /api/users/{id} 的权限验证测试",
+      "priority": "high",
+      "preconditions": [
+        "API服务正常运行",
+        "测试数据已创建",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 PUT 请求到 /api/users/{id}，无认证信息",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回401，未授权访问",
+      "test_data": {
+        "username": "newuser",
+        "email": "new944f5dac@example.com"
+      },
+      "tags": [
+        "PUT",
+        "users",
+        "权限验证"
+      ]
+    },
+    {
+      "id": "TC-API-025",
+      "type": "API",
+      "module": "users",
+      "name": "DELETE /api/users/{id} - 正常",
+      "description": "API接口 DELETE /api/users/{id} 的正常测试",
+      "priority": "high",
+      "preconditions": [
+        "API服务正常运行",
+        "测试数据已创建",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 DELETE 请求到 /api/users/{id}",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回200/201，响应数据正确",
+      "test_data": {
+        "username": "newuser",
+        "email": "newb8abe411@example.com"
+      },
+      "tags": [
+        "DELETE",
+        "users",
+        "正常"
+      ]
+    },
+    {
+      "id": "TC-API-026",
+      "type": "API",
+      "module": "users",
+      "name": "DELETE /api/users/{id} - 不存在",
+      "description": "API接口 DELETE /api/users/{id} 的不存在测试",
+      "priority": "medium",
+      "preconditions": [
+        "API服务正常运行",
+        "测试数据已创建",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 DELETE 请求到 /api/users/{id}，使用不存在的ID",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回404，资源不存在",
+      "test_data": {
+        "username": "newuser",
+        "email": "new9cea9e79@example.com"
+      },
+      "tags": [
+        "DELETE",
+        "users",
+        "不存在"
+      ]
+    },
+    {
+      "id": "TC-API-027",
+      "type": "API",
+      "module": "users",
+      "name": "DELETE /api/users/{id} - 权限验证",
+      "description": "API接口 DELETE /api/users/{id} 的权限验证测试",
+      "priority": "high",
+      "preconditions": [
+        "API服务正常运行",
+        "测试数据已创建",
+        "用户已登录"
+      ],
+      "test_steps": [
+        "准备测试数据（根据需要）",
+        "发送 DELETE 请求到 /api/users/{id}，无认证信息",
+        "验证响应状态码",
+        "验证响应数据格式",
+        "验证业务逻辑正确性"
+      ],
+      "expected_result": "返回401，未授权访问",
+      "test_data": {
+        "username": "newuser",
+        "email": "new0632dd6a@example.com"
+      },
+      "tags": [
+        "DELETE",
+        "users",
+        "权限验证"
+      ]
+    },
+    {
+      "id": "TC-UI-028",
+      "type": "UI",
+      "module": "登录页",
+      "name": "登录页 - 正常登录",
+      "description": "登录页的正常登录场景",
+      "priority": "high",
+      "preconditions": [
+        "浏览器已打开",
+        "页面已加载"
+      ],
+      "test_steps": [
+        "打开浏览器",
+        "访问登录页",
+        "执行正常登录操作",
+        "验证结果"
+      ],
+      "expected_result": "正常登录成功，页面显示正确",
+      "test_data": {},
+      "tags": [
+        "ui",
+        "登录页",
+        "正常登录"
+      ]
+    },
+    {
+      "id": "TC-UI-029",
+      "type": "UI",
+      "module": "登录页",
+      "name": "登录页 - 错误密码",
+      "description": "登录页的错误密码场景",
+      "priority": "medium",
+      "preconditions": [
+        "浏览器已打开",
+        "页面已加载"
+      ],
+      "test_steps": [
+        "打开浏览器",
+        "访问登录页",
+        "执行错误密码操作",
+        "验证结果"
+      ],
+      "expected_result": "错误密码成功，页面显示正确",
+      "test_data": {},
+      "tags": [
+        "ui",
+        "登录页",
+        "错误密码"
+      ]
+    },
+    {
+      "id": "TC-UI-030",
+      "type": "UI",
+      "module": "登录页",
+      "name": "登录页 - 空用户名",
+      "description": "登录页的空用户名场景",
+      "priority": "medium",
+      "preconditions": [
+        "浏览器已打开",
+        "页面已加载"
+      ],
+      "test_steps": [
+        "打开浏览器",
+        "访问登录页",
+        "执行空用户名操作",
+        "验证结果"
+      ],
+      "expected_result": "空用户名成功，页面显示正确",
+      "test_data": {},
+      "tags": [
+        "ui",
+        "登录页",
+        "空用户名"
+      ]
+    },
+    {
+      "id": "TC-UI-031",
+      "type": "UI",
+      "module": "登录页",
+      "name": "登录页 - 空密码",
+      "description": "登录页的空密码场景",
+      "priority": "medium",
+      "preconditions": [
+        "浏览器已打开",
+        "页面已加载"
+      ],
+      "test_steps": [
+        "打开浏览器",
+        "访问登录页",
+        "执行空密码操作",
+        "验证结果"
+      ],
+      "expected_result": "空密码成功，页面显示正确",
+      "test_data": {},
+      "tags": [
+        "ui",
+        "登录页",
+        "空密码"
+      ]
+    },
+    {
+      "id": "TC-UI-032",
+      "type": "UI",
+      "module": "登录页",
+      "name": "登录页 - SQL注入",
+      "description": "登录页的SQL注入场景",
+      "priority": "medium",
+      "preconditions": [
+        "浏览器已打开",
+        "页面已加载"
+      ],
+      "test_steps": [
+        "打开浏览器",
+        "访问登录页",
+        "执行SQL注入操作",
+        "验证结果"
+      ],
+      "expected_result": "SQL注入成功，页面显示正确",
+      "test_data": {},
+      "tags": [
+        "ui",
+        "登录页",
+        "SQL注入"
+      ]
+    },
+    {
+      "id": "TC-UI-033",
+      "type": "UI",
+      "module": "注册页",
+      "name": "注册页 - 正常注册",
+      "description": "注册页的正常注册场景",
+      "priority": "high",
+      "preconditions": [
+        "浏览器已打开",
+        "页面已加载"
+      ],
+      "test_steps": [
+        "打开浏览器",
+        "访问注册页",
+        "执行正常注册操作",
+        "验证结果"
+      ],
+      "expected_result": "正常注册成功，页面显示正确",
+      "test_data": {},
+      "tags": [
+        "ui",
+        "注册页",
+        "正常注册"
+      ]
+    },
+    {
+      "id": "TC-UI-034",
+      "type": "UI",
+      "module": "注册页",
+      "name": "注册页 - 邮箱格式错误",
+      "description": "注册页的邮箱格式错误场景",
+      "priority": "medium",
+      "preconditions": [
+        "浏览器已打开",
+        "页面已加载"
+      ],
+      "test_steps": [
+        "打开浏览器",
+        "访问注册页",
+        "执行邮箱格式错误操作",
+        "验证结果"
+      ],
+      "expected_result": "邮箱格式错误成功，页面显示正确",
+      "test_data": {},
+      "tags": [
+        "ui",
+        "注册页",
+        "邮箱格式错误"
+      ]
+    },
+    {
+      "id": "TC-UI-035",
+      "type": "UI",
+      "module": "注册页",
+      "name": "注册页 - 密码太短",
+      "description": "注册页的密码太短场景",
+      "priority": "medium",
+      "preconditions": [
+        "浏览器已打开",
+        "页面已加载"
+      ],
+      "test_steps": [
+        "打开浏览器",
+        "访问注册页",
+        "执行密码太短操作",
+        "验证结果"
+      ],
+      "expected_result": "密码太短成功，页面显示正确",
+      "test_data": {},
+      "tags": [
+        "ui",
+        "注册页",
+        "密码太短"
+      ]
+    },
+    {
+      "id": "TC-UI-036",
+      "type": "UI",
+      "module": "注册页",
+      "name": "注册页 - 用户名重复",
+      "description": "注册页的用户名重复场景",
+      "priority": "medium",
+      "preconditions": [
+        "浏览器已打开",
+        "页面已加载"
+      ],
+      "test_steps": [
+        "打开浏览器",
+        "访问注册页",
+        "执行用户名重复操作",
+        "验证结果"
+      ],
+      "expected_result": "用户名重复成功，页面显示正确",
+      "test_data": {},
+      "tags": [
+        "ui",
+        "注册页",
+        "用户名重复"
+      ]
+    },
+    {
+      "id": "TC-UI-037",
+      "type": "UI",
+      "module": "用户列表页",
+      "name": "用户列表页 - 搜索功能",
+      "description": "用户列表页的搜索功能场景",
+      "priority": "medium",
+      "preconditions": [
+        "浏览器已打开",
+        "页面已加载"
+      ],
+      "test_steps": [
+        "打开浏览器",
+        "访问用户列表页",
+        "执行搜索功能操作",
+        "验证结果"
+      ],
+      "expected_result": "搜索功能成功，页面显示正确",
+      "test_data": {},
+      "tags": [
+        "ui",
+        "用户列表页",
+        "搜索功能"
+      ]
+    },
+    {
+      "id": "TC-UI-038",
+      "type": "UI",
+      "module": "用户列表页",
+      "name": "用户列表页 - 分页功能",
+      "description": "用户列表页的分页功能场景",
+      "priority": "medium",
+      "preconditions": [
+        "浏览器已打开",
+        "页面已加载"
+      ],
+      "test_steps": [
+        "打开浏览器",
+        "访问用户列表页",
+        "执行分页功能操作",
+        "验证结果"
+      ],
+      "expected_result": "分页功能成功，页面显示正确",
+      "test_data": {},
+      "tags": [
+        "ui",
+        "用户列表页",
+        "分页功能"
+      ]
+    },
+    {
+      "id": "TC-UI-039",
+      "type": "UI",
+      "module": "用户列表页",
+      "name": "用户列表页 - 新增用户",
+      "description": "用户列表页的新增用户场景",
+      "priority": "medium",
+      "preconditions": [
+        "浏览器已打开",
+        "页面已加载"
+      ],
+      "test_steps": [
+        "打开浏览器",
+        "访问用户列表页",
+        "执行新增用户操作",
+        "验证结果"
+      ],
+      "expected_result": "新增用户成功，页面显示正确",
+      "test_data": {},
+      "tags": [
+        "ui",
+        "用户列表页",
+        "新增用户"
+      ]
+    },
+    {
+      "id": "TC-UI-040",
+      "type": "UI",
+      "module": "用户列表页",
+      "name": "用户列表页 - 编辑用户",
+      "description": "用户列表页的编辑用户场景",
+      "priority": "medium",
+      "preconditions": [
+        "浏览器已打开",
+        "页面已加载"
+      ],
+      "test_steps": [
+        "打开浏览器",
+        "访问用户列表页",
+        "执行编辑用户操作",
+        "验证结果"
+      ],
+      "expected_result": "编辑用户成功，页面显示正确",
+      "test_data": {},
+      "tags": [
+        "ui",
+        "用户列表页",
+        "编辑用户"
+      ]
+    },
+    {
+      "id": "TC-UI-041",
+      "type": "UI",
+      "module": "用户列表页",
+      "name": "用户列表页 - 删除用户",
+      "description": "用户列表页的删除用户场景",
+      "priority": "medium",
+      "preconditions": [
+        "浏览器已打开",
+        "页面已加载"
+      ],
+      "test_steps": [
+        "打开浏览器",
+        "访问用户列表页",
+        "执行删除用户操作",
+        "验证结果"
+      ],
+      "expected_result": "删除用户成功，页面显示正确",
+      "test_data": {},
+      "tags": [
+        "ui",
+        "用户列表页",
+        "删除用户"
+      ]
+    },
+    {
+      "id": "TC-INT-042",
+      "type": "Integration",
+      "module": "业务流程",
+      "name": "用户注册登录流程",
+      "description": "集成测试：用户注册登录流程",
+      "priority": "high",
+      "preconditions": [
+        "系统正常运行",
+        "数据库连接正常"
+      ],
+      "test_steps": [
+        "注册新用户",
+        "登录系统",
+        "验证登录状态"
+      ],
+      "expected_result": "所有步骤执行成功",
+      "test_data": {},
+      "tags": [
+        "integration",
+        "workflow"
+      ]
+    },
+    {
+      "id": "TC-INT-043",
+      "type": "Integration",
+      "module": "业务流程",
+      "name": "用户CRUD完整流程",
+      "description": "集成测试：用户CRUD完整流程",
+      "priority": "high",
+      "preconditions": [
+        "系统正常运行",
+        "数据库连接正常"
+      ],
+      "test_steps": [
+        "创建用户",
+        "查询用户",
+        "更新用户",
+        "删除用户",
+        "验证删除"
+      ],
+      "expected_result": "所有步骤执行成功",
+      "test_data": {},
+      "tags": [
+        "integration",
+        "workflow"
+      ]
+    },
+    {
+      "id": "TC-INT-044",
+      "type": "Integration",
+      "module": "业务流程",
+      "name": "数据权限隔离",
+      "description": "集成测试：数据权限隔离",
+      "priority": "medium",
+      "preconditions": [
+        "系统正常运行",
+        "数据库连接正常"
+      ],
+      "test_steps": [
+        "用户A创建数据",
+        "用户B尝试访问",
+        "验证权限隔离"
+      ],
+      "expected_result": "所有步骤执行成功",
+      "test_data": {},
+      "tags": [
+        "integration",
+        "workflow"
+      ]
+    }
+  ],
+  "defects": [
+    {
+      "id": "DEF-001",
+      "test_id": "TC-API-002",
+      "test_name": "POST /api/auth/login - 参数为空",
+      "title": "测试失败: POST /api/auth/login - 参数为空",
+      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "severity": "high",
+      "status": "new",
+      "type": "authentication",
+      "module": "auth",
+      "priority": "P2",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-002",
+        "3. 观察测试结果",
+        "4. 记录错误信息"
+      ],
+      "actual_result": "权限验证失败 - 预期失败",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-05-06T07:45:29.641257",
+      "assignee": "",
+      "tags": [
+        "认证问题"
+      ]
+    },
+    {
+      "id": "DEF-002",
+      "test_id": "TC-API-003",
+      "test_name": "POST /api/auth/login - 参数错误",
+      "title": "测试失败: POST /api/auth/login - 参数错误",
+      "description": "测试用例执行失败，错误信息: 参数错误 - 预期失败",
+      "severity": "high",
+      "status": "new",
+      "type": "authentication",
+      "module": "auth",
+      "priority": "P2",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-003",
+        "3. 观察测试结果",
+        "4. 记录错误信息"
+      ],
+      "actual_result": "参数错误 - 预期失败",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-05-06T07:45:29.641272",
+      "assignee": "",
+      "tags": [
+        "认证问题"
+      ]
+    },
+    {
+      "id": "DEF-003",
+      "test_id": "TC-API-004",
+      "test_name": "POST /api/auth/login - 权限验证",
+      "title": "测试失败: POST /api/auth/login - 权限验证",
+      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "severity": "high",
+      "status": "new",
+      "type": "authentication",
+      "module": "auth",
+      "priority": "P2",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-004",
+        "3. 观察测试结果",
+        "4. 记录错误信息"
+      ],
+      "actual_result": "权限验证失败 - 预期失败",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-05-06T07:45:29.641281",
+      "assignee": "",
+      "tags": [
+        "认证问题"
+      ]
+    },
+    {
+      "id": "DEF-004",
+      "test_id": "TC-API-006",
+      "test_name": "POST /api/auth/register - 参数为空",
+      "title": "测试失败: POST /api/auth/register - 参数为空",
+      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "severity": "high",
+      "status": "new",
+      "type": "authentication",
+      "module": "auth",
+      "priority": "P2",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-006",
+        "3. 观察测试结果",
+        "4. 记录错误信息"
+      ],
+      "actual_result": "权限验证失败 - 预期失败",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-05-06T07:45:29.641289",
+      "assignee": "",
+      "tags": [
+        "认证问题"
+      ]
+    },
+    {
+      "id": "DEF-005",
+      "test_id": "TC-API-007",
+      "test_name": "POST /api/auth/register - 参数错误",
+      "title": "测试失败: POST /api/auth/register - 参数错误",
+      "description": "测试用例执行失败，错误信息: 参数错误 - 预期失败",
+      "severity": "high",
+      "status": "new",
+      "type": "authentication",
+      "module": "auth",
+      "priority": "P2",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-007",
+        "3. 观察测试结果",
+        "4. 记录错误信息"
+      ],
+      "actual_result": "参数错误 - 预期失败",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-05-06T07:45:29.641296",
+      "assignee": "",
+      "tags": [
+        "认证问题"
+      ]
+    },
+    {
+      "id": "DEF-006",
+      "test_id": "TC-API-008",
+      "test_name": "POST /api/auth/register - 权限验证",
+      "title": "测试失败: POST /api/auth/register - 权限验证",
+      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "severity": "high",
+      "status": "new",
+      "type": "authentication",
+      "module": "auth",
+      "priority": "P2",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-008",
+        "3. 观察测试结果",
+        "4. 记录错误信息"
+      ],
+      "actual_result": "权限验证失败 - 预期失败",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-05-06T07:45:29.641303",
+      "assignee": "",
+      "tags": [
+        "认证问题"
+      ]
+    },
+    {
+      "id": "DEF-007",
+      "test_id": "TC-API-011",
+      "test_name": "GET /api/users - 权限验证",
+      "title": "测试失败: GET /api/users - 权限验证",
+      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "severity": "low",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P4",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-011",
+        "3. 观察测试结果",
+        "4. 记录错误信息"
+      ],
+      "actual_result": "权限验证失败 - 预期失败",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-05-06T07:45:29.641313",
+      "assignee": "",
+      "tags": [
+        "功能问题"
+      ]
+    },
+    {
+      "id": "DEF-008",
+      "test_id": "TC-API-015",
+      "test_name": "POST /api/users - 参数错误",
+      "title": "测试失败: POST /api/users - 参数错误",
+      "description": "测试用例执行失败，错误信息: 参数错误 - 预期失败",
+      "severity": "low",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P4",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-015",
+        "3. 观察测试结果",
+        "4. 记录错误信息"
+      ],
+      "actual_result": "参数错误 - 预期失败",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-05-06T07:45:29.641322",
+      "assignee": "",
+      "tags": [
+        "功能问题"
+      ]
+    },
+    {
+      "id": "DEF-009",
+      "test_id": "TC-API-016",
+      "test_name": "POST /api/users - 权限验证",
+      "title": "测试失败: POST /api/users - 权限验证",
+      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "severity": "low",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P4",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-016",
+        "3. 观察测试结果",
+        "4. 记录错误信息"
+      ],
+      "actual_result": "权限验证失败 - 预期失败",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-05-06T07:45:29.641330",
+      "assignee": "",
+      "tags": [
+        "功能问题"
+      ]
+    },
+    {
+      "id": "DEF-010",
+      "test_id": "TC-API-019",
+      "test_name": "GET /api/users/{id} - 权限验证",
+      "title": "测试失败: GET /api/users/{id} - 权限验证",
+      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "severity": "low",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P4",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-019",
+        "3. 观察测试结果",
+        "4. 记录错误信息"
+      ],
+      "actual_result": "权限验证失败 - 预期失败",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-05-06T07:45:29.641339",
+      "assignee": "",
+      "tags": [
+        "功能问题"
+      ]
+    },
+    {
+      "id": "DEF-011",
+      "test_id": "TC-API-022",
+      "test_name": "PUT /api/users/{id} - 不存在",
+      "title": "测试失败: PUT /api/users/{id} - 不存在",
+      "description": "测试用例执行失败，错误信息: 资源不存在 - 预期失败",
+      "severity": "low",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P4",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-022",
+        "3. 观察测试结果",
+        "4. 记录错误信息"
+      ],
+      "actual_result": "资源不存在 - 预期失败",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-05-06T07:45:29.641346",
+      "assignee": "",
+      "tags": [
+        "功能问题"
+      ]
+    },
+    {
+      "id": "DEF-012",
+      "test_id": "TC-API-023",
+      "test_name": "PUT /api/users/{id} - 参数错误",
+      "title": "测试失败: PUT /api/users/{id} - 参数错误",
+      "description": "测试用例执行失败，错误信息: 参数错误 - 预期失败",
+      "severity": "low",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P4",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-023",
+        "3. 观察测试结果",
+        "4. 记录错误信息"
+      ],
+      "actual_result": "参数错误 - 预期失败",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-05-06T07:45:29.641355",
+      "assignee": "",
+      "tags": [
+        "功能问题"
+      ]
+    },
+    {
+      "id": "DEF-013",
+      "test_id": "TC-API-024",
+      "test_name": "PUT /api/users/{id} - 权限验证",
+      "title": "测试失败: PUT /api/users/{id} - 权限验证",
+      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "severity": "low",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P4",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-024",
+        "3. 观察测试结果",
+        "4. 记录错误信息"
+      ],
+      "actual_result": "权限验证失败 - 预期失败",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-05-06T07:45:29.641361",
+      "assignee": "",
+      "tags": [
+        "功能问题"
+      ]
+    },
+    {
+      "id": "DEF-014",
+      "test_id": "TC-API-026",
+      "test_name": "DELETE /api/users/{id} - 不存在",
+      "title": "测试失败: DELETE /api/users/{id} - 不存在",
+      "description": "测试用例执行失败，错误信息: 资源不存在 - 预期失败",
+      "severity": "critical",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P1",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-026",
+        "3. 观察测试结果",
+        "4. 记录错误信息"
+      ],
+      "actual_result": "资源不存在 - 预期失败",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-05-06T07:45:29.641370",
+      "assignee": "",
+      "tags": [
+        "功能问题"
+      ]
+    },
+    {
+      "id": "DEF-015",
+      "test_id": "TC-API-027",
+      "test_name": "DELETE /api/users/{id} - 权限验证",
+      "title": "测试失败: DELETE /api/users/{id} - 权限验证",
+      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "severity": "critical",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P1",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-027",
+        "3. 观察测试结果",
+        "4. 记录错误信息"
+      ],
+      "actual_result": "权限验证失败 - 预期失败",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-05-06T07:45:29.641377",
+      "assignee": "",
+      "tags": [
+        "功能问题"
+      ]
+    },
+    {
+      "id": "DEF-SYS-016",
+      "test_id": "N/A",
+      "test_name": "users模块系统性缺陷",
+      "title": "users模块存在系统性缺陷",
+      "description": "检测到users模块存在多个相关缺陷，可能存在系统性问题",
+      "severity": "high",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "high",
+      "steps_to_reproduce": [
+        "执行users相关测试",
+        "观察多个测试失败",
+        "分析失败模式"
+      ],
+      "actual_result": "多个测试失败",
+      "expected_result": "所有测试通过",
+      "root_cause": "需要进一步分析",
+      "suggested_fix": "建议进行代码审查",
+      "created_at": "2026-05-06T07:45:29.642169",
+      "assignee": "",
+      "tags": [
+        "systemic",
+        "users",
+        "功能问题"
+      ]
+    }
+  ],
+  "execution_results": [
+    {
+      "test_id": "TC-API-001",
+      "test_name": "POST /api/auth/login - 正常",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.640876",
+      "end_time": "2026-05-06T07:45:29.640897",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "success": true,
+        "data": {}
+      },
+      "error_message": "API调用成功",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-002",
+      "test_name": "POST /api/auth/login - 参数为空",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.640900",
+      "end_time": "2026-05-06T07:45:29.640909",
+      "duration": 0.0,
+      "status": "failed",
+      "status_code": 401,
+      "response": {
+        "error": "Unauthorized"
+      },
+      "error_message": "权限验证失败 - 预期失败",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-003",
+      "test_name": "POST /api/auth/login - 参数错误",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.640912",
+      "end_time": "2026-05-06T07:45:29.640919",
+      "duration": 0.0,
+      "status": "failed",
+      "status_code": 400,
+      "response": {
+        "error": "Invalid parameters"
+      },
+      "error_message": "参数错误 - 预期失败",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-004",
+      "test_name": "POST /api/auth/login - 权限验证",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.640920",
+      "end_time": "2026-05-06T07:45:29.640931",
+      "duration": 0.0,
+      "status": "failed",
+      "status_code": 401,
+      "response": {
+        "error": "Unauthorized"
+      },
+      "error_message": "权限验证失败 - 预期失败",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-005",
+      "test_name": "POST /api/auth/register - 正常",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.640932",
+      "end_time": "2026-05-06T07:45:29.640937",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "success": true,
+        "data": {}
+      },
+      "error_message": "API调用成功",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-006",
+      "test_name": "POST /api/auth/register - 参数为空",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.640939",
+      "end_time": "2026-05-06T07:45:29.640945",
+      "duration": 0.0,
+      "status": "failed",
+      "status_code": 401,
+      "response": {
+        "error": "Unauthorized"
+      },
+      "error_message": "权限验证失败 - 预期失败",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-007",
+      "test_name": "POST /api/auth/register - 参数错误",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.640946",
+      "end_time": "2026-05-06T07:45:29.640950",
+      "duration": 0.0,
+      "status": "failed",
+      "status_code": 400,
+      "response": {
+        "error": "Invalid parameters"
+      },
+      "error_message": "参数错误 - 预期失败",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-008",
+      "test_name": "POST /api/auth/register - 权限验证",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.640951",
+      "end_time": "2026-05-06T07:45:29.640955",
+      "duration": 0.0,
+      "status": "failed",
+      "status_code": 401,
+      "response": {
+        "error": "Unauthorized"
+      },
+      "error_message": "权限验证失败 - 预期失败",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-009",
+      "test_name": "GET /api/users - 正常",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.640956",
+      "end_time": "2026-05-06T07:45:29.640960",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "success": true,
+        "data": {}
+      },
+      "error_message": "API调用成功",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-010",
+      "test_name": "GET /api/users - 无数据",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.640961",
+      "end_time": "2026-05-06T07:45:29.640966",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {},
+      "error_message": "测试通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-011",
+      "test_name": "GET /api/users - 权限验证",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.640967",
+      "end_time": "2026-05-06T07:45:29.640971",
+      "duration": 0.0,
+      "status": "failed",
+      "status_code": 401,
+      "response": {
+        "error": "Unauthorized"
+      },
+      "error_message": "权限验证失败 - 预期失败",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-012",
+      "test_name": "GET /api/users - 分页",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.640973",
+      "end_time": "2026-05-06T07:45:29.640977",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {},
+      "error_message": "测试通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-013",
+      "test_name": "POST /api/users - 正常",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.640979",
+      "end_time": "2026-05-06T07:45:29.640984",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "success": true,
+        "data": {}
+      },
+      "error_message": "API调用成功",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-014",
+      "test_name": "POST /api/users - 参数为空",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.640985",
+      "end_time": "2026-05-06T07:45:29.640990",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {},
+      "error_message": "测试通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-015",
+      "test_name": "POST /api/users - 参数错误",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.640991",
+      "end_time": "2026-05-06T07:45:29.640994",
+      "duration": 0.0,
+      "status": "failed",
+      "status_code": 400,
+      "response": {
+        "error": "Invalid parameters"
+      },
+      "error_message": "参数错误 - 预期失败",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-016",
+      "test_name": "POST /api/users - 权限验证",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.640996",
+      "end_time": "2026-05-06T07:45:29.640999",
+      "duration": 0.0,
+      "status": "failed",
+      "status_code": 401,
+      "response": {
+        "error": "Unauthorized"
+      },
+      "error_message": "权限验证失败 - 预期失败",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-017",
+      "test_name": "GET /api/users/{id} - 正常",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.641001",
+      "end_time": "2026-05-06T07:45:29.641004",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "success": true,
+        "data": {}
+      },
+      "error_message": "API调用成功",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-018",
+      "test_name": "GET /api/users/{id} - 无数据",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.641005",
+      "end_time": "2026-05-06T07:45:29.641010",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {},
+      "error_message": "测试通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-019",
+      "test_name": "GET /api/users/{id} - 权限验证",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.641011",
+      "end_time": "2026-05-06T07:45:29.641015",
+      "duration": 0.0,
+      "status": "failed",
+      "status_code": 401,
+      "response": {
+        "error": "Unauthorized"
+      },
+      "error_message": "权限验证失败 - 预期失败",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-020",
+      "test_name": "GET /api/users/{id} - 分页",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.641016",
+      "end_time": "2026-05-06T07:45:29.641020",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {},
+      "error_message": "测试通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-021",
+      "test_name": "PUT /api/users/{id} - 正常",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.641021",
+      "end_time": "2026-05-06T07:45:29.641025",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "success": true,
+        "data": {}
+      },
+      "error_message": "API调用成功",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-022",
+      "test_name": "PUT /api/users/{id} - 不存在",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.641026",
+      "end_time": "2026-05-06T07:45:29.641030",
+      "duration": 0.0,
+      "status": "failed",
+      "status_code": 404,
+      "response": {
+        "error": "Not found"
+      },
+      "error_message": "资源不存在 - 预期失败",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-023",
+      "test_name": "PUT /api/users/{id} - 参数错误",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.641031",
+      "end_time": "2026-05-06T07:45:29.641036",
+      "duration": 0.0,
+      "status": "failed",
+      "status_code": 400,
+      "response": {
+        "error": "Invalid parameters"
+      },
+      "error_message": "参数错误 - 预期失败",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-024",
+      "test_name": "PUT /api/users/{id} - 权限验证",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.641038",
+      "end_time": "2026-05-06T07:45:29.641041",
+      "duration": 0.0,
+      "status": "failed",
+      "status_code": 401,
+      "response": {
+        "error": "Unauthorized"
+      },
+      "error_message": "权限验证失败 - 预期失败",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-025",
+      "test_name": "DELETE /api/users/{id} - 正常",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.641043",
+      "end_time": "2026-05-06T07:45:29.641046",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "success": true,
+        "data": {}
+      },
+      "error_message": "API调用成功",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-026",
+      "test_name": "DELETE /api/users/{id} - 不存在",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.641047",
+      "end_time": "2026-05-06T07:45:29.641051",
+      "duration": 0.0,
+      "status": "failed",
+      "status_code": 404,
+      "response": {
+        "error": "Not found"
+      },
+      "error_message": "资源不存在 - 预期失败",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-API-027",
+      "test_name": "DELETE /api/users/{id} - 权限验证",
+      "test_type": "API",
+      "start_time": "2026-05-06T07:45:29.641053",
+      "end_time": "2026-05-06T07:45:29.641057",
+      "duration": 0.0,
+      "status": "failed",
+      "status_code": 401,
+      "response": {
+        "error": "Unauthorized"
+      },
+      "error_message": "权限验证失败 - 预期失败",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-UI-028",
+      "test_name": "登录页 - 正常登录",
+      "test_type": "UI",
+      "start_time": "2026-05-06T07:45:29.641058",
+      "end_time": "2026-05-06T07:45:29.641062",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "elements_found": 5
+      },
+      "error_message": "UI元素验证通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-UI-029",
+      "test_name": "登录页 - 错误密码",
+      "test_type": "UI",
+      "start_time": "2026-05-06T07:45:29.641063",
+      "end_time": "2026-05-06T07:45:29.641067",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "elements_found": 5
+      },
+      "error_message": "UI元素验证通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-UI-030",
+      "test_name": "登录页 - 空用户名",
+      "test_type": "UI",
+      "start_time": "2026-05-06T07:45:29.641068",
+      "end_time": "2026-05-06T07:45:29.641071",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "elements_found": 5
+      },
+      "error_message": "UI元素验证通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-UI-031",
+      "test_name": "登录页 - 空密码",
+      "test_type": "UI",
+      "start_time": "2026-05-06T07:45:29.641072",
+      "end_time": "2026-05-06T07:45:29.641075",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "elements_found": 5
+      },
+      "error_message": "UI元素验证通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-UI-032",
+      "test_name": "登录页 - SQL注入",
+      "test_type": "UI",
+      "start_time": "2026-05-06T07:45:29.641076",
+      "end_time": "2026-05-06T07:45:29.641080",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "elements_found": 5
+      },
+      "error_message": "UI元素验证通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-UI-033",
+      "test_name": "注册页 - 正常注册",
+      "test_type": "UI",
+      "start_time": "2026-05-06T07:45:29.641081",
+      "end_time": "2026-05-06T07:45:29.641096",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "elements_found": 5
+      },
+      "error_message": "UI元素验证通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-UI-034",
+      "test_name": "注册页 - 邮箱格式错误",
+      "test_type": "UI",
+      "start_time": "2026-05-06T07:45:29.641098",
+      "end_time": "2026-05-06T07:45:29.641101",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "elements_found": 5
+      },
+      "error_message": "UI元素验证通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-UI-035",
+      "test_name": "注册页 - 密码太短",
+      "test_type": "UI",
+      "start_time": "2026-05-06T07:45:29.641102",
+      "end_time": "2026-05-06T07:45:29.641105",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "elements_found": 5
+      },
+      "error_message": "UI元素验证通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-UI-036",
+      "test_name": "注册页 - 用户名重复",
+      "test_type": "UI",
+      "start_time": "2026-05-06T07:45:29.641107",
+      "end_time": "2026-05-06T07:45:29.641110",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "elements_found": 5
+      },
+      "error_message": "UI元素验证通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-UI-037",
+      "test_name": "用户列表页 - 搜索功能",
+      "test_type": "UI",
+      "start_time": "2026-05-06T07:45:29.641111",
+      "end_time": "2026-05-06T07:45:29.641114",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "elements_found": 5
+      },
+      "error_message": "UI元素验证通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-UI-038",
+      "test_name": "用户列表页 - 分页功能",
+      "test_type": "UI",
+      "start_time": "2026-05-06T07:45:29.641115",
+      "end_time": "2026-05-06T07:45:29.641118",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "elements_found": 5
+      },
+      "error_message": "UI元素验证通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-UI-039",
+      "test_name": "用户列表页 - 新增用户",
+      "test_type": "UI",
+      "start_time": "2026-05-06T07:45:29.641120",
+      "end_time": "2026-05-06T07:45:29.641123",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "elements_found": 5
+      },
+      "error_message": "UI元素验证通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-UI-040",
+      "test_name": "用户列表页 - 编辑用户",
+      "test_type": "UI",
+      "start_time": "2026-05-06T07:45:29.641124",
+      "end_time": "2026-05-06T07:45:29.641127",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "elements_found": 5
+      },
+      "error_message": "UI元素验证通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-UI-041",
+      "test_name": "用户列表页 - 删除用户",
+      "test_type": "UI",
+      "start_time": "2026-05-06T07:45:29.641129",
+      "end_time": "2026-05-06T07:45:29.641132",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "elements_found": 5
+      },
+      "error_message": "UI元素验证通过",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-INT-042",
+      "test_name": "用户注册登录流程",
+      "test_type": "Integration",
+      "start_time": "2026-05-06T07:45:29.641133",
+      "end_time": "2026-05-06T07:45:29.641145",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "steps_completed": 3
+      },
+      "error_message": "集成流程执行成功",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-INT-043",
+      "test_name": "用户CRUD完整流程",
+      "test_type": "Integration",
+      "start_time": "2026-05-06T07:45:29.641147",
+      "end_time": "2026-05-06T07:45:29.641155",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "steps_completed": 3
+      },
+      "error_message": "集成流程执行成功",
+      "screenshots": [],
+      "logs": []
+    },
+    {
+      "test_id": "TC-INT-044",
+      "test_name": "数据权限隔离",
+      "test_type": "Integration",
+      "start_time": "2026-05-06T07:45:29.641157",
+      "end_time": "2026-05-06T07:45:29.641162",
+      "duration": 0.0,
+      "status": "passed",
+      "status_code": 200,
+      "response": {
+        "steps_completed": 3
+      },
+      "error_message": "集成流程执行成功",
+      "screenshots": [],
+      "logs": []
+    }
+  ],
+  "report_path": "output/test_report.html",
+  "output_files": {
+    "test_cases": "output/test_cases.csv",
+    "defects": "output/defects.csv",
+    "report": "output/test_report.html"
+  },
+  "summary": {
+    "total_tasks": 7,
+    "completed": 7,
+    "failed": 0,
+    "total_duration": 0.0,
+    "test_cases_count": 44,
+    "defects_count": 16
+  }
+}
