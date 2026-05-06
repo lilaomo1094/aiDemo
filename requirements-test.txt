@@ -1,0 +1,9 @@
+pytest
+pytest-asyncio
+pytest-html
+pytest-mock
+requests
+httpx
+locust
+pytest-benchmark
+faker
