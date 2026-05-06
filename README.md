@@ -7,36 +7,56 @@ proDemoA AI全栈测试框架是一个专为AI应用设计的全面测试解决�
 ## 框架架构
 
 ```
-├── tests/
+├── tests/                     # 测试代码
 │   ├── unit/                  # 单元测试
-│   │   ├── models/            # AI模型单元测试
-│   │   ├── services/          # 服务层单元测试
-│   │   └── utils/              # 工具函数测试
 │   ├── integration/           # 集成测试
-│   │   ├── api/                # API集成测试
-│   │   ├── database/           # 数据库集成测试
-│   │   └── ai_pipeline/        # AI流程集成测试
-│   ├── e2e/                   # 端到端测试
-│   │   ├── web/                # Web端E2E测试
-│   │   └── api/                # API端E2E测试
-│   ├── performance/            # 性能测试
-│   │   ├── load/               # 负载测试
-│   │   └── stress/             # 压力测试
-│   ├── security/               # 安全测试
-│   │   ├── auth/               # 认证测试
-│   │   └── vulnerability/       # 漏洞扫描
-│   └── ai_specific/            # AI专项测试
-│       ├── model_evaluation/   # 模型评估测试
-│       ├── prompt/             # Prompt测试
-│       └── accuracy/           # 准确性测试
+│   ├── e2e/                  # 端到端测试
+│   ├── performance/           # 性能测试
+│   ├── security/             # 安全测试
+│   └── ai_specific/          # AI专项测试
+├── agents/                    # AI智能体 (43个)
+│   ├── testing/              # 测试Agent (9个)
+│   ├── engineering/          # 工程Agent (34个)
+│   ├── index.json            # Agent索引
+│   └── README.md             # Agent说明
 ├── fixtures/                  # 测试数据fixtures
-├── helpers/                    # 测试辅助工具
-├── config/                     # 测试配置
-├── reports/                    # 测试报告
-├── conftest.py                # Pytest配置
-├── pytest.ini                  # Pytest设置
-└── requirements-test.txt      # 测试依赖
+├── helpers/                   # 测试辅助工具
+├── config/                    # 测试配置
+├── reports/                   # 测试报告
+├── conftest.py               # Pytest配置
+├── pytest.ini                 # Pytest设置
+└── requirements-test.txt     # 测试依赖
 ```
+
+## AI智能体 (Agents)
+
+本项目整合了来自 [agency-agents-zh](https://github.com/jnMetaCode/agency-agents-zh) 的43个AI智能体，用于辅助测试工作。
+
+### 测试Agent (9个)
+
+| Agent | 说明 |
+|-------|------|
+| API测试工程师 | RESTful API接口测试 |
+| 性能基准测试工程师 | 性能基准测试与优化 |
+| 测试结果分析师 | 测试结果分析与报告 |
+| 无障碍审计师 | Web无障碍标准合规性测试 |
+| 证据收集器 | 测试过程证据收集与记录 |
+| 工具评估师 | 测试工具评估与选型 |
+| 工作流优化师 | 测试流程优化 |
+| 现实检查员 | AI输出真实性验证 |
+| 嵌入式QA工程师 | 嵌入式系统QA |
+
+### 工程Agent (34个)
+
+包括：前端开发者、后端架构师、AI工程师、代码审查员、安全工程师、DevOps自动化、SRE等。
+
+详细Agent列表请查看 [agents/index.json](agents/index.json)
+
+### 使用方式
+
+1. 在AI IDE中读取 `agents/testing/` 或 `agents/engineering/` 下的 `.md` 文件
+2. 使用Agent的提示词进行测试辅助工作
+3. 可通过 `agents/index.json` 快速查找所需Agent
 
 ## 核心特性
 
