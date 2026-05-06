@@ -1,0 +1,58 @@
+{
+  "project_name": "用户管理系统",
+  "project_code": "UMS-001",
+  "test_type": "全面测试",
+  "test_environment": "test",
+  "requirement_doc": "# 用户管理系统需求文档\n\n## 功能需求\n\n### 1. 用户登录 (REQ-001)\n用户可以通过用户名密码登录系统\n- 用户名密码正确返回token\n- 用户名密码错误返回401\n\n### 2. 用户注册 (REQ-002)\n新用户可以注册账号\n- 邮箱格式验证\n- 密码强度验证\n- 用户名唯一性检查\n\n### 3. 用户管理 (REQ-003)\n管理员可以管理用户\n- 创建用户\n- 查询用户列表\n- 查询用户详情\n- 更新用户信息\n- 删除用户\n\n## 非功能需求\n\n### 性能要求\n- 登录响应时间 < 200ms\n- 查询响应时间 < 500ms\n\n### 安全要求\n- 密码加密存储\n- 接口认证验证\n- SQL注入防护\n\n## 验收标准\n\n1. 所有功能正常工作\n2. 性能满足要求\n3. 安全测试通过",
+  "database_schema": {
+    "type": "mysql",
+    "host": "localhost",
+    "port": 3306,
+    "database": "ums_db",
+    "tables": [
+      {
+        "name": "users",
+        "description": "用户表",
+        "columns": [
+          {"name": "id", "type": "INT", "primary_key": true},
+          {"name": "username", "type": "VARCHAR(50)", "nullable": false},
+          {"name": "email", "type": "VARCHAR(100)", "nullable": false},
+          {"name": "password_hash", "type": "VARCHAR(255)", "nullable": false},
+          {"name": "role", "type": "VARCHAR(20)", "default": "user"},
+          {"name": "created_at", "type": "DATETIME"},
+          {"name": "updated_at", "type": "DATETIME"}
+        ]
+      },
+      {
+        "name": "sessions",
+        "description": "会话表",
+        "columns": [
+          {"name": "id", "type": "INT", "primary_key": true},
+          {"name": "user_id", "type": "INT", "foreign_key": "users.id"},
+          {"name": "token", "type": "VARCHAR(255)", "nullable": false},
+          {"name": "expires_at", "type": "DATETIME"},
+          {"name": "created_at", "type": "DATETIME"}
+        ]
+      }
+    ]
+  },
+  "code_repository": {
+    "frontend": {
+      "enabled": true,
+      "type": "github",
+      "url": "https://github.com/example/frontend",
+      "branch": "develop",
+      "language": "react",
+      "test_framework": "jest"
+    },
+    "backend": {
+      "enabled": true,
+      "type": "github",
+      "url": "https://github.com/example/backend",
+      "branch": "develop",
+      "language": "python",
+      "test_framework": "pytest",
+      "api_spec": "swagger"
+    }
+  }
+}

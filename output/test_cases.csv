@@ -1,0 +1,45 @@
+﻿用例ID,用例名称,用例类型,所属模块,优先级,前置条件,测试步骤,预期结果,测试数据,标签
+TC-API-001,POST /api/auth/login - 正常,API,auth,high,API服务正常运行,准备测试数据（根据需要）; 发送 POST 请求到 /api/auth/login; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回200/201，响应数据正确,{"username": "testuser", "password": "Test123456"},POST, auth, 正常
+TC-API-002,POST /api/auth/login - 参数为空,API,auth,medium,API服务正常运行,准备测试数据（根据需要）; 发送 POST 请求到 /api/auth/login，参数为空; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回400，提示参数不能为空,{"username": "testuser", "password": "Test123456"},POST, auth, 参数为空
+TC-API-003,POST /api/auth/login - 参数错误,API,auth,medium,API服务正常运行,准备测试数据（根据需要）; 发送 POST 请求到 /api/auth/login，使用错误参数; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回400，提示参数错误,{"username": "testuser", "password": "Test123456"},POST, auth, 参数错误
+TC-API-004,POST /api/auth/login - 权限验证,API,auth,high,API服务正常运行,准备测试数据（根据需要）; 发送 POST 请求到 /api/auth/login，无认证信息; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回401，未授权访问,{"username": "testuser", "password": "Test123456"},POST, auth, 权限验证
+TC-API-005,POST /api/auth/register - 正常,API,auth,high,API服务正常运行,准备测试数据（根据需要）; 发送 POST 请求到 /api/auth/register; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回200/201，响应数据正确,{"username": "testuser64d2f80e", "email": "test9b477284@example.com", "password": "Test123456"},POST, auth, 正常
+TC-API-006,POST /api/auth/register - 参数为空,API,auth,medium,API服务正常运行,准备测试数据（根据需要）; 发送 POST 请求到 /api/auth/register，参数为空; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回400，提示参数不能为空,{"username": "testuser8e7bd248", "email": "testbd42f85f@example.com", "password": "Test123456"},POST, auth, 参数为空
+TC-API-007,POST /api/auth/register - 参数错误,API,auth,medium,API服务正常运行,准备测试数据（根据需要）; 发送 POST 请求到 /api/auth/register，使用错误参数; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回400，提示参数错误,{"username": "testuser06ffff97", "email": "test9727fb43@example.com", "password": "Test123456"},POST, auth, 参数错误
+TC-API-008,POST /api/auth/register - 权限验证,API,auth,high,API服务正常运行,准备测试数据（根据需要）; 发送 POST 请求到 /api/auth/register，无认证信息; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回401，未授权访问,{"username": "testuserc700f56f", "email": "test198674b2@example.com", "password": "Test123456"},POST, auth, 权限验证
+TC-API-009,GET /api/users - 正常,API,users,high,API服务正常运行; 用户已登录,准备测试数据（根据需要）; 发送 GET 请求到 /api/users; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回200/201，响应数据正确,{"username": "newuser", "email": "new2cb242a9@example.com"},GET, users, 正常
+TC-API-010,GET /api/users - 无数据,API,users,medium,API服务正常运行; 用户已登录,准备测试数据（根据需要）; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,按预期返回相应状态码,{"username": "newuser", "email": "newaa3532be@example.com"},GET, users, 无数据
+TC-API-011,GET /api/users - 权限验证,API,users,high,API服务正常运行; 用户已登录,准备测试数据（根据需要）; 发送 GET 请求到 /api/users，无认证信息; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回401，未授权访问,{"username": "newuser", "email": "newea22245d@example.com"},GET, users, 权限验证
+TC-API-012,GET /api/users - 分页,API,users,medium,API服务正常运行; 用户已登录,准备测试数据（根据需要）; 发送 GET 请求到 /api/users?page=1&page_size=10; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回200，分页数据正确,{"username": "newuser", "email": "new1eeb6961@example.com"},GET, users, 分页
+TC-API-013,POST /api/users - 正常,API,users,high,API服务正常运行; 用户已登录,准备测试数据（根据需要）; 发送 POST 请求到 /api/users; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回200/201，响应数据正确,{"username": "newuser", "email": "new7535ff2a@example.com"},POST, users, 正常
+TC-API-014,POST /api/users - 参数为空,API,users,medium,API服务正常运行; 用户已登录,准备测试数据（根据需要）; 发送 POST 请求到 /api/users，参数为空; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回400，提示参数不能为空,{"username": "newuser", "email": "new043eccd3@example.com"},POST, users, 参数为空
+TC-API-015,POST /api/users - 参数错误,API,users,medium,API服务正常运行; 用户已登录,准备测试数据（根据需要）; 发送 POST 请求到 /api/users，使用错误参数; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回400，提示参数错误,{"username": "newuser", "email": "newc6bbc968@example.com"},POST, users, 参数错误
+TC-API-016,POST /api/users - 权限验证,API,users,high,API服务正常运行; 用户已登录,准备测试数据（根据需要）; 发送 POST 请求到 /api/users，无认证信息; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回401，未授权访问,{"username": "newuser", "email": "new357f7071@example.com"},POST, users, 权限验证
+TC-API-017,GET /api/users/{id} - 正常,API,users,high,API服务正常运行; 用户已登录,准备测试数据（根据需要）; 发送 GET 请求到 /api/users/{id}; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回200/201，响应数据正确,{"username": "newuser", "email": "new8c0bc930@example.com"},GET, users, 正常
+TC-API-018,GET /api/users/{id} - 无数据,API,users,medium,API服务正常运行; 用户已登录,准备测试数据（根据需要）; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,按预期返回相应状态码,{"username": "newuser", "email": "new5f103efe@example.com"},GET, users, 无数据
+TC-API-019,GET /api/users/{id} - 权限验证,API,users,high,API服务正常运行; 用户已登录,准备测试数据（根据需要）; 发送 GET 请求到 /api/users/{id}，无认证信息; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回401，未授权访问,{"username": "newuser", "email": "newf2be6d05@example.com"},GET, users, 权限验证
+TC-API-020,GET /api/users/{id} - 分页,API,users,medium,API服务正常运行; 用户已登录,准备测试数据（根据需要）; 发送 GET 请求到 /api/users/{id}?page=1&page_size=10; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回200，分页数据正确,{"username": "newuser", "email": "new5ddd4066@example.com"},GET, users, 分页
+TC-API-021,PUT /api/users/{id} - 正常,API,users,high,API服务正常运行; 测试数据已创建; 用户已登录,准备测试数据（根据需要）; 发送 PUT 请求到 /api/users/{id}; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回200/201，响应数据正确,{"username": "newuser", "email": "newb57f6b65@example.com"},PUT, users, 正常
+TC-API-022,PUT /api/users/{id} - 不存在,API,users,medium,API服务正常运行; 测试数据已创建; 用户已登录,准备测试数据（根据需要）; 发送 PUT 请求到 /api/users/{id}，使用不存在的ID; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回404，资源不存在,{"username": "newuser", "email": "newea23c463@example.com"},PUT, users, 不存在
+TC-API-023,PUT /api/users/{id} - 参数错误,API,users,medium,API服务正常运行; 测试数据已创建; 用户已登录,准备测试数据（根据需要）; 发送 PUT 请求到 /api/users/{id}，使用错误参数; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回400，提示参数错误,{"username": "newuser", "email": "new6189285f@example.com"},PUT, users, 参数错误
+TC-API-024,PUT /api/users/{id} - 权限验证,API,users,high,API服务正常运行; 测试数据已创建; 用户已登录,准备测试数据（根据需要）; 发送 PUT 请求到 /api/users/{id}，无认证信息; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回401，未授权访问,{"username": "newuser", "email": "new24f5f5a3@example.com"},PUT, users, 权限验证
+TC-API-025,DELETE /api/users/{id} - 正常,API,users,high,API服务正常运行; 测试数据已创建; 用户已登录,准备测试数据（根据需要）; 发送 DELETE 请求到 /api/users/{id}; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回200/201，响应数据正确,{"username": "newuser", "email": "newfac8ed73@example.com"},DELETE, users, 正常
+TC-API-026,DELETE /api/users/{id} - 不存在,API,users,medium,API服务正常运行; 测试数据已创建; 用户已登录,准备测试数据（根据需要）; 发送 DELETE 请求到 /api/users/{id}，使用不存在的ID; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回404，资源不存在,{"username": "newuser", "email": "new827a06f1@example.com"},DELETE, users, 不存在
+TC-API-027,DELETE /api/users/{id} - 权限验证,API,users,high,API服务正常运行; 测试数据已创建; 用户已登录,准备测试数据（根据需要）; 发送 DELETE 请求到 /api/users/{id}，无认证信息; 验证响应状态码; 验证响应数据格式; 验证业务逻辑正确性,返回401，未授权访问,{"username": "newuser", "email": "newe6ad5e3b@example.com"},DELETE, users, 权限验证
+TC-UI-028,登录页 - 正常登录,UI,登录页,high,浏览器已打开; 页面已加载,打开浏览器; 访问登录页; 执行正常登录操作; 验证结果,正常登录成功，页面显示正确,{},ui, 登录页, 正常登录
+TC-UI-029,登录页 - 错误密码,UI,登录页,medium,浏览器已打开; 页面已加载,打开浏览器; 访问登录页; 执行错误密码操作; 验证结果,错误密码成功，页面显示正确,{},ui, 登录页, 错误密码
+TC-UI-030,登录页 - 空用户名,UI,登录页,medium,浏览器已打开; 页面已加载,打开浏览器; 访问登录页; 执行空用户名操作; 验证结果,空用户名成功，页面显示正确,{},ui, 登录页, 空用户名
+TC-UI-031,登录页 - 空密码,UI,登录页,medium,浏览器已打开; 页面已加载,打开浏览器; 访问登录页; 执行空密码操作; 验证结果,空密码成功，页面显示正确,{},ui, 登录页, 空密码
+TC-UI-032,登录页 - SQL注入,UI,登录页,medium,浏览器已打开; 页面已加载,打开浏览器; 访问登录页; 执行SQL注入操作; 验证结果,SQL注入成功，页面显示正确,{},ui, 登录页, SQL注入
+TC-UI-033,注册页 - 正常注册,UI,注册页,high,浏览器已打开; 页面已加载,打开浏览器; 访问注册页; 执行正常注册操作; 验证结果,正常注册成功，页面显示正确,{},ui, 注册页, 正常注册
+TC-UI-034,注册页 - 邮箱格式错误,UI,注册页,medium,浏览器已打开; 页面已加载,打开浏览器; 访问注册页; 执行邮箱格式错误操作; 验证结果,邮箱格式错误成功，页面显示正确,{},ui, 注册页, 邮箱格式错误
+TC-UI-035,注册页 - 密码太短,UI,注册页,medium,浏览器已打开; 页面已加载,打开浏览器; 访问注册页; 执行密码太短操作; 验证结果,密码太短成功，页面显示正确,{},ui, 注册页, 密码太短
+TC-UI-036,注册页 - 用户名重复,UI,注册页,medium,浏览器已打开; 页面已加载,打开浏览器; 访问注册页; 执行用户名重复操作; 验证结果,用户名重复成功，页面显示正确,{},ui, 注册页, 用户名重复
+TC-UI-037,用户列表页 - 搜索功能,UI,用户列表页,medium,浏览器已打开; 页面已加载,打开浏览器; 访问用户列表页; 执行搜索功能操作; 验证结果,搜索功能成功，页面显示正确,{},ui, 用户列表页, 搜索功能
+TC-UI-038,用户列表页 - 分页功能,UI,用户列表页,medium,浏览器已打开; 页面已加载,打开浏览器; 访问用户列表页; 执行分页功能操作; 验证结果,分页功能成功，页面显示正确,{},ui, 用户列表页, 分页功能
+TC-UI-039,用户列表页 - 新增用户,UI,用户列表页,medium,浏览器已打开; 页面已加载,打开浏览器; 访问用户列表页; 执行新增用户操作; 验证结果,新增用户成功，页面显示正确,{},ui, 用户列表页, 新增用户
+TC-UI-040,用户列表页 - 编辑用户,UI,用户列表页,medium,浏览器已打开; 页面已加载,打开浏览器; 访问用户列表页; 执行编辑用户操作; 验证结果,编辑用户成功，页面显示正确,{},ui, 用户列表页, 编辑用户
+TC-UI-041,用户列表页 - 删除用户,UI,用户列表页,medium,浏览器已打开; 页面已加载,打开浏览器; 访问用户列表页; 执行删除用户操作; 验证结果,删除用户成功，页面显示正确,{},ui, 用户列表页, 删除用户
+TC-INT-042,用户注册登录流程,Integration,业务流程,high,系统正常运行; 数据库连接正常,注册新用户; 登录系统; 验证登录状态,所有步骤执行成功,{},integration, workflow
+TC-INT-043,用户CRUD完整流程,Integration,业务流程,high,系统正常运行; 数据库连接正常,创建用户; 查询用户; 更新用户; 删除用户; 验证删除,所有步骤执行成功,{},integration, workflow
+TC-INT-044,数据权限隔离,Integration,业务流程,medium,系统正常运行; 数据库连接正常,用户A创建数据; 用户B尝试访问; 验证权限隔离,所有步骤执行成功,{},integration, workflow

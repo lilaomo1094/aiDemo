@@ -1,0 +1,87 @@
+{
+  "project": {
+    "name": "proDemoA 全链路自动化测试平台",
+    "version": "1.0.0",
+    "description": "基于AI Agent的全链路自动化测试系统"
+  },
+  "automation": {
+    "enabled": true,
+    "parallel_execution": true,
+    "max_workers": 4,
+    "retry_failed": true,
+    "retry_times": 2
+  },
+  "agents": {
+    "requirement_analyzer": {
+      "enabled": true,
+      "agent_file": "agents/requirement_analyzer.py",
+      "timeout": 120
+    },
+    "code_parser": {
+      "enabled": true,
+      "agent_file": "agents/code_parser.py",
+      "timeout": 180
+    },
+    "test_generator": {
+      "enabled": true,
+      "agent_file": "agents/test_generator.py",
+      "timeout": 300
+    },
+    "test_executor": {
+      "enabled": true,
+      "agent_file": "agents/test_executor.py",
+      "timeout": 600
+    },
+    "defect_detector": {
+      "enabled": true,
+      "agent_file": "agents/defect_detector.py",
+      "timeout": 180
+    },
+    "report_generator": {
+      "enabled": true,
+      "agent_file": "agents/report_generator.py",
+      "timeout": 60
+    }
+  },
+  "test": {
+    "types": [
+      "unit",
+      "integration",
+      "api",
+      "e2e",
+      "security",
+      "performance"
+    ],
+    "coverage_target": 80,
+    "pass_threshold": 95
+  },
+  "database": {
+    "enabled": false,
+    "type": "mysql",
+    "config": {}
+  },
+  "code_repository": {
+    "frontend": {
+      "enabled": false,
+      "url": "",
+      "branch": "main"
+    },
+    "backend": {
+      "enabled": false,
+      "url": "",
+      "branch": "main"
+    }
+  },
+  "output": {
+    "test_cases": "output/test_cases.xlsx",
+    "defects": "output/defects.xlsx",
+    "report": "output/test_report.html"
+  },
+  "llm": {
+    "provider": "openai",
+    "model": "gpt-4",
+    "api_key": "",
+    "base_url": "https://api.openai.com/v1",
+    "temperature": 0.7
+  }
+}
