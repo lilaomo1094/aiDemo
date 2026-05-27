@@ -1,5 +1,5 @@
 {
-  "run_id": "RUN-20260506074529-3070b1",
+  "run_id": "RUN-20260527073609-d41e93",
   "status": "completed",
   "test_cases": [
     {
@@ -133,8 +133,8 @@
       ],
       "expected_result": "返回200/201，响应数据正确",
       "test_data": {
-        "username": "testuser4a876cb9",
-        "email": "test32a34f64@example.com",
+        "username": "testusere5dcf0f5",
+        "email": "test712ad119@example.com",
         "password": "Test123456"
       },
       "tags": [
@@ -162,8 +162,8 @@
       ],
       "expected_result": "返回400，提示参数不能为空",
       "test_data": {
-        "username": "testuser6c801f89",
-        "email": "test3575e846@example.com",
+        "username": "testuser5afcff2d",
+        "email": "testcf19cad6@example.com",
         "password": "Test123456"
       },
       "tags": [
@@ -191,8 +191,8 @@
       ],
       "expected_result": "返回400，提示参数错误",
       "test_data": {
-        "username": "testuserde247b02",
-        "email": "testc0057ff5@example.com",
+        "username": "testuser26785610",
+        "email": "test5fe4c648@example.com",
         "password": "Test123456"
       },
       "tags": [
@@ -220,8 +220,8 @@
       ],
       "expected_result": "返回401，未授权访问",
       "test_data": {
-        "username": "testusercefaf827",
-        "email": "test8428ff51@example.com",
+        "username": "testuser174d0141",
+        "email": "test2c281353@example.com",
         "password": "Test123456"
       },
       "tags": [
@@ -251,7 +251,7 @@
       "expected_result": "返回200/201，响应数据正确",
       "test_data": {
         "username": "newuser",
-        "email": "newbb7f520f@example.com"
+        "email": "new55ae9126@example.com"
       },
       "tags": [
         "GET",
@@ -279,7 +279,7 @@
       "expected_result": "按预期返回相应状态码",
       "test_data": {
         "username": "newuser",
-        "email": "newb6e2be73@example.com"
+        "email": "new3ad9ac5f@example.com"
       },
       "tags": [
         "GET",
@@ -308,7 +308,7 @@
       "expected_result": "返回401，未授权访问",
       "test_data": {
         "username": "newuser",
-        "email": "new998a70d5@example.com"
+        "email": "new255773fa@example.com"
       },
       "tags": [
         "GET",
@@ -337,7 +337,7 @@
       "expected_result": "返回200，分页数据正确",
       "test_data": {
         "username": "newuser",
-        "email": "newefafef88@example.com"
+        "email": "new1a7a8e9a@example.com"
       },
       "tags": [
         "GET",
@@ -366,7 +366,7 @@
       "expected_result": "返回200/201，响应数据正确",
       "test_data": {
         "username": "newuser",
-        "email": "newc817660a@example.com"
+        "email": "new45c50d4c@example.com"
       },
       "tags": [
         "POST",
@@ -395,7 +395,7 @@
       "expected_result": "返回400，提示参数不能为空",
       "test_data": {
         "username": "newuser",
-        "email": "newcc42eb91@example.com"
+        "email": "new95881037@example.com"
       },
       "tags": [
         "POST",
@@ -424,7 +424,7 @@
       "expected_result": "返回400，提示参数错误",
       "test_data": {
         "username": "newuser",
-        "email": "newe8d93a18@example.com"
+        "email": "new5136ac1a@example.com"
       },
       "tags": [
         "POST",
@@ -453,7 +453,7 @@
       "expected_result": "返回401，未授权访问",
       "test_data": {
         "username": "newuser",
-        "email": "new3a822f6e@example.com"
+        "email": "new2aaedfbe@example.com"
       },
       "tags": [
         "POST",
@@ -482,7 +482,7 @@
       "expected_result": "返回200/201，响应数据正确",
       "test_data": {
         "username": "newuser",
-        "email": "new0e2f5dd1@example.com"
+        "email": "new65254a09@example.com"
       },
       "tags": [
         "GET",
@@ -510,7 +510,7 @@
       "expected_result": "按预期返回相应状态码",
       "test_data": {
         "username": "newuser",
-        "email": "newf84a94dc@example.com"
+        "email": "new2e7f3ed5@example.com"
       },
       "tags": [
         "GET",
@@ -539,7 +539,7 @@
       "expected_result": "返回401，未授权访问",
       "test_data": {
         "username": "newuser",
-        "email": "newf5b860a3@example.com"
+        "email": "new2af2d3b4@example.com"
       },
       "tags": [
         "GET",
@@ -568,7 +568,7 @@
       "expected_result": "返回200，分页数据正确",
       "test_data": {
         "username": "newuser",
-        "email": "new24439b5d@example.com"
+        "email": "new67e3d6cf@example.com"
       },
       "tags": [
         "GET",
@@ -598,7 +598,7 @@
       "expected_result": "返回200/201，响应数据正确",
       "test_data": {
         "username": "newuser",
-        "email": "newb9ce98bf@example.com"
+        "email": "new1731b1bb@example.com"
       },
       "tags": [
         "PUT",
@@ -628,7 +628,7 @@
       "expected_result": "返回404，资源不存在",
       "test_data": {
         "username": "newuser",
-        "email": "new230f1060@example.com"
+        "email": "new36826176@example.com"
       },
       "tags": [
         "PUT",
@@ -658,7 +658,7 @@
       "expected_result": "返回400，提示参数错误",
       "test_data": {
         "username": "newuser",
-        "email": "new89551421@example.com"
+        "email": "newbeff92f0@example.com"
       },
       "tags": [
         "PUT",
@@ -688,7 +688,7 @@
       "expected_result": "返回401，未授权访问",
       "test_data": {
         "username": "newuser",
-        "email": "new944f5dac@example.com"
+        "email": "new00c277b6@example.com"
       },
       "tags": [
         "PUT",
@@ -718,7 +718,7 @@
       "expected_result": "返回200/201，响应数据正确",
       "test_data": {
         "username": "newuser",
-        "email": "newb8abe411@example.com"
+        "email": "new245d933d@example.com"
       },
       "tags": [
         "DELETE",
@@ -748,7 +748,7 @@
       "expected_result": "返回404，资源不存在",
       "test_data": {
         "username": "newuser",
-        "email": "new9cea9e79@example.com"
+        "email": "newac9eb9aa@example.com"
       },
       "tags": [
         "DELETE",
@@ -778,7 +778,7 @@
       "expected_result": "返回401，未授权访问",
       "test_data": {
         "username": "newuser",
-        "email": "new0632dd6a@example.com"
+        "email": "new196ada19@example.com"
       },
       "tags": [
         "DELETE",
@@ -1230,7 +1230,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641257",
+      "created_at": "2026-05-27T07:36:09.777634",
       "assignee": "",
       "tags": [
         "认证问题"
@@ -1257,7 +1257,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641272",
+      "created_at": "2026-05-27T07:36:09.777648",
       "assignee": "",
       "tags": [
         "认证问题"
@@ -1284,7 +1284,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641281",
+      "created_at": "2026-05-27T07:36:09.777657",
       "assignee": "",
       "tags": [
         "认证问题"
@@ -1311,7 +1311,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641289",
+      "created_at": "2026-05-27T07:36:09.777665",
       "assignee": "",
       "tags": [
         "认证问题"
@@ -1338,7 +1338,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641296",
+      "created_at": "2026-05-27T07:36:09.777672",
       "assignee": "",
       "tags": [
         "认证问题"
@@ -1365,7 +1365,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641303",
+      "created_at": "2026-05-27T07:36:09.777680",
       "assignee": "",
       "tags": [
         "认证问题"
@@ -1392,7 +1392,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641313",
+      "created_at": "2026-05-27T07:36:09.777690",
       "assignee": "",
       "tags": [
         "功能问题"
@@ -1419,7 +1419,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641322",
+      "created_at": "2026-05-27T07:36:09.777698",
       "assignee": "",
       "tags": [
         "功能问题"
@@ -1446,7 +1446,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641330",
+      "created_at": "2026-05-27T07:36:09.777707",
       "assignee": "",
       "tags": [
         "功能问题"
@@ -1473,7 +1473,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641339",
+      "created_at": "2026-05-27T07:36:09.777715",
       "assignee": "",
       "tags": [
         "功能问题"
@@ -1500,7 +1500,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641346",
+      "created_at": "2026-05-27T07:36:09.777723",
       "assignee": "",
       "tags": [
         "功能问题"
@@ -1527,7 +1527,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641355",
+      "created_at": "2026-05-27T07:36:09.777731",
       "assignee": "",
       "tags": [
         "功能问题"
@@ -1554,7 +1554,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641361",
+      "created_at": "2026-05-27T07:36:09.777738",
       "assignee": "",
       "tags": [
         "功能问题"
@@ -1581,7 +1581,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641370",
+      "created_at": "2026-05-27T07:36:09.777746",
       "assignee": "",
       "tags": [
         "功能问题"
@@ -1608,7 +1608,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641377",
+      "created_at": "2026-05-27T07:36:09.777753",
       "assignee": "",
       "tags": [
         "功能问题"
@@ -1634,7 +1634,7 @@
       "expected_result": "所有测试通过",
       "root_cause": "需要进一步分析",
       "suggested_fix": "建议进行代码审查",
-      "created_at": "2026-05-06T07:45:29.642169",
+      "created_at": "2026-05-27T07:36:09.778573",
       "assignee": "",
       "tags": [
         "systemic",
@@ -1648,8 +1648,8 @@
       "test_id": "TC-API-001",
       "test_name": "POST /api/auth/login - 正常",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640876",
-      "end_time": "2026-05-06T07:45:29.640897",
+      "start_time": "2026-05-27T07:36:09.777249",
+      "end_time": "2026-05-27T07:36:09.777269",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -1665,8 +1665,8 @@
       "test_id": "TC-API-002",
       "test_name": "POST /api/auth/login - 参数为空",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640900",
-      "end_time": "2026-05-06T07:45:29.640909",
+      "start_time": "2026-05-27T07:36:09.777272",
+      "end_time": "2026-05-27T07:36:09.777282",
       "duration": 0.0,
       "status": "failed",
       "status_code": 401,
@@ -1681,8 +1681,8 @@
       "test_id": "TC-API-003",
       "test_name": "POST /api/auth/login - 参数错误",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640912",
-      "end_time": "2026-05-06T07:45:29.640919",
+      "start_time": "2026-05-27T07:36:09.777284",
+      "end_time": "2026-05-27T07:36:09.777296",
       "duration": 0.0,
       "status": "failed",
       "status_code": 400,
@@ -1697,8 +1697,8 @@
       "test_id": "TC-API-004",
       "test_name": "POST /api/auth/login - 权限验证",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640920",
-      "end_time": "2026-05-06T07:45:29.640931",
+      "start_time": "2026-05-27T07:36:09.777298",
+      "end_time": "2026-05-27T07:36:09.777309",
       "duration": 0.0,
       "status": "failed",
       "status_code": 401,
@@ -1713,8 +1713,8 @@
       "test_id": "TC-API-005",
       "test_name": "POST /api/auth/register - 正常",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640932",
-      "end_time": "2026-05-06T07:45:29.640937",
+      "start_time": "2026-05-27T07:36:09.777310",
+      "end_time": "2026-05-27T07:36:09.777315",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -1730,8 +1730,8 @@
       "test_id": "TC-API-006",
       "test_name": "POST /api/auth/register - 参数为空",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640939",
-      "end_time": "2026-05-06T07:45:29.640945",
+      "start_time": "2026-05-27T07:36:09.777316",
+      "end_time": "2026-05-27T07:36:09.777326",
       "duration": 0.0,
       "status": "failed",
       "status_code": 401,
@@ -1746,8 +1746,8 @@
       "test_id": "TC-API-007",
       "test_name": "POST /api/auth/register - 参数错误",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640946",
-      "end_time": "2026-05-06T07:45:29.640950",
+      "start_time": "2026-05-27T07:36:09.777328",
+      "end_time": "2026-05-27T07:36:09.777332",
       "duration": 0.0,
       "status": "failed",
       "status_code": 400,
@@ -1762,8 +1762,8 @@
       "test_id": "TC-API-008",
       "test_name": "POST /api/auth/register - 权限验证",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640951",
-      "end_time": "2026-05-06T07:45:29.640955",
+      "start_time": "2026-05-27T07:36:09.777334",
+      "end_time": "2026-05-27T07:36:09.777337",
       "duration": 0.0,
       "status": "failed",
       "status_code": 401,
@@ -1778,8 +1778,8 @@
       "test_id": "TC-API-009",
       "test_name": "GET /api/users - 正常",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640956",
-      "end_time": "2026-05-06T07:45:29.640960",
+      "start_time": "2026-05-27T07:36:09.777339",
+      "end_time": "2026-05-27T07:36:09.777342",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -1795,8 +1795,8 @@
       "test_id": "TC-API-010",
       "test_name": "GET /api/users - 无数据",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640961",
-      "end_time": "2026-05-06T07:45:29.640966",
+      "start_time": "2026-05-27T07:36:09.777344",
+      "end_time": "2026-05-27T07:36:09.777348",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -1809,8 +1809,8 @@
       "test_id": "TC-API-011",
       "test_name": "GET /api/users - 权限验证",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640967",
-      "end_time": "2026-05-06T07:45:29.640971",
+      "start_time": "2026-05-27T07:36:09.777350",
+      "end_time": "2026-05-27T07:36:09.777354",
       "duration": 0.0,
       "status": "failed",
       "status_code": 401,
@@ -1825,8 +1825,8 @@
       "test_id": "TC-API-012",
       "test_name": "GET /api/users - 分页",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640973",
-      "end_time": "2026-05-06T07:45:29.640977",
+      "start_time": "2026-05-27T07:36:09.777355",
+      "end_time": "2026-05-27T07:36:09.777360",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -1839,8 +1839,8 @@
       "test_id": "TC-API-013",
       "test_name": "POST /api/users - 正常",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640979",
-      "end_time": "2026-05-06T07:45:29.640984",
+      "start_time": "2026-05-27T07:36:09.777362",
+      "end_time": "2026-05-27T07:36:09.777371",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -1856,8 +1856,8 @@
       "test_id": "TC-API-014",
       "test_name": "POST /api/users - 参数为空",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640985",
-      "end_time": "2026-05-06T07:45:29.640990",
+      "start_time": "2026-05-27T07:36:09.777373",
+      "end_time": "2026-05-27T07:36:09.777377",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -1870,8 +1870,8 @@
       "test_id": "TC-API-015",
       "test_name": "POST /api/users - 参数错误",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640991",
-      "end_time": "2026-05-06T07:45:29.640994",
+      "start_time": "2026-05-27T07:36:09.777379",
+      "end_time": "2026-05-27T07:36:09.777382",
       "duration": 0.0,
       "status": "failed",
       "status_code": 400,
@@ -1886,8 +1886,8 @@
       "test_id": "TC-API-016",
       "test_name": "POST /api/users - 权限验证",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640996",
-      "end_time": "2026-05-06T07:45:29.640999",
+      "start_time": "2026-05-27T07:36:09.777383",
+      "end_time": "2026-05-27T07:36:09.777387",
       "duration": 0.0,
       "status": "failed",
       "status_code": 401,
@@ -1902,8 +1902,8 @@
       "test_id": "TC-API-017",
       "test_name": "GET /api/users/{id} - 正常",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641001",
-      "end_time": "2026-05-06T07:45:29.641004",
+      "start_time": "2026-05-27T07:36:09.777388",
+      "end_time": "2026-05-27T07:36:09.777392",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -1919,8 +1919,8 @@
       "test_id": "TC-API-018",
       "test_name": "GET /api/users/{id} - 无数据",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641005",
-      "end_time": "2026-05-06T07:45:29.641010",
+      "start_time": "2026-05-27T07:36:09.777393",
+      "end_time": "2026-05-27T07:36:09.777398",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -1933,8 +1933,8 @@
       "test_id": "TC-API-019",
       "test_name": "GET /api/users/{id} - 权限验证",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641011",
-      "end_time": "2026-05-06T07:45:29.641015",
+      "start_time": "2026-05-27T07:36:09.777399",
+      "end_time": "2026-05-27T07:36:09.777403",
       "duration": 0.0,
       "status": "failed",
       "status_code": 401,
@@ -1949,8 +1949,8 @@
       "test_id": "TC-API-020",
       "test_name": "GET /api/users/{id} - 分页",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641016",
-      "end_time": "2026-05-06T07:45:29.641020",
+      "start_time": "2026-05-27T07:36:09.777404",
+      "end_time": "2026-05-27T07:36:09.777408",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -1963,8 +1963,8 @@
       "test_id": "TC-API-021",
       "test_name": "PUT /api/users/{id} - 正常",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641021",
-      "end_time": "2026-05-06T07:45:29.641025",
+      "start_time": "2026-05-27T07:36:09.777409",
+      "end_time": "2026-05-27T07:36:09.777413",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -1980,8 +1980,8 @@
       "test_id": "TC-API-022",
       "test_name": "PUT /api/users/{id} - 不存在",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641026",
-      "end_time": "2026-05-06T07:45:29.641030",
+      "start_time": "2026-05-27T07:36:09.777414",
+      "end_time": "2026-05-27T07:36:09.777418",
       "duration": 0.0,
       "status": "failed",
       "status_code": 404,
@@ -1996,8 +1996,8 @@
       "test_id": "TC-API-023",
       "test_name": "PUT /api/users/{id} - 参数错误",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641031",
-      "end_time": "2026-05-06T07:45:29.641036",
+      "start_time": "2026-05-27T07:36:09.777419",
+      "end_time": "2026-05-27T07:36:09.777428",
       "duration": 0.0,
       "status": "failed",
       "status_code": 400,
@@ -2012,8 +2012,8 @@
       "test_id": "TC-API-024",
       "test_name": "PUT /api/users/{id} - 权限验证",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641038",
-      "end_time": "2026-05-06T07:45:29.641041",
+      "start_time": "2026-05-27T07:36:09.777430",
+      "end_time": "2026-05-27T07:36:09.777433",
       "duration": 0.0,
       "status": "failed",
       "status_code": 401,
@@ -2028,8 +2028,8 @@
       "test_id": "TC-API-025",
       "test_name": "DELETE /api/users/{id} - 正常",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641043",
-      "end_time": "2026-05-06T07:45:29.641046",
+      "start_time": "2026-05-27T07:36:09.777435",
+      "end_time": "2026-05-27T07:36:09.777438",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2045,8 +2045,8 @@
       "test_id": "TC-API-026",
       "test_name": "DELETE /api/users/{id} - 不存在",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641047",
-      "end_time": "2026-05-06T07:45:29.641051",
+      "start_time": "2026-05-27T07:36:09.777440",
+      "end_time": "2026-05-27T07:36:09.777444",
       "duration": 0.0,
       "status": "failed",
       "status_code": 404,
@@ -2061,8 +2061,8 @@
       "test_id": "TC-API-027",
       "test_name": "DELETE /api/users/{id} - 权限验证",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641053",
-      "end_time": "2026-05-06T07:45:29.641057",
+      "start_time": "2026-05-27T07:36:09.777445",
+      "end_time": "2026-05-27T07:36:09.777449",
       "duration": 0.0,
       "status": "failed",
       "status_code": 401,
@@ -2077,8 +2077,8 @@
       "test_id": "TC-UI-028",
       "test_name": "登录页 - 正常登录",
       "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641058",
-      "end_time": "2026-05-06T07:45:29.641062",
+      "start_time": "2026-05-27T07:36:09.777450",
+      "end_time": "2026-05-27T07:36:09.777454",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2093,8 +2093,8 @@
       "test_id": "TC-UI-029",
       "test_name": "登录页 - 错误密码",
       "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641063",
-      "end_time": "2026-05-06T07:45:29.641067",
+      "start_time": "2026-05-27T07:36:09.777456",
+      "end_time": "2026-05-27T07:36:09.777460",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2109,8 +2109,8 @@
       "test_id": "TC-UI-030",
       "test_name": "登录页 - 空用户名",
       "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641068",
-      "end_time": "2026-05-06T07:45:29.641071",
+      "start_time": "2026-05-27T07:36:09.777461",
+      "end_time": "2026-05-27T07:36:09.777464",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2125,8 +2125,8 @@
       "test_id": "TC-UI-031",
       "test_name": "登录页 - 空密码",
       "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641072",
-      "end_time": "2026-05-06T07:45:29.641075",
+      "start_time": "2026-05-27T07:36:09.777465",
+      "end_time": "2026-05-27T07:36:09.777469",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2141,8 +2141,8 @@
       "test_id": "TC-UI-032",
       "test_name": "登录页 - SQL注入",
       "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641076",
-      "end_time": "2026-05-06T07:45:29.641080",
+      "start_time": "2026-05-27T07:36:09.777470",
+      "end_time": "2026-05-27T07:36:09.777473",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2157,8 +2157,8 @@
       "test_id": "TC-UI-033",
       "test_name": "注册页 - 正常注册",
       "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641081",
-      "end_time": "2026-05-06T07:45:29.641096",
+      "start_time": "2026-05-27T07:36:09.777474",
+      "end_time": "2026-05-27T07:36:09.777482",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2173,8 +2173,8 @@
       "test_id": "TC-UI-034",
       "test_name": "注册页 - 邮箱格式错误",
       "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641098",
-      "end_time": "2026-05-06T07:45:29.641101",
+      "start_time": "2026-05-27T07:36:09.777484",
+      "end_time": "2026-05-27T07:36:09.777487",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2189,8 +2189,8 @@
       "test_id": "TC-UI-035",
       "test_name": "注册页 - 密码太短",
       "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641102",
-      "end_time": "2026-05-06T07:45:29.641105",
+      "start_time": "2026-05-27T07:36:09.777489",
+      "end_time": "2026-05-27T07:36:09.777492",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2205,8 +2205,8 @@
       "test_id": "TC-UI-036",
       "test_name": "注册页 - 用户名重复",
       "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641107",
-      "end_time": "2026-05-06T07:45:29.641110",
+      "start_time": "2026-05-27T07:36:09.777493",
+      "end_time": "2026-05-27T07:36:09.777496",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2221,8 +2221,8 @@
       "test_id": "TC-UI-037",
       "test_name": "用户列表页 - 搜索功能",
       "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641111",
-      "end_time": "2026-05-06T07:45:29.641114",
+      "start_time": "2026-05-27T07:36:09.777497",
+      "end_time": "2026-05-27T07:36:09.777500",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2237,8 +2237,8 @@
       "test_id": "TC-UI-038",
       "test_name": "用户列表页 - 分页功能",
       "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641115",
-      "end_time": "2026-05-06T07:45:29.641118",
+      "start_time": "2026-05-27T07:36:09.777501",
+      "end_time": "2026-05-27T07:36:09.777504",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2253,8 +2253,8 @@
       "test_id": "TC-UI-039",
       "test_name": "用户列表页 - 新增用户",
       "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641120",
-      "end_time": "2026-05-06T07:45:29.641123",
+      "start_time": "2026-05-27T07:36:09.777506",
+      "end_time": "2026-05-27T07:36:09.777509",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2269,8 +2269,8 @@
       "test_id": "TC-UI-040",
       "test_name": "用户列表页 - 编辑用户",
       "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641124",
-      "end_time": "2026-05-06T07:45:29.641127",
+      "start_time": "2026-05-27T07:36:09.777510",
+      "end_time": "2026-05-27T07:36:09.777513",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2285,8 +2285,8 @@
       "test_id": "TC-UI-041",
       "test_name": "用户列表页 - 删除用户",
       "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641129",
-      "end_time": "2026-05-06T07:45:29.641132",
+      "start_time": "2026-05-27T07:36:09.777514",
+      "end_time": "2026-05-27T07:36:09.777517",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2301,8 +2301,8 @@
       "test_id": "TC-INT-042",
       "test_name": "用户注册登录流程",
       "test_type": "Integration",
-      "start_time": "2026-05-06T07:45:29.641133",
-      "end_time": "2026-05-06T07:45:29.641145",
+      "start_time": "2026-05-27T07:36:09.777519",
+      "end_time": "2026-05-27T07:36:09.777522",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2317,8 +2317,8 @@
       "test_id": "TC-INT-043",
       "test_name": "用户CRUD完整流程",
       "test_type": "Integration",
-      "start_time": "2026-05-06T07:45:29.641147",
-      "end_time": "2026-05-06T07:45:29.641155",
+      "start_time": "2026-05-27T07:36:09.777523",
+      "end_time": "2026-05-27T07:36:09.777532",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
@@ -2333,8 +2333,8 @@
       "test_id": "TC-INT-044",
       "test_name": "数据权限隔离",
       "test_type": "Integration",
-      "start_time": "2026-05-06T07:45:29.641157",
-      "end_time": "2026-05-06T07:45:29.641162",
+      "start_time": "2026-05-27T07:36:09.777534",
+      "end_time": "2026-05-27T07:36:09.777539",
       "duration": 0.0,
       "status": "passed",
       "status_code": 200,
