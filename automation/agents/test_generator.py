@@ -1,197 +1,200 @@
+# -*- coding: utf-8 -*-
+"""测试用例生成 Agent：基于需求、代码、数据库生成结构化用例."""
+
+import json
 import uuid
-from typing import Dict, List, Any
-from datetime import datetime
+from typing import Dict, List
+
+from .base import BaseAgent
 
 
-class TestGenerator:
-    """测试用例生成Agent - 基于需求和代码生成测试用例"""
-
-    def __init__(self, config: Dict):
-        self.config = config
-        self.test_cases = []
+class TestGenerator(BaseAgent):
+    SYSTEM_PROMPT = """你是一名资深测试用例设计专家。请根据输入的需求、API 规范和数据库结构生成测试用例，并以 JSON 数组输出。
+每个用例字段：
+{
+  "id": "TC-API-001",
+  "type": "API|Database|UI|Integration",
+  "module": "模块名",
+  "name": "用例名称",
+  "description": "用例描述",
+  "priority": "high|medium|low",
+  "preconditions": ["前置条件"],
+  "test_steps": ["步骤1", "步骤2"],
+  "expected_result": "预期结果",
+  "expected_status": 200,
+  "action": {"method": "POST", "path": "/api/xxx", "data": {}, "headers": {}, "expected_status": 200, "sql": "", "steps": [], "url": ""},
+  "tags": ["api", "auth"]
+}
+注意：
+1. 为每个 API 生成正例和反例（参数为空、参数错误、权限不足、资源不存在）。
+2. 为数据库表生成约束完整性用例。
+3. 如果前端组件信息存在，补充 UI 用例。
+4. 只输出 JSON 数组，不要额外解释。"""
 
     def execute(self, task, context) -> Dict:
-        """执行测试用例生成"""
         requirements = context.metadata.get("requirements", [])
         api_endpoints = []
         data_models = []
+        frontend_components = []
 
-        if hasattr(context, 'code_info'):
-            code_info = context.code_info or {}
-            api_endpoints = code_info.get("api_endpoints", [])
-            data_models = code_info.get("data_models", [])
+        code_info = getattr(context, "code_info", {}) or {}
+        backend = code_info.get("backend", {})
+        database = code_info.get("database", {})
+        frontend = code_info.get("frontend", {})
 
-        if not api_endpoints:
-            api_endpoints = [
-                {"method": "POST", "path": "/api/auth/login"},
-                {"method": "POST", "path": "/api/auth/register"},
-                {"method": "GET", "path": "/api/users"},
-                {"method": "POST", "path": "/api/users"},
-                {"method": "GET", "path": "/api/users/{id}"},
-                {"method": "PUT", "path": "/api/users/{id}"},
-                {"method": "DELETE", "path": "/api/users/{id}"}
-            ]
+        api_endpoints = backend.get("api_endpoints", [])
+        data_models = backend.get("data_models", []) or database.get("tables", [])
+        frontend_components = frontend.get("components", [])
 
-        self._generate_api_test_cases(api_endpoints)
-        self._generate_db_test_cases(data_models)
-        self._generate_ui_test_cases()
-        self._generate_integration_test_cases()
+        # 如果存在 LLM，优先使用 LLM 生成
+        if self.llm:
+            test_cases = self._generate_with_llm(
+                requirements, api_endpoints, data_models, frontend_components
+            )
+        else:
+            test_cases = []
+
+        # 兜底规则生成
+        if not test_cases:
+            test_cases = self._generate_rule_based(
+                requirements, api_endpoints, data_models, frontend_components
+            )
 
         return {
-            "test_cases": self.test_cases,
+            "test_cases": test_cases,
             "summary": {
-                "total_cases": len(self.test_cases),
-                "by_type": self._count_by_type()
-            }
+                "total_cases": len(test_cases),
+                "by_type": self._count_by_type(test_cases),
+            },
         }
 
-    def _generate_api_test_cases(self, endpoints: List[Dict]):
-        """生成API测试用例"""
+    def _generate_with_llm(
+        self,
+        requirements: List[Dict],
+        api_endpoints: List[Dict],
+        data_models: List[Dict],
+        frontend_components: List[Dict],
+    ) -> List[Dict]:
+        prompt = self._build_prompt(requirements, api_endpoints, data_models, frontend_components)
+        result = self._call_llm_json(prompt, system=self.SYSTEM_PROMPT, fallback=[])
+        if not isinstance(result, list):
+            return []
+        for idx, tc in enumerate(result):
+            if "id" not in tc:
+                tc["id"] = f"TC-{tc.get('type', 'GEN')}-{idx + 1:03d}"
+        return result
+
+    def _build_prompt(
+        self,
+        requirements: List[Dict],
+        api_endpoints: List[Dict],
+        data_models: List[Dict],
+        frontend_components: List[Dict],
+    ) -> str:
+        return f"""请根据以下信息生成测试用例：
+
+## 需求列表
+{json.dumps(requirements, ensure_ascii=False, indent=2)}
+
+## API 接口
+{json.dumps(api_endpoints, ensure_ascii=False, indent=2)}
+
+## 数据模型
+{json.dumps(data_models, ensure_ascii=False, indent=2)}
+
+## 前端组件
+{json.dumps(frontend_components, ensure_ascii=False, indent=2)}
+"""
+
+    def _generate_rule_based(
+        self,
+        requirements: List[Dict],
+        api_endpoints: List[Dict],
+        data_models: List[Dict],
+        frontend_components: List[Dict],
+    ) -> List[Dict]:
+        test_cases = []
+        endpoints = api_endpoints or [
+            {"method": "POST", "path": "/api/auth/login"},
+            {"method": "POST", "path": "/api/auth/register"},
+            {"method": "GET", "path": "/api/users"},
+            {"method": "POST", "path": "/api/users"},
+            {"method": "GET", "path": "/api/users/{{id}}"},
+            {"method": "PUT", "path": "/api/users/{{id}}"},
+            {"method": "DELETE", "path": "/api/users/{{id}}"},
+        ]
+
         test_type_map = {
             "POST": ["正常", "参数为空", "参数错误", "权限验证"],
             "GET": ["正常", "无数据", "权限验证", "分页"],
             "PUT": ["正常", "不存在", "参数错误", "权限验证"],
-            "DELETE": ["正常", "不存在", "权限验证"]
+            "DELETE": ["正常", "不存在", "权限验证"],
         }
 
         for endpoint in endpoints:
             method = endpoint.get("method", "GET")
             path = endpoint.get("path", "")
-            test_types = test_type_map.get(method, ["正常"])
-
-            for test_type in test_types:
-                test_case = {
-                    "id": f"TC-API-{len(self.test_cases) + 1:03d}",
+            for test_type in test_type_map.get(method, ["正常"]):
+                tc_id = f"TC-API-{len(test_cases) + 1:03d}"
+                priority = "high" if "权限" in test_type or "正常" in test_type else "medium"
+                expected_status = self._expected_status(method, test_type)
+                test_cases.append({
+                    "id": tc_id,
                     "type": "API",
                     "module": self._extract_module(path),
                     "name": f"{method} {path} - {test_type}",
-                    "description": f"API接口 {method} {path} 的{test_type}测试",
-                    "priority": "high" if "权限" in test_type or "正常" in test_type else "medium",
-                    "preconditions": self._get_api_preconditions(method, path),
-                    "test_steps": self._generate_api_steps(method, path, test_type),
-                    "expected_result": self._get_api_expected_result(method, test_type),
-                    "test_data": self._generate_test_data(method, path),
-                    "tags": [method, self._extract_module(path), test_type]
-                }
-                self.test_cases.append(test_case)
+                    "description": f"API 接口 {method} {path} 的{test_type}测试",
+                    "priority": priority,
+                    "preconditions": self._api_preconditions(method, path),
+                    "test_steps": self._api_steps(method, path, test_type),
+                    "expected_result": self._api_expected_result(method, test_type),
+                    "expected_status": expected_status,
+                    "action": {
+                        "method": method,
+                        "path": path,
+                        "data": self._api_data(method, path, test_type),
+                        "headers": {},
+                        "expected_status": expected_status,
+                    },
+                    "tags": [method, self._extract_module(path), test_type],
+                })
 
-    def _generate_db_test_cases(self, models: List[Dict]):
-        """生成数据库测试用例"""
-        for model in models:
-            table_name = model.get("name", "")
-
-            test_case = {
-                "id": f"TC-DB-{len(self.test_cases) + 1:03d}",
+        for model in data_models:
+            table = model.get("name", "")
+            test_cases.append({
+                "id": f"TC-DB-{len(test_cases) + 1:03d}",
                 "type": "Database",
-                "module": table_name,
-                "name": f"{table_name} 表数据完整性测试",
-                "description": f"验证{table_name}表的数据完整性、约束和关系",
+                "module": table,
+                "name": f"{table} 表数据完整性测试",
+                "description": f"验证 {table} 表的数据完整性、约束和关系",
                 "priority": "high",
                 "preconditions": ["数据库连接正常"],
                 "test_steps": [
-                    f"验证{table_name}表主键约束",
-                    f"验证{table_name}表外键约束",
-                    f"验证{table_name}表非空约束",
-                    f"验证{table_name}表数据唯一性",
-                    f"验证{table_name}表与其他表的数据关系"
+                    f"验证 {table} 表主键约束",
+                    f"验证 {table} 表外键约束",
+                    f"验证 {table} 表非空约束",
                 ],
-                "expected_result": "所有约束条件正常工作，数据关系正确",
-                "test_data": {"table": table_name},
-                "tags": ["database", table_name, "constraint"]
-            }
-            self.test_cases.append(test_case)
+                "expected_result": "所有约束条件正常工作",
+                "action": {"sql": f"SELECT * FROM {table} LIMIT 1"},
+                "tags": ["database", table, "constraint"],
+            })
 
-    def _generate_ui_test_cases(self):
-        """生成UI测试用例"""
-        ui_tests = [
-            {
-                "page": "登录页",
-                "elements": ["用户名输入框", "密码输入框", "登录按钮", "注册链接"],
-                "tests": ["正常登录", "错误密码", "空用户名", "空密码", "SQL注入"]
-            },
-            {
-                "page": "注册页",
-                "elements": ["用户名输入框", "邮箱输入框", "密码输入框", "注册按钮"],
-                "tests": ["正常注册", "邮箱格式错误", "密码太短", "用户名重复"]
-            },
-            {
-                "page": "用户列表页",
-                "elements": ["搜索框", "用户表格", "新增按钮", "编辑按钮", "删除按钮"],
-                "tests": ["搜索功能", "分页功能", "新增用户", "编辑用户", "删除用户"]
-            }
-        ]
-
-        for ui_test in ui_tests:
-            for test in ui_test["tests"]:
-                test_case = {
-                    "id": f"TC-UI-{len(self.test_cases) + 1:03d}",
-                    "type": "UI",
-                    "module": ui_test["page"],
-                    "name": f"{ui_test['page']} - {test}",
-                    "description": f"{ui_test['page']}的{test}场景",
-                    "priority": "high" if "正常" in test else "medium",
-                    "preconditions": ["浏览器已打开", "页面已加载"],
-                    "test_steps": self._generate_ui_steps(ui_test["page"], test),
-                    "expected_result": f"{test}成功，页面显示正确",
-                    "test_data": {},
-                    "tags": ["ui", ui_test["page"], test]
-                }
-                self.test_cases.append(test_case)
-
-    def _generate_integration_test_cases(self):
-        """生成集成测试用例"""
-        integration_tests = [
-            {
-                "name": "用户注册登录流程",
-                "steps": ["注册新用户", "登录系统", "验证登录状态"],
-                "priority": "high"
-            },
-            {
-                "name": "用户CRUD完整流程",
-                "steps": ["创建用户", "查询用户", "更新用户", "删除用户", "验证删除"],
-                "priority": "high"
-            },
-            {
-                "name": "数据权限隔离",
-                "steps": ["用户A创建数据", "用户B尝试访问", "验证权限隔离"],
-                "priority": "medium"
-            }
-        ]
-
-        for test in integration_tests:
-            test_case = {
-                "id": f"TC-INT-{len(self.test_cases) + 1:03d}",
-                "type": "Integration",
-                "module": "业务流程",
-                "name": test["name"],
-                "description": f"集成测试：{test['name']}",
-                "priority": test["priority"],
-                "preconditions": ["系统正常运行", "数据库连接正常"],
-                "test_steps": test["steps"],
-                "expected_result": "所有步骤执行成功",
-                "test_data": {},
-                "tags": ["integration", "workflow"]
-            }
-            self.test_cases.append(test_case)
+        return test_cases
 
     def _extract_module(self, path: str) -> str:
-        """从路径提取模块名"""
         parts = path.split("/")
         return parts[2] if len(parts) > 2 else "common"
 
-    def _get_api_preconditions(self, method: str, path: str) -> List[str]:
-        """获取API前置条件"""
-        preconditions = ["API服务正常运行"]
-        if method in ["PUT", "DELETE"]:
-            preconditions.append("测试数据已创建")
+    def _api_preconditions(self, method: str, path: str) -> List[str]:
+        pre = ["API 服务正常运行"]
+        if method in {"PUT", "DELETE"}:
+            pre.append("测试数据已创建")
         if "/auth" not in path:
-            preconditions.append("用户已登录")
-        return preconditions
+            pre.append("用户已登录")
+        return pre
 
-    def _generate_api_steps(self, method: str, path: str, test_type: str) -> List[str]:
-        """生成API测试步骤"""
-        steps = [f"准备测试数据（根据需要）"]
-        
+    def _api_steps(self, method: str, path: str, test_type: str) -> List[str]:
+        steps = ["准备测试数据"]
         if "正常" in test_type:
             steps.append(f"发送 {method} 请求到 {path}")
         elif "为空" in test_type:
@@ -201,50 +204,56 @@ class TestGenerator:
         elif "权限" in test_type:
             steps.append(f"发送 {method} 请求到 {path}，无认证信息")
         elif "不存在" in test_type:
-            steps.append(f"发送 {method} 请求到 {path}，使用不存在的ID")
+            steps.append(f"发送 {method} 请求到 {path}，使用不存在的 ID")
         elif "分页" in test_type:
             steps.append(f"发送 GET 请求到 {path}?page=1&page_size=10")
-        
-        steps.append("验证响应状态码")
-        steps.append("验证响应数据格式")
-        steps.append("验证业务逻辑正确性")
-        
+        steps.extend(["验证响应状态码", "验证响应数据格式", "验证业务逻辑"])
         return steps
 
-    def _get_api_expected_result(self, method: str, test_type: str) -> str:
-        """获取API预期结果"""
-        if "正常" in test_type:
-            return "返回200/201，响应数据正确"
-        elif "为空" in test_type:
-            return "返回400，提示参数不能为空"
-        elif "错误" in test_type:
-            return "返回400，提示参数错误"
-        elif "权限" in test_type:
-            return "返回401，未授权访问"
-        elif "不存在" in test_type:
-            return "返回404，资源不存在"
-        elif "分页" in test_type:
-            return "返回200，分页数据正确"
-        return "按预期返回相应状态码"
+    def _api_expected_result(self, method: str, test_type: str) -> str:
+        mapping = {
+            "正常": "返回 200/201，数据正确",
+            "为空": "返回 400，提示参数错误",
+            "错误": "返回 400，提示参数错误",
+            "权限": "返回 401，未授权",
+            "不存在": "返回 404，资源不存在",
+            "分页": "返回 200，分页数据正确",
+        }
+        return mapping.get(test_type, "按预期返回")
 
-    def _generate_test_data(self, method: str, path: str) -> Dict:
-        """生成测试数据"""
+    def _expected_status(self, method: str, test_type: str) -> int:
+        mapping = {
+            "正常": 200 if method != "POST" else 201,
+            "为空": 400,
+            "错误": 400,
+            "权限": 401,
+            "不存在": 404,
+            "分页": 200,
+        }
+        return mapping.get(test_type, 200)
+
+    def _api_data(self, method: str, path: str, test_type: str) -> Dict:
+        if "为空" in test_type:
+            return {}
+        if "错误" in test_type:
+            return {"invalid": "value"}
+        if "权限" in test_type:
+            return {}
+        if "不存在" in test_type:
+            return {"id": 999999}
         if "login" in path:
             return {"username": "testuser", "password": "Test123456"}
-        elif "register" in path:
+        if "register" in path:
             return {"username": f"testuser{uuid.uuid4().hex[:8]}", "email": f"test{uuid.uuid4().hex[:8]}@example.com", "password": "Test123456"}
-        elif "users" in path:
-            return {"username": "newuser", "email": f"new{uuid.uuid4().hex[:8]}@example.com"}
+        if "users" in path:
+            if method == "POST":
+                return {"username": "newuser", "email": f"new{uuid.uuid4().hex[:8]}@example.com"}
+            return {"page": 1, "page_size": 10}
         return {}
 
-    def _generate_ui_steps(self, page: str, test: str) -> List[str]:
-        """生成UI测试步骤"""
-        return ["打开浏览器", f"访问{page}", f"执行{test}操作", "验证结果"]
-
-    def _count_by_type(self) -> Dict:
-        """按类型统计"""
+    def _count_by_type(self, test_cases: List[Dict]) -> Dict:
         counts = {}
-        for tc in self.test_cases:
-            tc_type = tc.get("type", "Unknown")
-            counts[tc_type] = counts.get(tc_type, 0) + 1
+        for tc in test_cases:
+            t = tc.get("type", "Unknown")
+            counts[t] = counts.get(t, 0) + 1
         return counts

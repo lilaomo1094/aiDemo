@@ -1,203 +1,138 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-proDemoA 全链路自动化测试平台 - 主入口
+"""proDemoA 全链路自动化测试平台 - 主入口.
 
-使用方法:
-    python run_automation.py
-
-测试人员只需修改 config/project_config.py 文件即可开始测试
+用法:
+    python run_automation.py [--config config/project_config.py]
 """
 
+import argparse
 import json
-import uuid
 import os
 import sys
+import uuid
 from datetime import datetime
 from pathlib import Path
 
-# 确保可以导入automation模块
-script_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, script_dir)
-sys.path.insert(0, os.path.join(script_dir, 'automation'))
+script_dir = Path(__file__).parent.resolve()
+sys.path.insert(0, str(script_dir))
 
-from workflow.engine import WorkflowEngine, WorkflowContext, create_workflow
-
-
-def load_project_config():
-    """加载项目配置文件"""
-    config_file = os.path.join(script_dir, 'config', 'project_config.py')
-    
-    if not os.path.exists(config_file):
-        raise FileNotFoundError(f"配置文件不存在: {config_file}")
-    
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("project_config", config_file)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    
-    return module.PROJECT_CONFIG
+from automation.core.config import PlatformConfig, load_config, merge_with_framework_config
+from automation.core.output import OutputFormatter
+from automation.workflow.engine import WorkflowContext, create_workflow
 
 
-def load_requirement_doc(config):
-    """加载需求文档"""
-    # 优先从文件读取
-    if config.get("requirement_doc_path"):
-        doc_path = os.path.join(script_dir, config["requirement_doc_path"])
-        if os.path.exists(doc_path):
-            with open(doc_path, 'r', encoding='utf-8') as f:
-                return f.read()
-    
-    # 其次使用直接填写的内容
-    if config.get("requirement_doc"):
-        return config["requirement_doc"]
-    
-    return ""
+def load_project_config(path: str) -> PlatformConfig:
+    project = load_config(path)
+    return merge_with_framework_config(project)
 
 
-def prepare_input_data(config):
-    """准备输入数据"""
-    # 加载需求文档
-    requirement_doc = load_requirement_doc(config)
-    
-    # 准备数据库结构
-    database_schema = {}
-    if config.get("database", {}).get("enabled"):
-        db_config = config["database"]
-        database_schema = {
-            "type": db_config.get("type", "mysql"),
-            "host": db_config.get("host", "localhost"),
-            "port": db_config.get("port", 3306),
-            "database": db_config.get("database", ""),
-            "tables": db_config.get("tables", [])
-        }
-    
-    # 准备代码仓库信息
-    code_info = {"frontend": {}, "backend": {}}
-    
-    if config.get("frontend_repo", {}).get("enabled"):
-        code_info["frontend"] = config["frontend_repo"]
-    
-    if config.get("backend_repo", {}).get("enabled"):
-        code_info["backend"] = config["backend_repo"]
-    
+def prepare_input_data(config: PlatformConfig) -> dict:
     return {
-        "project_name": config.get("project_name", "未命名项目"),
-        "project_code": config.get("project_code", ""),
-        "test_type": config.get("test_type", "功能测试"),
-        "test_environment": config.get("test_environment", "test"),
-        "requirement_doc": requirement_doc,
-        "database_schema": database_schema,
-        "code_info": code_info
+        "project_name": config.project.name,
+        "project_code": config.project.code,
+        "test_type": config.project.test_type,
+        "test_environment": config.project.environment,
+        "requirement_doc": config.requirement.load_text(config.base_dir),
+        "database_schema": config.database.model_dump() if config.database else {},
+        "code_info": {},
     }
 
 
-def ensure_output_dir():
-    """确保输出目录存在"""
-    output_dir = Path(os.path.join(script_dir, 'output'))
-    output_dir.mkdir(exist_ok=True)
-    return output_dir
-
-
 class AutomationTestPlatform:
-    """全链路自动化测试平台主类"""
-    
-    def __init__(self):
-        self.config = load_project_config()
+    """全链路自动化测试平台主类."""
+
+    def __init__(self, config_path: str = "config/project_config.py"):
+        self.config = load_project_config(config_path)
         self.workflow = create_workflow(self.config)
-        self.output_dir = ensure_output_dir()
-        
+        self.output_dir = self.config.base_dir / "output"
+        self.output_dir.mkdir(exist_ok=True)
+
     def run(self, input_data: dict = None) -> dict:
-        """运行全链路自动化测试"""
         if input_data is None:
             input_data = prepare_input_data(self.config)
-        
+
         run_id = f"RUN-{datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}"
-        
-        print(f"\n{'='*60}")
-        print(f"🚀 proDemoA 全链路自动化测试平台")
-        print(f"{'='*60}")
-        print(f"📋 项目名称: {input_data.get('project_name', 'N/A')}")
-        print(f"📋 项目代码: {input_data.get('project_code', 'N/A')}")
-        print(f"📋 测试类型: {input_data.get('test_type', 'N/A')}")
-        print(f"📋 运行ID: {run_id}")
-        print(f"📅 开始时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"{'='*60}\n")
-        
         project_info = {
             "run_id": run_id,
             "project_name": input_data.get("project_name", "未命名项目"),
             "project_code": input_data.get("project_code", ""),
             "test_type": input_data.get("test_type", "功能测试"),
             "test_environment": input_data.get("test_environment", "test"),
-            "start_time": datetime.now().isoformat()
+            "start_time": datetime.now().isoformat(),
         }
-        
+
+        self._print_start(project_info, run_id)
+
         context = WorkflowContext(
             run_id=run_id,
             project_info=project_info,
             requirement_doc=input_data.get("requirement_doc", ""),
             database_schema=input_data.get("database_schema", {}),
-            code_info=input_data.get("code_info", {})
+            code_info=input_data.get("code_info", {}),
         )
-        
+
         results = self.workflow.run(context)
-        
-        print(f"\n{'='*60}")
-        print(f"✅ 测试执行完成")
-        print(f"{'='*60}")
-        print(f"📊 总任务数: {results['summary']['total_tasks']}")
-        print(f"✅ 完成: {results['summary']['completed']}")
-        print(f"❌ 失败: {results['summary']['failed']}")
-        print(f"⏱️  总耗时: {results['summary']['total_duration']:.2f}秒")
-        print(f"📝 测试用例数: {results['summary']['test_cases_count']}")
-        print(f"🐛 缺陷数: {results['summary']['defects_count']}")
-        print(f"{'='*60}\n")
-        
-        output_files = self.config.get("output", {})
-        
+        self._print_summary(results)
+
         output_info = {
             "run_id": run_id,
-            "status": results['status'],
+            "status": results["status"],
             "test_cases": context.test_cases,
             "defects": context.defects,
             "execution_results": context.execution_results,
-            "report_path": context.metadata.get("report_path", output_files.get("report_file", "output/test_report.html")),
-            "output_files": {
-                "test_cases": output_files.get("test_cases_file", "output/test_cases.csv"),
-                "defects": output_files.get("defects_file", "output/defects.csv"),
-                "report": output_files.get("report_file", "output/test_report.html")
-            },
-            "summary": results['summary']
+            "report_path": context.metadata.get("report_path", self.config.output.report_file),
+            "output_files": context.metadata.get("output_files", {}),
+            "summary": results["summary"],
         }
-        
+
         self._save_results(output_info)
         self._print_output_files(output_info)
-        
         return output_info
-    
+
+    def _print_start(self, project_info: dict, run_id: str):
+        print(f"\n{'=' * 60}")
+        print("🚀 proDemoA 全链路自动化测试平台")
+        print(f"{'=' * 60}")
+        print(f"📋 项目名称: {project_info['project_name']}")
+        print(f"📋 项目代码: {project_info['project_code']}")
+        print(f"📋 测试类型: {project_info['test_type']}")
+        print(f"📋 运行ID: {run_id}")
+        print(f"📅 开始时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"{'=' * 60}\n")
+
+    def _print_summary(self, results: dict):
+        summary = results["summary"]
+        print(f"\n{'=' * 60}")
+        print("✅ 测试执行完成")
+        print(f"{'=' * 60}")
+        print(f"📊 总任务数: {summary['total_tasks']}")
+        print(f"✅ 完成: {summary['completed']}")
+        print(f"❌ 失败: {summary['failed']}")
+        print(f"⏱️  总耗时: {summary['total_duration']:.2f}秒")
+        print(f"📝 测试用例数: {summary['test_cases_count']}")
+        print(f"🐛 缺陷数: {summary['defects_count']}")
+        print(f"{'=' * 60}\n")
+
     def _save_results(self, results: dict):
-        """保存结果到文件"""
-        output_files = self.config.get("output", {})
-        
-        results_file = os.path.join(script_dir, output_files.get("results_file", "output/results.json"))
-        with open(results_file, 'w', encoding='utf-8') as f:
-            json.dump(results, f, ensure_ascii=False, indent=2)
-        
-        print(f"📁 结果已保存")
-    
+        formatter = OutputFormatter(self.config.base_dir)
+        formatter.save_json(results, self.config.output.results_file)
+        print("📁 结果已保存")
+
     def _print_output_files(self, results: dict):
-        """打印输出文件信息"""
         print("📄 输出文件:")
         for name, path in results.get("output_files", {}).items():
-            full_path = os.path.join(script_dir, path)
-            if os.path.exists(full_path):
-                size = os.path.getsize(full_path)
+            full_path = self.config.base_dir / path
+            if full_path.exists():
+                size = full_path.stat().st_size
                 print(f"   - {name}: {path} ({size} bytes)")
 
 
 def main():
-    """主入口函数"""
+    parser = argparse.ArgumentParser(description="proDemoA 全链路自动化测试平台")
+    parser.add_argument("--config", default="config/project_config.py", help="配置文件路径")
+    args = parser.parse_args()
+
     print("""
     ╔══════════════════════════════════════════════════════════╗
     ║         proDemoA 全链路自动化测试平台                    ║
@@ -206,17 +141,17 @@ def main():
     ║  运行: python run_automation.py                         ║
     ╚══════════════════════════════════════════════════════════╝
     """)
-    
+
     try:
-        platform = AutomationTestPlatform()
+        platform = AutomationTestPlatform(config_path=args.config)
         results = platform.run()
-        
-        print("\n" + "="*60)
+
+        print("\n" + "=" * 60)
         print("📊 测试结果摘要")
-        print("="*60)
+        print("=" * 60)
         print(f"   测试用例总数: {results['summary']['test_cases_count']}")
         print(f"   缺陷总数: {results['summary']['defects_count']}")
-        
+
     except FileNotFoundError as e:
         print(f"\n❌ 错误: {e}")
         print("\n请确保配置文件存在: config/project_config.py")

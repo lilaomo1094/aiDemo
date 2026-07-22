@@ -1,0 +1,48 @@
+# -*- coding: utf-8 -*-
+"""OpenAI / Azure OpenAI / 兼容 OpenAI API 的 Provider."""
+
+import json
+from typing import Dict, List
+
+import requests
+
+from .base import LLMProvider, LLMResponse
+
+
+class OpenAIProvider(LLMProvider):
+    def __init__(self, config):
+        super().__init__(config)
+        self.api_key = config.api_key or ""
+        self.base_url = (config.base_url or "https://api.openai.com/v1").rstrip("/")
+        self.model = config.model
+        self.temperature = config.temperature
+        self.max_tokens = config.max_tokens
+        self.timeout = config.timeout
+
+    def chat(self, messages: List[Dict[str, str]], **kwargs) -> LLMResponse:
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": kwargs.get("model", self.model),
+            "messages": messages,
+            "temperature": kwargs.get("temperature", self.temperature),
+            "max_tokens": kwargs.get("max_tokens", self.max_tokens),
+        }
+        response = requests.post(
+            f"{self.base_url}/chat/completions",
+            headers=headers,
+            json=payload,
+            timeout=self.timeout,
+        )
+        response.raise_for_status()
+        data = response.json()
+        choice = data["choices"][0]
+        content = choice["message"].get("content", "")
+        return LLMResponse(
+            content=content,
+            model=data.get("model", self.model),
+            usage=data.get("usage", {}),
+            raw=data,
+        )

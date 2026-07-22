@@ -1,148 +1,118 @@
+# -*- coding: utf-8 -*-
+"""需求分析 Agent：解析需求文档，提取测试要点与验收标准."""
+
 import re
-import json
-from typing import Dict, List, Any
-from datetime import datetime
+from typing import Dict, List
+
+from .base import BaseAgent
 
 
-class RequirementAnalyzer:
-    """需求分析Agent - 解析需求文档，提取测试要点"""
-
-    def __init__(self, config: Dict):
-        self.config = config
-        self.requirements = []
-        self.test_points = []
-        self.acceptance_criteria = []
+class RequirementAnalyzer(BaseAgent):
+    SYSTEM_PROMPT = """你是一名资深测试分析师。请基于用户需求文档，提取结构化信息并以 JSON 输出。
+输出格式：
+{
+  "requirements": [
+    {"id": "REQ-001", "title": "", "description": "", "priority": "high|medium|low", "test_type": "functional|performance|security|compatibility"}
+  ],
+  "test_points": [
+    {"req_id": "REQ-001", "test_point": "", "priority": "high|medium|low"}
+  ],
+  "acceptance_criteria": [
+    {"req_id": "REQ-001", "criteria": ["", ""]}
+  ]
+}
+只输出 JSON，不要额外解释。"""
 
     def execute(self, task, context) -> Dict:
-        """执行需求分析"""
-        requirement_doc = context.requirement_doc or self._load_requirement_doc(context)
+        requirement_doc = context.requirement_doc or ""
+        if not requirement_doc.strip():
+            requirement_doc = self._sample_doc()
 
-        self._parse_requirement(requirement_doc)
-        self._extract_test_points()
-        self._extract_acceptance_criteria()
+        fallback = self._rule_based_parse(requirement_doc)
+        llm_result = self._call_llm_json(
+            self._build_prompt(requirement_doc),
+            system=self.SYSTEM_PROMPT,
+            fallback=fallback,
+        )
+
+        requirements = llm_result.get("requirements") or fallback.get("requirements", [])
+        test_points = llm_result.get("test_points") or fallback.get("test_points", [])
+        acceptance_criteria = llm_result.get("acceptance_criteria") or fallback.get("acceptance_criteria", [])
 
         return {
             "requirement_doc": requirement_doc,
-            "requirements": self.requirements,
-            "test_points": self.test_points,
-            "acceptance_criteria": self.acceptance_criteria,
+            "requirements": requirements,
+            "test_points": test_points,
+            "acceptance_criteria": acceptance_criteria,
             "summary": {
-                "total_requirements": len(self.requirements),
-                "total_test_points": len(self.test_points),
-                "total_criteria": len(self.acceptance_criteria)
-            }
+                "total_requirements": len(requirements),
+                "total_test_points": len(test_points),
+                "total_criteria": len(acceptance_criteria),
+            },
         }
 
-    def _load_requirement_doc(self, context) -> str:
-        """从上下文加载需求文档"""
-        return context.project_info.get("requirement_doc", "")
+    def _build_prompt(self, doc: str) -> str:
+        return f"""请分析以下需求文档并提取结构化信息：
 
-    def _parse_requirement(self, doc: str):
-        """解析需求文档"""
-        if not doc:
-            self.requirements = self._generate_sample_requirements()
-            return
+{doc}
+"""
 
-        lines = doc.split('\n')
-        current_req = None
-
+    def _rule_based_parse(self, doc: str) -> Dict:
+        requirements = []
+        lines = doc.split("\n")
+        current = None
         for line in lines:
             line = line.strip()
-
-            if line.startswith('#') or line.startswith('##'):
+            if not line or line.startswith("#"):
                 continue
-
-            req_match = re.match(r'(?:REQ|需求|功能)[-：:\s]*(\d+)', line, re.IGNORECASE)
-            if req_match:
-                if current_req:
-                    self.requirements.append(current_req)
-                current_req = {
-                    "id": f"REQ-{req_match.group(1)}",
-                    "title": line,
+            match = re.match(r".*\(REQ-(\d+)\).*", line)
+            if match:
+                if current:
+                    requirements.append(current)
+                current = {
+                    "id": f"REQ-{match.group(1)}",
+                    "title": line.replace(f"(REQ-{match.group(1)})", "").strip(" -：:"),
                     "description": "",
                     "priority": "medium",
-                    "test_type": "functional"
+                    "test_type": "functional",
                 }
-            elif current_req and line:
-                current_req["description"] += line + " "
+            elif current and line.startswith("-"):
+                current["description"] += line.lstrip("- ").strip() + " "
+        if current:
+            requirements.append(current)
 
-        if current_req:
-            self.requirements.append(current_req)
+        if not requirements:
+            requirements = self._sample_requirements()
 
-    def _generate_sample_requirements(self) -> List[Dict]:
-        """生成示例需求"""
-        return [
-            {
-                "id": "REQ-001",
-                "title": "用户登录功能",
-                "description": "用户可以通过用户名密码登录系统",
-                "priority": "high",
-                "test_type": "functional"
-            },
-            {
-                "id": "REQ-002", 
-                "title": "用户注册功能",
-                "description": "新用户可以注册账号",
-                "priority": "high",
-                "test_type": "functional"
-            },
-            {
-                "id": "REQ-003",
-                "title": "数据查询功能",
-                "description": "用户可以查询业务数据",
-                "priority": "medium",
-                "test_type": "functional"
-            }
-        ]
-
-    def _extract_test_points(self):
-        """提取测试要点"""
-        test_point_mapping = {
-            "high": ["功能正确性", "边界条件", "异常处理", "安全性"],
-            "medium": ["性能", "可用性", "兼容性"],
-            "low": ["可维护性", "可扩展性"]
-        }
-
-        for req in self.requirements:
-            priority = req.get("priority", "medium")
-            points = test_point_mapping.get(priority, test_point_mapping["medium"])
-
-            for point in points:
-                self.test_points.append({
-                    "req_id": req["id"],
-                    "test_point": point,
-                    "priority": priority
-                })
-
-    def _extract_acceptance_criteria(self):
-        """提取验收标准"""
-        for req in self.requirements:
-            self.acceptance_criteria.append({
+        test_points = []
+        acceptance_criteria = []
+        for req in requirements:
+            for point in self._points_by_priority(req.get("priority", "medium")):
+                test_points.append({"req_id": req["id"], "test_point": point, "priority": req.get("priority", "medium")})
+            acceptance_criteria.append({
                 "req_id": req["id"],
                 "criteria": [
-                    f"{req['title']}功能正常工作",
-                    f"{req['title']}错误提示信息正确",
-                    f"{req['title']}响应时间满足要求"
-                ]
+                    f"{req['title']} 功能正常工作",
+                    f"{req['title']} 错误提示信息正确",
+                    f"{req['title']} 响应时间满足要求",
+                ],
             })
+        return {"requirements": requirements, "test_points": test_points, "acceptance_criteria": acceptance_criteria}
 
-    def _call_llm(self, prompt: str) -> str:
-        """调用LLM接口（预留）"""
-        return ""
+    def _points_by_priority(self, priority: str) -> List[str]:
+        mapping = {
+            "high": ["功能正确性", "边界条件", "异常处理", "安全性"],
+            "medium": ["性能", "可用性", "兼容性"],
+            "low": ["可维护性", "可扩展性"],
+        }
+        return mapping.get(priority, mapping["medium"])
 
+    def _sample_doc(self) -> str:
+        return "# 示例需求\n## 1. 用户登录 (REQ-001)\n用户可以通过用户名密码登录系统"
 
-def extract_requirements_from_markdown(markdown_text: str) -> List[Dict]:
-    """从Markdown提取需求"""
-    analyzer = RequirementAnalyzer({})
-    analyzer._parse_requirement(markdown_text)
-    return analyzer.requirements
-
-
-def extract_requirements_from_docx(docx_path: str) -> List[Dict]:
-    """从Word文档提取需求"""
-    return []
-
-
-def extract_requirements_from_pdf(pdf_path: str) -> List[Dict]:
-    """从PDF提取需求"""
-    return []
+    def _sample_requirements(self) -> List[Dict]:
+        return [
+            {"id": "REQ-001", "title": "用户登录", "description": "用户可以通过用户名密码登录系统", "priority": "high", "test_type": "functional"},
+            {"id": "REQ-002", "title": "用户注册", "description": "新用户可以注册账号", "priority": "high", "test_type": "functional"},
+            {"id": "REQ-003", "title": "数据查询", "description": "用户可以查询业务数据", "priority": "medium", "test_type": "functional"},
+        ]

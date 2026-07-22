@@ -1,5 +1,5 @@
 {
-  "run_id": "RUN-20260506074529-3070b1",
+  "run_id": "RUN-20260722094903-95aad6",
   "status": "completed",
   "test_cases": [
     {
@@ -7,22 +7,29 @@
       "type": "API",
       "module": "auth",
       "name": "POST /api/auth/login - 正常",
-      "description": "API接口 POST /api/auth/login 的正常测试",
+      "description": "API 接口 POST /api/auth/login 的正常测试",
       "priority": "high",
       "preconditions": [
-        "API服务正常运行"
+        "API 服务正常运行"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "发送 POST 请求到 /api/auth/login",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回200/201，响应数据正确",
-      "test_data": {
-        "username": "testuser",
-        "password": "Test123456"
+      "expected_result": "返回 200/201，数据正确",
+      "expected_status": 201,
+      "action": {
+        "method": "POST",
+        "path": "/api/auth/login",
+        "data": {
+          "username": "testuser",
+          "password": "Test123456"
+        },
+        "headers": {},
+        "expected_status": 201
       },
       "tags": [
         "POST",
@@ -35,22 +42,26 @@
       "type": "API",
       "module": "auth",
       "name": "POST /api/auth/login - 参数为空",
-      "description": "API接口 POST /api/auth/login 的参数为空测试",
+      "description": "API 接口 POST /api/auth/login 的参数为空测试",
       "priority": "medium",
       "preconditions": [
-        "API服务正常运行"
+        "API 服务正常运行"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "发送 POST 请求到 /api/auth/login，参数为空",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回400，提示参数不能为空",
-      "test_data": {
-        "username": "testuser",
-        "password": "Test123456"
+      "expected_result": "按预期返回",
+      "expected_status": 200,
+      "action": {
+        "method": "POST",
+        "path": "/api/auth/login",
+        "data": {},
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "POST",
@@ -63,22 +74,28 @@
       "type": "API",
       "module": "auth",
       "name": "POST /api/auth/login - 参数错误",
-      "description": "API接口 POST /api/auth/login 的参数错误测试",
+      "description": "API 接口 POST /api/auth/login 的参数错误测试",
       "priority": "medium",
       "preconditions": [
-        "API服务正常运行"
+        "API 服务正常运行"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "发送 POST 请求到 /api/auth/login，使用错误参数",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回400，提示参数错误",
-      "test_data": {
-        "username": "testuser",
-        "password": "Test123456"
+      "expected_result": "按预期返回",
+      "expected_status": 200,
+      "action": {
+        "method": "POST",
+        "path": "/api/auth/login",
+        "data": {
+          "invalid": "value"
+        },
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "POST",
@@ -91,22 +108,26 @@
       "type": "API",
       "module": "auth",
       "name": "POST /api/auth/login - 权限验证",
-      "description": "API接口 POST /api/auth/login 的权限验证测试",
+      "description": "API 接口 POST /api/auth/login 的权限验证测试",
       "priority": "high",
       "preconditions": [
-        "API服务正常运行"
+        "API 服务正常运行"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "发送 POST 请求到 /api/auth/login，无认证信息",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回401，未授权访问",
-      "test_data": {
-        "username": "testuser",
-        "password": "Test123456"
+      "expected_result": "按预期返回",
+      "expected_status": 200,
+      "action": {
+        "method": "POST",
+        "path": "/api/auth/login",
+        "data": {},
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "POST",
@@ -119,23 +140,30 @@
       "type": "API",
       "module": "auth",
       "name": "POST /api/auth/register - 正常",
-      "description": "API接口 POST /api/auth/register 的正常测试",
+      "description": "API 接口 POST /api/auth/register 的正常测试",
       "priority": "high",
       "preconditions": [
-        "API服务正常运行"
+        "API 服务正常运行"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "发送 POST 请求到 /api/auth/register",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回200/201，响应数据正确",
-      "test_data": {
-        "username": "testuser4a876cb9",
-        "email": "test32a34f64@example.com",
-        "password": "Test123456"
+      "expected_result": "返回 200/201，数据正确",
+      "expected_status": 201,
+      "action": {
+        "method": "POST",
+        "path": "/api/auth/register",
+        "data": {
+          "username": "testuserdff1fdf6",
+          "email": "test9db810cd@example.com",
+          "password": "Test123456"
+        },
+        "headers": {},
+        "expected_status": 201
       },
       "tags": [
         "POST",
@@ -148,23 +176,26 @@
       "type": "API",
       "module": "auth",
       "name": "POST /api/auth/register - 参数为空",
-      "description": "API接口 POST /api/auth/register 的参数为空测试",
+      "description": "API 接口 POST /api/auth/register 的参数为空测试",
       "priority": "medium",
       "preconditions": [
-        "API服务正常运行"
+        "API 服务正常运行"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "发送 POST 请求到 /api/auth/register，参数为空",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回400，提示参数不能为空",
-      "test_data": {
-        "username": "testuser6c801f89",
-        "email": "test3575e846@example.com",
-        "password": "Test123456"
+      "expected_result": "按预期返回",
+      "expected_status": 200,
+      "action": {
+        "method": "POST",
+        "path": "/api/auth/register",
+        "data": {},
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "POST",
@@ -177,23 +208,28 @@
       "type": "API",
       "module": "auth",
       "name": "POST /api/auth/register - 参数错误",
-      "description": "API接口 POST /api/auth/register 的参数错误测试",
+      "description": "API 接口 POST /api/auth/register 的参数错误测试",
       "priority": "medium",
       "preconditions": [
-        "API服务正常运行"
+        "API 服务正常运行"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "发送 POST 请求到 /api/auth/register，使用错误参数",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回400，提示参数错误",
-      "test_data": {
-        "username": "testuserde247b02",
-        "email": "testc0057ff5@example.com",
-        "password": "Test123456"
+      "expected_result": "按预期返回",
+      "expected_status": 200,
+      "action": {
+        "method": "POST",
+        "path": "/api/auth/register",
+        "data": {
+          "invalid": "value"
+        },
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "POST",
@@ -206,23 +242,26 @@
       "type": "API",
       "module": "auth",
       "name": "POST /api/auth/register - 权限验证",
-      "description": "API接口 POST /api/auth/register 的权限验证测试",
+      "description": "API 接口 POST /api/auth/register 的权限验证测试",
       "priority": "high",
       "preconditions": [
-        "API服务正常运行"
+        "API 服务正常运行"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "发送 POST 请求到 /api/auth/register，无认证信息",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回401，未授权访问",
-      "test_data": {
-        "username": "testusercefaf827",
-        "email": "test8428ff51@example.com",
-        "password": "Test123456"
+      "expected_result": "按预期返回",
+      "expected_status": 200,
+      "action": {
+        "method": "POST",
+        "path": "/api/auth/register",
+        "data": {},
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "POST",
@@ -235,23 +274,30 @@
       "type": "API",
       "module": "users",
       "name": "GET /api/users - 正常",
-      "description": "API接口 GET /api/users 的正常测试",
+      "description": "API 接口 GET /api/users 的正常测试",
       "priority": "high",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "发送 GET 请求到 /api/users",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回200/201，响应数据正确",
-      "test_data": {
-        "username": "newuser",
-        "email": "newbb7f520f@example.com"
+      "expected_result": "返回 200/201，数据正确",
+      "expected_status": 200,
+      "action": {
+        "method": "GET",
+        "path": "/api/users",
+        "data": {
+          "page": 1,
+          "page_size": 10
+        },
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "GET",
@@ -264,22 +310,29 @@
       "type": "API",
       "module": "users",
       "name": "GET /api/users - 无数据",
-      "description": "API接口 GET /api/users 的无数据测试",
+      "description": "API 接口 GET /api/users 的无数据测试",
       "priority": "medium",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "按预期返回相应状态码",
-      "test_data": {
-        "username": "newuser",
-        "email": "newb6e2be73@example.com"
+      "expected_result": "按预期返回",
+      "expected_status": 200,
+      "action": {
+        "method": "GET",
+        "path": "/api/users",
+        "data": {
+          "page": 1,
+          "page_size": 10
+        },
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "GET",
@@ -292,23 +345,27 @@
       "type": "API",
       "module": "users",
       "name": "GET /api/users - 权限验证",
-      "description": "API接口 GET /api/users 的权限验证测试",
+      "description": "API 接口 GET /api/users 的权限验证测试",
       "priority": "high",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "发送 GET 请求到 /api/users，无认证信息",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回401，未授权访问",
-      "test_data": {
-        "username": "newuser",
-        "email": "new998a70d5@example.com"
+      "expected_result": "按预期返回",
+      "expected_status": 200,
+      "action": {
+        "method": "GET",
+        "path": "/api/users",
+        "data": {},
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "GET",
@@ -321,23 +378,30 @@
       "type": "API",
       "module": "users",
       "name": "GET /api/users - 分页",
-      "description": "API接口 GET /api/users 的分页测试",
+      "description": "API 接口 GET /api/users 的分页测试",
       "priority": "medium",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "发送 GET 请求到 /api/users?page=1&page_size=10",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回200，分页数据正确",
-      "test_data": {
-        "username": "newuser",
-        "email": "newefafef88@example.com"
+      "expected_result": "返回 200，分页数据正确",
+      "expected_status": 200,
+      "action": {
+        "method": "GET",
+        "path": "/api/users",
+        "data": {
+          "page": 1,
+          "page_size": 10
+        },
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "GET",
@@ -350,23 +414,30 @@
       "type": "API",
       "module": "users",
       "name": "POST /api/users - 正常",
-      "description": "API接口 POST /api/users 的正常测试",
+      "description": "API 接口 POST /api/users 的正常测试",
       "priority": "high",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "发送 POST 请求到 /api/users",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回200/201，响应数据正确",
-      "test_data": {
-        "username": "newuser",
-        "email": "newc817660a@example.com"
+      "expected_result": "返回 200/201，数据正确",
+      "expected_status": 201,
+      "action": {
+        "method": "POST",
+        "path": "/api/users",
+        "data": {
+          "username": "newuser",
+          "email": "newb7dbb44e@example.com"
+        },
+        "headers": {},
+        "expected_status": 201
       },
       "tags": [
         "POST",
@@ -379,23 +450,27 @@
       "type": "API",
       "module": "users",
       "name": "POST /api/users - 参数为空",
-      "description": "API接口 POST /api/users 的参数为空测试",
+      "description": "API 接口 POST /api/users 的参数为空测试",
       "priority": "medium",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "发送 POST 请求到 /api/users，参数为空",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回400，提示参数不能为空",
-      "test_data": {
-        "username": "newuser",
-        "email": "newcc42eb91@example.com"
+      "expected_result": "按预期返回",
+      "expected_status": 200,
+      "action": {
+        "method": "POST",
+        "path": "/api/users",
+        "data": {},
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "POST",
@@ -408,23 +483,29 @@
       "type": "API",
       "module": "users",
       "name": "POST /api/users - 参数错误",
-      "description": "API接口 POST /api/users 的参数错误测试",
+      "description": "API 接口 POST /api/users 的参数错误测试",
       "priority": "medium",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "发送 POST 请求到 /api/users，使用错误参数",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回400，提示参数错误",
-      "test_data": {
-        "username": "newuser",
-        "email": "newe8d93a18@example.com"
+      "expected_result": "按预期返回",
+      "expected_status": 200,
+      "action": {
+        "method": "POST",
+        "path": "/api/users",
+        "data": {
+          "invalid": "value"
+        },
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "POST",
@@ -437,23 +518,27 @@
       "type": "API",
       "module": "users",
       "name": "POST /api/users - 权限验证",
-      "description": "API接口 POST /api/users 的权限验证测试",
+      "description": "API 接口 POST /api/users 的权限验证测试",
       "priority": "high",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "发送 POST 请求到 /api/users，无认证信息",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回401，未授权访问",
-      "test_data": {
-        "username": "newuser",
-        "email": "new3a822f6e@example.com"
+      "expected_result": "按预期返回",
+      "expected_status": 200,
+      "action": {
+        "method": "POST",
+        "path": "/api/users",
+        "data": {},
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "POST",
@@ -465,24 +550,31 @@
       "id": "TC-API-017",
       "type": "API",
       "module": "users",
-      "name": "GET /api/users/{id} - 正常",
-      "description": "API接口 GET /api/users/{id} 的正常测试",
+      "name": "GET /api/users/{{id}} - 正常",
+      "description": "API 接口 GET /api/users/{{id}} 的正常测试",
       "priority": "high",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
-        "发送 GET 请求到 /api/users/{id}",
+        "准备测试数据",
+        "发送 GET 请求到 /api/users/{{id}}",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回200/201，响应数据正确",
-      "test_data": {
-        "username": "newuser",
-        "email": "new0e2f5dd1@example.com"
+      "expected_result": "返回 200/201，数据正确",
+      "expected_status": 200,
+      "action": {
+        "method": "GET",
+        "path": "/api/users/{{id}}",
+        "data": {
+          "page": 1,
+          "page_size": 10
+        },
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "GET",
@@ -494,23 +586,30 @@
       "id": "TC-API-018",
       "type": "API",
       "module": "users",
-      "name": "GET /api/users/{id} - 无数据",
-      "description": "API接口 GET /api/users/{id} 的无数据测试",
+      "name": "GET /api/users/{{id}} - 无数据",
+      "description": "API 接口 GET /api/users/{{id}} 的无数据测试",
       "priority": "medium",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
+        "准备测试数据",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "按预期返回相应状态码",
-      "test_data": {
-        "username": "newuser",
-        "email": "newf84a94dc@example.com"
+      "expected_result": "按预期返回",
+      "expected_status": 200,
+      "action": {
+        "method": "GET",
+        "path": "/api/users/{{id}}",
+        "data": {
+          "page": 1,
+          "page_size": 10
+        },
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "GET",
@@ -522,24 +621,28 @@
       "id": "TC-API-019",
       "type": "API",
       "module": "users",
-      "name": "GET /api/users/{id} - 权限验证",
-      "description": "API接口 GET /api/users/{id} 的权限验证测试",
+      "name": "GET /api/users/{{id}} - 权限验证",
+      "description": "API 接口 GET /api/users/{{id}} 的权限验证测试",
       "priority": "high",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
-        "发送 GET 请求到 /api/users/{id}，无认证信息",
+        "准备测试数据",
+        "发送 GET 请求到 /api/users/{{id}}，无认证信息",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回401，未授权访问",
-      "test_data": {
-        "username": "newuser",
-        "email": "newf5b860a3@example.com"
+      "expected_result": "按预期返回",
+      "expected_status": 200,
+      "action": {
+        "method": "GET",
+        "path": "/api/users/{{id}}",
+        "data": {},
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "GET",
@@ -551,24 +654,31 @@
       "id": "TC-API-020",
       "type": "API",
       "module": "users",
-      "name": "GET /api/users/{id} - 分页",
-      "description": "API接口 GET /api/users/{id} 的分页测试",
+      "name": "GET /api/users/{{id}} - 分页",
+      "description": "API 接口 GET /api/users/{{id}} 的分页测试",
       "priority": "medium",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
-        "发送 GET 请求到 /api/users/{id}?page=1&page_size=10",
+        "准备测试数据",
+        "发送 GET 请求到 /api/users/{{id}}?page=1&page_size=10",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回200，分页数据正确",
-      "test_data": {
-        "username": "newuser",
-        "email": "new24439b5d@example.com"
+      "expected_result": "返回 200，分页数据正确",
+      "expected_status": 200,
+      "action": {
+        "method": "GET",
+        "path": "/api/users/{{id}}",
+        "data": {
+          "page": 1,
+          "page_size": 10
+        },
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "GET",
@@ -580,25 +690,32 @@
       "id": "TC-API-021",
       "type": "API",
       "module": "users",
-      "name": "PUT /api/users/{id} - 正常",
-      "description": "API接口 PUT /api/users/{id} 的正常测试",
+      "name": "PUT /api/users/{{id}} - 正常",
+      "description": "API 接口 PUT /api/users/{{id}} 的正常测试",
       "priority": "high",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "测试数据已创建",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
-        "发送 PUT 请求到 /api/users/{id}",
+        "准备测试数据",
+        "发送 PUT 请求到 /api/users/{{id}}",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回200/201，响应数据正确",
-      "test_data": {
-        "username": "newuser",
-        "email": "newb9ce98bf@example.com"
+      "expected_result": "返回 200/201，数据正确",
+      "expected_status": 200,
+      "action": {
+        "method": "PUT",
+        "path": "/api/users/{{id}}",
+        "data": {
+          "page": 1,
+          "page_size": 10
+        },
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "PUT",
@@ -610,25 +727,31 @@
       "id": "TC-API-022",
       "type": "API",
       "module": "users",
-      "name": "PUT /api/users/{id} - 不存在",
-      "description": "API接口 PUT /api/users/{id} 的不存在测试",
+      "name": "PUT /api/users/{{id}} - 不存在",
+      "description": "API 接口 PUT /api/users/{{id}} 的不存在测试",
       "priority": "medium",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "测试数据已创建",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
-        "发送 PUT 请求到 /api/users/{id}，使用不存在的ID",
+        "准备测试数据",
+        "发送 PUT 请求到 /api/users/{{id}}，使用不存在的 ID",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回404，资源不存在",
-      "test_data": {
-        "username": "newuser",
-        "email": "new230f1060@example.com"
+      "expected_result": "返回 404，资源不存在",
+      "expected_status": 404,
+      "action": {
+        "method": "PUT",
+        "path": "/api/users/{{id}}",
+        "data": {
+          "id": 999999
+        },
+        "headers": {},
+        "expected_status": 404
       },
       "tags": [
         "PUT",
@@ -640,25 +763,31 @@
       "id": "TC-API-023",
       "type": "API",
       "module": "users",
-      "name": "PUT /api/users/{id} - 参数错误",
-      "description": "API接口 PUT /api/users/{id} 的参数错误测试",
+      "name": "PUT /api/users/{{id}} - 参数错误",
+      "description": "API 接口 PUT /api/users/{{id}} 的参数错误测试",
       "priority": "medium",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "测试数据已创建",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
-        "发送 PUT 请求到 /api/users/{id}，使用错误参数",
+        "准备测试数据",
+        "发送 PUT 请求到 /api/users/{{id}}，使用错误参数",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回400，提示参数错误",
-      "test_data": {
-        "username": "newuser",
-        "email": "new89551421@example.com"
+      "expected_result": "按预期返回",
+      "expected_status": 200,
+      "action": {
+        "method": "PUT",
+        "path": "/api/users/{{id}}",
+        "data": {
+          "invalid": "value"
+        },
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "PUT",
@@ -670,25 +799,29 @@
       "id": "TC-API-024",
       "type": "API",
       "module": "users",
-      "name": "PUT /api/users/{id} - 权限验证",
-      "description": "API接口 PUT /api/users/{id} 的权限验证测试",
+      "name": "PUT /api/users/{{id}} - 权限验证",
+      "description": "API 接口 PUT /api/users/{{id}} 的权限验证测试",
       "priority": "high",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "测试数据已创建",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
-        "发送 PUT 请求到 /api/users/{id}，无认证信息",
+        "准备测试数据",
+        "发送 PUT 请求到 /api/users/{{id}}，无认证信息",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回401，未授权访问",
-      "test_data": {
-        "username": "newuser",
-        "email": "new944f5dac@example.com"
+      "expected_result": "按预期返回",
+      "expected_status": 200,
+      "action": {
+        "method": "PUT",
+        "path": "/api/users/{{id}}",
+        "data": {},
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "PUT",
@@ -700,25 +833,32 @@
       "id": "TC-API-025",
       "type": "API",
       "module": "users",
-      "name": "DELETE /api/users/{id} - 正常",
-      "description": "API接口 DELETE /api/users/{id} 的正常测试",
+      "name": "DELETE /api/users/{{id}} - 正常",
+      "description": "API 接口 DELETE /api/users/{{id}} 的正常测试",
       "priority": "high",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "测试数据已创建",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
-        "发送 DELETE 请求到 /api/users/{id}",
+        "准备测试数据",
+        "发送 DELETE 请求到 /api/users/{{id}}",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回200/201，响应数据正确",
-      "test_data": {
-        "username": "newuser",
-        "email": "newb8abe411@example.com"
+      "expected_result": "返回 200/201，数据正确",
+      "expected_status": 200,
+      "action": {
+        "method": "DELETE",
+        "path": "/api/users/{{id}}",
+        "data": {
+          "page": 1,
+          "page_size": 10
+        },
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "DELETE",
@@ -730,25 +870,31 @@
       "id": "TC-API-026",
       "type": "API",
       "module": "users",
-      "name": "DELETE /api/users/{id} - 不存在",
-      "description": "API接口 DELETE /api/users/{id} 的不存在测试",
+      "name": "DELETE /api/users/{{id}} - 不存在",
+      "description": "API 接口 DELETE /api/users/{{id}} 的不存在测试",
       "priority": "medium",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "测试数据已创建",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
-        "发送 DELETE 请求到 /api/users/{id}，使用不存在的ID",
+        "准备测试数据",
+        "发送 DELETE 请求到 /api/users/{{id}}，使用不存在的 ID",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回404，资源不存在",
-      "test_data": {
-        "username": "newuser",
-        "email": "new9cea9e79@example.com"
+      "expected_result": "返回 404，资源不存在",
+      "expected_status": 404,
+      "action": {
+        "method": "DELETE",
+        "path": "/api/users/{{id}}",
+        "data": {
+          "id": 999999
+        },
+        "headers": {},
+        "expected_status": 404
       },
       "tags": [
         "DELETE",
@@ -760,461 +906,67 @@
       "id": "TC-API-027",
       "type": "API",
       "module": "users",
-      "name": "DELETE /api/users/{id} - 权限验证",
-      "description": "API接口 DELETE /api/users/{id} 的权限验证测试",
+      "name": "DELETE /api/users/{{id}} - 权限验证",
+      "description": "API 接口 DELETE /api/users/{{id}} 的权限验证测试",
       "priority": "high",
       "preconditions": [
-        "API服务正常运行",
+        "API 服务正常运行",
         "测试数据已创建",
         "用户已登录"
       ],
       "test_steps": [
-        "准备测试数据（根据需要）",
-        "发送 DELETE 请求到 /api/users/{id}，无认证信息",
+        "准备测试数据",
+        "发送 DELETE 请求到 /api/users/{{id}}，无认证信息",
         "验证响应状态码",
         "验证响应数据格式",
-        "验证业务逻辑正确性"
+        "验证业务逻辑"
       ],
-      "expected_result": "返回401，未授权访问",
-      "test_data": {
-        "username": "newuser",
-        "email": "new0632dd6a@example.com"
+      "expected_result": "按预期返回",
+      "expected_status": 200,
+      "action": {
+        "method": "DELETE",
+        "path": "/api/users/{{id}}",
+        "data": {},
+        "headers": {},
+        "expected_status": 200
       },
       "tags": [
         "DELETE",
         "users",
         "权限验证"
       ]
-    },
-    {
-      "id": "TC-UI-028",
-      "type": "UI",
-      "module": "登录页",
-      "name": "登录页 - 正常登录",
-      "description": "登录页的正常登录场景",
-      "priority": "high",
-      "preconditions": [
-        "浏览器已打开",
-        "页面已加载"
-      ],
-      "test_steps": [
-        "打开浏览器",
-        "访问登录页",
-        "执行正常登录操作",
-        "验证结果"
-      ],
-      "expected_result": "正常登录成功，页面显示正确",
-      "test_data": {},
-      "tags": [
-        "ui",
-        "登录页",
-        "正常登录"
-      ]
-    },
-    {
-      "id": "TC-UI-029",
-      "type": "UI",
-      "module": "登录页",
-      "name": "登录页 - 错误密码",
-      "description": "登录页的错误密码场景",
-      "priority": "medium",
-      "preconditions": [
-        "浏览器已打开",
-        "页面已加载"
-      ],
-      "test_steps": [
-        "打开浏览器",
-        "访问登录页",
-        "执行错误密码操作",
-        "验证结果"
-      ],
-      "expected_result": "错误密码成功，页面显示正确",
-      "test_data": {},
-      "tags": [
-        "ui",
-        "登录页",
-        "错误密码"
-      ]
-    },
-    {
-      "id": "TC-UI-030",
-      "type": "UI",
-      "module": "登录页",
-      "name": "登录页 - 空用户名",
-      "description": "登录页的空用户名场景",
-      "priority": "medium",
-      "preconditions": [
-        "浏览器已打开",
-        "页面已加载"
-      ],
-      "test_steps": [
-        "打开浏览器",
-        "访问登录页",
-        "执行空用户名操作",
-        "验证结果"
-      ],
-      "expected_result": "空用户名成功，页面显示正确",
-      "test_data": {},
-      "tags": [
-        "ui",
-        "登录页",
-        "空用户名"
-      ]
-    },
-    {
-      "id": "TC-UI-031",
-      "type": "UI",
-      "module": "登录页",
-      "name": "登录页 - 空密码",
-      "description": "登录页的空密码场景",
-      "priority": "medium",
-      "preconditions": [
-        "浏览器已打开",
-        "页面已加载"
-      ],
-      "test_steps": [
-        "打开浏览器",
-        "访问登录页",
-        "执行空密码操作",
-        "验证结果"
-      ],
-      "expected_result": "空密码成功，页面显示正确",
-      "test_data": {},
-      "tags": [
-        "ui",
-        "登录页",
-        "空密码"
-      ]
-    },
-    {
-      "id": "TC-UI-032",
-      "type": "UI",
-      "module": "登录页",
-      "name": "登录页 - SQL注入",
-      "description": "登录页的SQL注入场景",
-      "priority": "medium",
-      "preconditions": [
-        "浏览器已打开",
-        "页面已加载"
-      ],
-      "test_steps": [
-        "打开浏览器",
-        "访问登录页",
-        "执行SQL注入操作",
-        "验证结果"
-      ],
-      "expected_result": "SQL注入成功，页面显示正确",
-      "test_data": {},
-      "tags": [
-        "ui",
-        "登录页",
-        "SQL注入"
-      ]
-    },
-    {
-      "id": "TC-UI-033",
-      "type": "UI",
-      "module": "注册页",
-      "name": "注册页 - 正常注册",
-      "description": "注册页的正常注册场景",
-      "priority": "high",
-      "preconditions": [
-        "浏览器已打开",
-        "页面已加载"
-      ],
-      "test_steps": [
-        "打开浏览器",
-        "访问注册页",
-        "执行正常注册操作",
-        "验证结果"
-      ],
-      "expected_result": "正常注册成功，页面显示正确",
-      "test_data": {},
-      "tags": [
-        "ui",
-        "注册页",
-        "正常注册"
-      ]
-    },
-    {
-      "id": "TC-UI-034",
-      "type": "UI",
-      "module": "注册页",
-      "name": "注册页 - 邮箱格式错误",
-      "description": "注册页的邮箱格式错误场景",
-      "priority": "medium",
-      "preconditions": [
-        "浏览器已打开",
-        "页面已加载"
-      ],
-      "test_steps": [
-        "打开浏览器",
-        "访问注册页",
-        "执行邮箱格式错误操作",
-        "验证结果"
-      ],
-      "expected_result": "邮箱格式错误成功，页面显示正确",
-      "test_data": {},
-      "tags": [
-        "ui",
-        "注册页",
-        "邮箱格式错误"
-      ]
-    },
-    {
-      "id": "TC-UI-035",
-      "type": "UI",
-      "module": "注册页",
-      "name": "注册页 - 密码太短",
-      "description": "注册页的密码太短场景",
-      "priority": "medium",
-      "preconditions": [
-        "浏览器已打开",
-        "页面已加载"
-      ],
-      "test_steps": [
-        "打开浏览器",
-        "访问注册页",
-        "执行密码太短操作",
-        "验证结果"
-      ],
-      "expected_result": "密码太短成功，页面显示正确",
-      "test_data": {},
-      "tags": [
-        "ui",
-        "注册页",
-        "密码太短"
-      ]
-    },
-    {
-      "id": "TC-UI-036",
-      "type": "UI",
-      "module": "注册页",
-      "name": "注册页 - 用户名重复",
-      "description": "注册页的用户名重复场景",
-      "priority": "medium",
-      "preconditions": [
-        "浏览器已打开",
-        "页面已加载"
-      ],
-      "test_steps": [
-        "打开浏览器",
-        "访问注册页",
-        "执行用户名重复操作",
-        "验证结果"
-      ],
-      "expected_result": "用户名重复成功，页面显示正确",
-      "test_data": {},
-      "tags": [
-        "ui",
-        "注册页",
-        "用户名重复"
-      ]
-    },
-    {
-      "id": "TC-UI-037",
-      "type": "UI",
-      "module": "用户列表页",
-      "name": "用户列表页 - 搜索功能",
-      "description": "用户列表页的搜索功能场景",
-      "priority": "medium",
-      "preconditions": [
-        "浏览器已打开",
-        "页面已加载"
-      ],
-      "test_steps": [
-        "打开浏览器",
-        "访问用户列表页",
-        "执行搜索功能操作",
-        "验证结果"
-      ],
-      "expected_result": "搜索功能成功，页面显示正确",
-      "test_data": {},
-      "tags": [
-        "ui",
-        "用户列表页",
-        "搜索功能"
-      ]
-    },
-    {
-      "id": "TC-UI-038",
-      "type": "UI",
-      "module": "用户列表页",
-      "name": "用户列表页 - 分页功能",
-      "description": "用户列表页的分页功能场景",
-      "priority": "medium",
-      "preconditions": [
-        "浏览器已打开",
-        "页面已加载"
-      ],
-      "test_steps": [
-        "打开浏览器",
-        "访问用户列表页",
-        "执行分页功能操作",
-        "验证结果"
-      ],
-      "expected_result": "分页功能成功，页面显示正确",
-      "test_data": {},
-      "tags": [
-        "ui",
-        "用户列表页",
-        "分页功能"
-      ]
-    },
-    {
-      "id": "TC-UI-039",
-      "type": "UI",
-      "module": "用户列表页",
-      "name": "用户列表页 - 新增用户",
-      "description": "用户列表页的新增用户场景",
-      "priority": "medium",
-      "preconditions": [
-        "浏览器已打开",
-        "页面已加载"
-      ],
-      "test_steps": [
-        "打开浏览器",
-        "访问用户列表页",
-        "执行新增用户操作",
-        "验证结果"
-      ],
-      "expected_result": "新增用户成功，页面显示正确",
-      "test_data": {},
-      "tags": [
-        "ui",
-        "用户列表页",
-        "新增用户"
-      ]
-    },
-    {
-      "id": "TC-UI-040",
-      "type": "UI",
-      "module": "用户列表页",
-      "name": "用户列表页 - 编辑用户",
-      "description": "用户列表页的编辑用户场景",
-      "priority": "medium",
-      "preconditions": [
-        "浏览器已打开",
-        "页面已加载"
-      ],
-      "test_steps": [
-        "打开浏览器",
-        "访问用户列表页",
-        "执行编辑用户操作",
-        "验证结果"
-      ],
-      "expected_result": "编辑用户成功，页面显示正确",
-      "test_data": {},
-      "tags": [
-        "ui",
-        "用户列表页",
-        "编辑用户"
-      ]
-    },
-    {
-      "id": "TC-UI-041",
-      "type": "UI",
-      "module": "用户列表页",
-      "name": "用户列表页 - 删除用户",
-      "description": "用户列表页的删除用户场景",
-      "priority": "medium",
-      "preconditions": [
-        "浏览器已打开",
-        "页面已加载"
-      ],
-      "test_steps": [
-        "打开浏览器",
-        "访问用户列表页",
-        "执行删除用户操作",
-        "验证结果"
-      ],
-      "expected_result": "删除用户成功，页面显示正确",
-      "test_data": {},
-      "tags": [
-        "ui",
-        "用户列表页",
-        "删除用户"
-      ]
-    },
-    {
-      "id": "TC-INT-042",
-      "type": "Integration",
-      "module": "业务流程",
-      "name": "用户注册登录流程",
-      "description": "集成测试：用户注册登录流程",
-      "priority": "high",
-      "preconditions": [
-        "系统正常运行",
-        "数据库连接正常"
-      ],
-      "test_steps": [
-        "注册新用户",
-        "登录系统",
-        "验证登录状态"
-      ],
-      "expected_result": "所有步骤执行成功",
-      "test_data": {},
-      "tags": [
-        "integration",
-        "workflow"
-      ]
-    },
-    {
-      "id": "TC-INT-043",
-      "type": "Integration",
-      "module": "业务流程",
-      "name": "用户CRUD完整流程",
-      "description": "集成测试：用户CRUD完整流程",
-      "priority": "high",
-      "preconditions": [
-        "系统正常运行",
-        "数据库连接正常"
-      ],
-      "test_steps": [
-        "创建用户",
-        "查询用户",
-        "更新用户",
-        "删除用户",
-        "验证删除"
-      ],
-      "expected_result": "所有步骤执行成功",
-      "test_data": {},
-      "tags": [
-        "integration",
-        "workflow"
-      ]
-    },
-    {
-      "id": "TC-INT-044",
-      "type": "Integration",
-      "module": "业务流程",
-      "name": "数据权限隔离",
-      "description": "集成测试：数据权限隔离",
-      "priority": "medium",
-      "preconditions": [
-        "系统正常运行",
-        "数据库连接正常"
-      ],
-      "test_steps": [
-        "用户A创建数据",
-        "用户B尝试访问",
-        "验证权限隔离"
-      ],
-      "expected_result": "所有步骤执行成功",
-      "test_data": {},
-      "tags": [
-        "integration",
-        "workflow"
-      ]
     }
   ],
   "defects": [
     {
       "id": "DEF-001",
+      "test_id": "TC-API-001",
+      "test_name": "POST /api/auth/login - 正常",
+      "title": "测试失败: POST /api/auth/login - 正常",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/login (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "severity": "high",
+      "status": "new",
+      "type": "authentication",
+      "module": "auth",
+      "priority": "P2",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-001",
+        "3. 观察测试结果"
+      ],
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/login (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-07-22T09:49:03.770829",
+      "tags": []
+    },
+    {
+      "id": "DEF-002",
       "test_id": "TC-API-002",
       "test_name": "POST /api/auth/login - 参数为空",
       "title": "测试失败: POST /api/auth/login - 参数为空",
-      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/login (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "severity": "high",
       "status": "new",
       "type": "authentication",
@@ -1223,25 +975,21 @@
       "steps_to_reproduce": [
         "1. 准备测试环境",
         "2. 执行测试用例 TC-API-002",
-        "3. 观察测试结果",
-        "4. 记录错误信息"
+        "3. 观察测试结果"
       ],
-      "actual_result": "权限验证失败 - 预期失败",
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/login (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641257",
-      "assignee": "",
-      "tags": [
-        "认证问题"
-      ]
+      "created_at": "2026-07-22T09:49:03.770844",
+      "tags": []
     },
     {
-      "id": "DEF-002",
+      "id": "DEF-003",
       "test_id": "TC-API-003",
       "test_name": "POST /api/auth/login - 参数错误",
       "title": "测试失败: POST /api/auth/login - 参数错误",
-      "description": "测试用例执行失败，错误信息: 参数错误 - 预期失败",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/login (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "severity": "high",
       "status": "new",
       "type": "authentication",
@@ -1250,25 +998,21 @@
       "steps_to_reproduce": [
         "1. 准备测试环境",
         "2. 执行测试用例 TC-API-003",
-        "3. 观察测试结果",
-        "4. 记录错误信息"
+        "3. 观察测试结果"
       ],
-      "actual_result": "参数错误 - 预期失败",
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/login (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641272",
-      "assignee": "",
-      "tags": [
-        "认证问题"
-      ]
+      "created_at": "2026-07-22T09:49:03.770856",
+      "tags": []
     },
     {
-      "id": "DEF-003",
+      "id": "DEF-004",
       "test_id": "TC-API-004",
       "test_name": "POST /api/auth/login - 权限验证",
       "title": "测试失败: POST /api/auth/login - 权限验证",
-      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/login (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "severity": "high",
       "status": "new",
       "type": "authentication",
@@ -1277,25 +1021,44 @@
       "steps_to_reproduce": [
         "1. 准备测试环境",
         "2. 执行测试用例 TC-API-004",
-        "3. 观察测试结果",
-        "4. 记录错误信息"
+        "3. 观察测试结果"
       ],
-      "actual_result": "权限验证失败 - 预期失败",
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/login (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641281",
-      "assignee": "",
-      "tags": [
-        "认证问题"
-      ]
+      "created_at": "2026-07-22T09:49:03.770864",
+      "tags": []
     },
     {
-      "id": "DEF-004",
+      "id": "DEF-005",
+      "test_id": "TC-API-005",
+      "test_name": "POST /api/auth/register - 正常",
+      "title": "测试失败: POST /api/auth/register - 正常",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/register (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "severity": "high",
+      "status": "new",
+      "type": "authentication",
+      "module": "auth",
+      "priority": "P2",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-005",
+        "3. 观察测试结果"
+      ],
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/register (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-07-22T09:49:03.770873",
+      "tags": []
+    },
+    {
+      "id": "DEF-006",
       "test_id": "TC-API-006",
       "test_name": "POST /api/auth/register - 参数为空",
       "title": "测试失败: POST /api/auth/register - 参数为空",
-      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/register (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "severity": "high",
       "status": "new",
       "type": "authentication",
@@ -1304,25 +1067,21 @@
       "steps_to_reproduce": [
         "1. 准备测试环境",
         "2. 执行测试用例 TC-API-006",
-        "3. 观察测试结果",
-        "4. 记录错误信息"
+        "3. 观察测试结果"
       ],
-      "actual_result": "权限验证失败 - 预期失败",
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/register (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641289",
-      "assignee": "",
-      "tags": [
-        "认证问题"
-      ]
+      "created_at": "2026-07-22T09:49:03.770883",
+      "tags": []
     },
     {
-      "id": "DEF-005",
+      "id": "DEF-007",
       "test_id": "TC-API-007",
       "test_name": "POST /api/auth/register - 参数错误",
       "title": "测试失败: POST /api/auth/register - 参数错误",
-      "description": "测试用例执行失败，错误信息: 参数错误 - 预期失败",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/register (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "severity": "high",
       "status": "new",
       "type": "authentication",
@@ -1331,25 +1090,21 @@
       "steps_to_reproduce": [
         "1. 准备测试环境",
         "2. 执行测试用例 TC-API-007",
-        "3. 观察测试结果",
-        "4. 记录错误信息"
+        "3. 观察测试结果"
       ],
-      "actual_result": "参数错误 - 预期失败",
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/register (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641296",
-      "assignee": "",
-      "tags": [
-        "认证问题"
-      ]
+      "created_at": "2026-07-22T09:49:03.770890",
+      "tags": []
     },
     {
-      "id": "DEF-006",
+      "id": "DEF-008",
       "test_id": "TC-API-008",
       "test_name": "POST /api/auth/register - 权限验证",
       "title": "测试失败: POST /api/auth/register - 权限验证",
-      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/register (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "severity": "high",
       "status": "new",
       "type": "authentication",
@@ -1358,25 +1113,67 @@
       "steps_to_reproduce": [
         "1. 准备测试环境",
         "2. 执行测试用例 TC-API-008",
-        "3. 观察测试结果",
-        "4. 记录错误信息"
+        "3. 观察测试结果"
       ],
-      "actual_result": "权限验证失败 - 预期失败",
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/register (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641303",
-      "assignee": "",
-      "tags": [
-        "认证问题"
-      ]
+      "created_at": "2026-07-22T09:49:03.770897",
+      "tags": []
     },
     {
-      "id": "DEF-007",
+      "id": "DEF-009",
+      "test_id": "TC-API-009",
+      "test_name": "GET /api/users - 正常",
+      "title": "测试失败: GET /api/users - 正常",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "severity": "low",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P4",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-009",
+        "3. 观察测试结果"
+      ],
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-07-22T09:49:03.770906",
+      "tags": []
+    },
+    {
+      "id": "DEF-010",
+      "test_id": "TC-API-010",
+      "test_name": "GET /api/users - 无数据",
+      "title": "测试失败: GET /api/users - 无数据",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "severity": "low",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P4",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-010",
+        "3. 观察测试结果"
+      ],
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-07-22T09:49:03.770915",
+      "tags": []
+    },
+    {
+      "id": "DEF-011",
       "test_id": "TC-API-011",
       "test_name": "GET /api/users - 权限验证",
       "title": "测试失败: GET /api/users - 权限验证",
-      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "severity": "low",
       "status": "new",
       "type": "functional",
@@ -1385,25 +1182,90 @@
       "steps_to_reproduce": [
         "1. 准备测试环境",
         "2. 执行测试用例 TC-API-011",
-        "3. 观察测试结果",
-        "4. 记录错误信息"
+        "3. 观察测试结果"
       ],
-      "actual_result": "权限验证失败 - 预期失败",
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641313",
-      "assignee": "",
-      "tags": [
-        "功能问题"
-      ]
+      "created_at": "2026-07-22T09:49:03.770922",
+      "tags": []
     },
     {
-      "id": "DEF-008",
+      "id": "DEF-012",
+      "test_id": "TC-API-012",
+      "test_name": "GET /api/users - 分页",
+      "title": "测试失败: GET /api/users - 分页",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "severity": "low",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P4",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-012",
+        "3. 观察测试结果"
+      ],
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-07-22T09:49:03.770930",
+      "tags": []
+    },
+    {
+      "id": "DEF-013",
+      "test_id": "TC-API-013",
+      "test_name": "POST /api/users - 正常",
+      "title": "测试失败: POST /api/users - 正常",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "severity": "low",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P4",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-013",
+        "3. 观察测试结果"
+      ],
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-07-22T09:49:03.770938",
+      "tags": []
+    },
+    {
+      "id": "DEF-014",
+      "test_id": "TC-API-014",
+      "test_name": "POST /api/users - 参数为空",
+      "title": "测试失败: POST /api/users - 参数为空",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "severity": "low",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P4",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-014",
+        "3. 观察测试结果"
+      ],
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-07-22T09:49:03.770946",
+      "tags": []
+    },
+    {
+      "id": "DEF-015",
       "test_id": "TC-API-015",
       "test_name": "POST /api/users - 参数错误",
       "title": "测试失败: POST /api/users - 参数错误",
-      "description": "测试用例执行失败，错误信息: 参数错误 - 预期失败",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "severity": "low",
       "status": "new",
       "type": "functional",
@@ -1412,25 +1274,21 @@
       "steps_to_reproduce": [
         "1. 准备测试环境",
         "2. 执行测试用例 TC-API-015",
-        "3. 观察测试结果",
-        "4. 记录错误信息"
+        "3. 观察测试结果"
       ],
-      "actual_result": "参数错误 - 预期失败",
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641322",
-      "assignee": "",
-      "tags": [
-        "功能问题"
-      ]
+      "created_at": "2026-07-22T09:49:03.770953",
+      "tags": []
     },
     {
-      "id": "DEF-009",
+      "id": "DEF-016",
       "test_id": "TC-API-016",
       "test_name": "POST /api/users - 权限验证",
       "title": "测试失败: POST /api/users - 权限验证",
-      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "severity": "low",
       "status": "new",
       "type": "functional",
@@ -1439,25 +1297,67 @@
       "steps_to_reproduce": [
         "1. 准备测试环境",
         "2. 执行测试用例 TC-API-016",
-        "3. 观察测试结果",
-        "4. 记录错误信息"
+        "3. 观察测试结果"
       ],
-      "actual_result": "权限验证失败 - 预期失败",
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641330",
-      "assignee": "",
-      "tags": [
-        "功能问题"
-      ]
+      "created_at": "2026-07-22T09:49:03.770964",
+      "tags": []
     },
     {
-      "id": "DEF-010",
+      "id": "DEF-017",
+      "test_id": "TC-API-017",
+      "test_name": "GET /api/users/{{id}} - 正常",
+      "title": "测试失败: GET /api/users/{{id}} - 正常",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "severity": "low",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P4",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-017",
+        "3. 观察测试结果"
+      ],
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-07-22T09:49:03.770973",
+      "tags": []
+    },
+    {
+      "id": "DEF-018",
+      "test_id": "TC-API-018",
+      "test_name": "GET /api/users/{{id}} - 无数据",
+      "title": "测试失败: GET /api/users/{{id}} - 无数据",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "severity": "low",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P4",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-018",
+        "3. 观察测试结果"
+      ],
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-07-22T09:49:03.770981",
+      "tags": []
+    },
+    {
+      "id": "DEF-019",
       "test_id": "TC-API-019",
-      "test_name": "GET /api/users/{id} - 权限验证",
-      "title": "测试失败: GET /api/users/{id} - 权限验证",
-      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "test_name": "GET /api/users/{{id}} - 权限验证",
+      "title": "测试失败: GET /api/users/{{id}} - 权限验证",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "severity": "low",
       "status": "new",
       "type": "functional",
@@ -1466,25 +1366,67 @@
       "steps_to_reproduce": [
         "1. 准备测试环境",
         "2. 执行测试用例 TC-API-019",
-        "3. 观察测试结果",
-        "4. 记录错误信息"
+        "3. 观察测试结果"
       ],
-      "actual_result": "权限验证失败 - 预期失败",
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641339",
-      "assignee": "",
-      "tags": [
-        "功能问题"
-      ]
+      "created_at": "2026-07-22T09:49:03.770989",
+      "tags": []
     },
     {
-      "id": "DEF-011",
+      "id": "DEF-020",
+      "test_id": "TC-API-020",
+      "test_name": "GET /api/users/{{id}} - 分页",
+      "title": "测试失败: GET /api/users/{{id}} - 分页",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "severity": "low",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P4",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-020",
+        "3. 观察测试结果"
+      ],
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-07-22T09:49:03.770996",
+      "tags": []
+    },
+    {
+      "id": "DEF-021",
+      "test_id": "TC-API-021",
+      "test_name": "PUT /api/users/{{id}} - 正常",
+      "title": "测试失败: PUT /api/users/{{id}} - 正常",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "severity": "low",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P4",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-021",
+        "3. 观察测试结果"
+      ],
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-07-22T09:49:03.771006",
+      "tags": []
+    },
+    {
+      "id": "DEF-022",
       "test_id": "TC-API-022",
-      "test_name": "PUT /api/users/{id} - 不存在",
-      "title": "测试失败: PUT /api/users/{id} - 不存在",
-      "description": "测试用例执行失败，错误信息: 资源不存在 - 预期失败",
+      "test_name": "PUT /api/users/{{id}} - 不存在",
+      "title": "测试失败: PUT /api/users/{{id}} - 不存在",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "severity": "low",
       "status": "new",
       "type": "functional",
@@ -1493,25 +1435,21 @@
       "steps_to_reproduce": [
         "1. 准备测试环境",
         "2. 执行测试用例 TC-API-022",
-        "3. 观察测试结果",
-        "4. 记录错误信息"
+        "3. 观察测试结果"
       ],
-      "actual_result": "资源不存在 - 预期失败",
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641346",
-      "assignee": "",
-      "tags": [
-        "功能问题"
-      ]
+      "created_at": "2026-07-22T09:49:03.771014",
+      "tags": []
     },
     {
-      "id": "DEF-012",
+      "id": "DEF-023",
       "test_id": "TC-API-023",
-      "test_name": "PUT /api/users/{id} - 参数错误",
-      "title": "测试失败: PUT /api/users/{id} - 参数错误",
-      "description": "测试用例执行失败，错误信息: 参数错误 - 预期失败",
+      "test_name": "PUT /api/users/{{id}} - 参数错误",
+      "title": "测试失败: PUT /api/users/{{id}} - 参数错误",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "severity": "low",
       "status": "new",
       "type": "functional",
@@ -1520,25 +1458,21 @@
       "steps_to_reproduce": [
         "1. 准备测试环境",
         "2. 执行测试用例 TC-API-023",
-        "3. 观察测试结果",
-        "4. 记录错误信息"
+        "3. 观察测试结果"
       ],
-      "actual_result": "参数错误 - 预期失败",
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641355",
-      "assignee": "",
-      "tags": [
-        "功能问题"
-      ]
+      "created_at": "2026-07-22T09:49:03.771023",
+      "tags": []
     },
     {
-      "id": "DEF-013",
+      "id": "DEF-024",
       "test_id": "TC-API-024",
-      "test_name": "PUT /api/users/{id} - 权限验证",
-      "title": "测试失败: PUT /api/users/{id} - 权限验证",
-      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "test_name": "PUT /api/users/{{id}} - 权限验证",
+      "title": "测试失败: PUT /api/users/{{id}} - 权限验证",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "severity": "low",
       "status": "new",
       "type": "functional",
@@ -1547,25 +1481,44 @@
       "steps_to_reproduce": [
         "1. 准备测试环境",
         "2. 执行测试用例 TC-API-024",
-        "3. 观察测试结果",
-        "4. 记录错误信息"
+        "3. 观察测试结果"
       ],
-      "actual_result": "权限验证失败 - 预期失败",
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641361",
-      "assignee": "",
-      "tags": [
-        "功能问题"
-      ]
+      "created_at": "2026-07-22T09:49:03.771031",
+      "tags": []
     },
     {
-      "id": "DEF-014",
+      "id": "DEF-025",
+      "test_id": "TC-API-025",
+      "test_name": "DELETE /api/users/{{id}} - 正常",
+      "title": "测试失败: DELETE /api/users/{{id}} - 正常",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "severity": "critical",
+      "status": "new",
+      "type": "functional",
+      "module": "users",
+      "priority": "P1",
+      "steps_to_reproduce": [
+        "1. 准备测试环境",
+        "2. 执行测试用例 TC-API-025",
+        "3. 观察测试结果"
+      ],
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+      "expected_result": "按需求正常工作",
+      "root_cause": "",
+      "suggested_fix": "",
+      "created_at": "2026-07-22T09:49:03.771039",
+      "tags": []
+    },
+    {
+      "id": "DEF-026",
       "test_id": "TC-API-026",
-      "test_name": "DELETE /api/users/{id} - 不存在",
-      "title": "测试失败: DELETE /api/users/{id} - 不存在",
-      "description": "测试用例执行失败，错误信息: 资源不存在 - 预期失败",
+      "test_name": "DELETE /api/users/{{id}} - 不存在",
+      "title": "测试失败: DELETE /api/users/{{id}} - 不存在",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "severity": "critical",
       "status": "new",
       "type": "functional",
@@ -1574,25 +1527,21 @@
       "steps_to_reproduce": [
         "1. 准备测试环境",
         "2. 执行测试用例 TC-API-026",
-        "3. 观察测试结果",
-        "4. 记录错误信息"
+        "3. 观察测试结果"
       ],
-      "actual_result": "资源不存在 - 预期失败",
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641370",
-      "assignee": "",
-      "tags": [
-        "功能问题"
-      ]
+      "created_at": "2026-07-22T09:49:03.771048",
+      "tags": []
     },
     {
-      "id": "DEF-015",
+      "id": "DEF-027",
       "test_id": "TC-API-027",
-      "test_name": "DELETE /api/users/{id} - 权限验证",
-      "title": "测试失败: DELETE /api/users/{id} - 权限验证",
-      "description": "测试用例执行失败，错误信息: 权限验证失败 - 预期失败",
+      "test_name": "DELETE /api/users/{{id}} - 权限验证",
+      "title": "测试失败: DELETE /api/users/{{id}} - 权限验证",
+      "description": "执行结果: 请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "severity": "critical",
       "status": "new",
       "type": "functional",
@@ -1601,32 +1550,28 @@
       "steps_to_reproduce": [
         "1. 准备测试环境",
         "2. 执行测试用例 TC-API-027",
-        "3. 观察测试结果",
-        "4. 记录错误信息"
+        "3. 观察测试结果"
       ],
-      "actual_result": "权限验证失败 - 预期失败",
+      "actual_result": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-05-06T07:45:29.641377",
-      "assignee": "",
-      "tags": [
-        "功能问题"
-      ]
+      "created_at": "2026-07-22T09:49:03.771056",
+      "tags": []
     },
     {
-      "id": "DEF-SYS-016",
+      "id": "DEF-SYS-001",
       "test_id": "N/A",
-      "test_name": "users模块系统性缺陷",
-      "title": "users模块存在系统性缺陷",
-      "description": "检测到users模块存在多个相关缺陷，可能存在系统性问题",
+      "test_name": "auth 模块系统性缺陷",
+      "title": "auth 模块存在系统性缺陷",
+      "description": "检测到 auth 模块存在 8 个相关缺陷，可能存在系统性问题",
       "severity": "high",
       "status": "new",
-      "type": "functional",
-      "module": "users",
-      "priority": "high",
+      "type": "systemic",
+      "module": "auth",
+      "priority": "P2",
       "steps_to_reproduce": [
-        "执行users相关测试",
+        "执行 auth 相关测试",
         "观察多个测试失败",
         "分析失败模式"
       ],
@@ -1634,12 +1579,36 @@
       "expected_result": "所有测试通过",
       "root_cause": "需要进一步分析",
       "suggested_fix": "建议进行代码审查",
-      "created_at": "2026-05-06T07:45:29.642169",
-      "assignee": "",
+      "created_at": "2026-07-22T09:49:03.771084",
       "tags": [
         "systemic",
-        "users",
-        "功能问题"
+        "auth"
+      ]
+    },
+    {
+      "id": "DEF-SYS-002",
+      "test_id": "N/A",
+      "test_name": "users 模块系统性缺陷",
+      "title": "users 模块存在系统性缺陷",
+      "description": "检测到 users 模块存在 19 个相关缺陷，可能存在系统性问题",
+      "severity": "high",
+      "status": "new",
+      "type": "systemic",
+      "module": "users",
+      "priority": "P2",
+      "steps_to_reproduce": [
+        "执行 users 相关测试",
+        "观察多个测试失败",
+        "分析失败模式"
+      ],
+      "actual_result": "多个测试失败",
+      "expected_result": "所有测试通过",
+      "root_cause": "需要进一步分析",
+      "suggested_fix": "建议进行代码审查",
+      "created_at": "2026-07-22T09:49:03.771090",
+      "tags": [
+        "systemic",
+        "users"
       ]
     }
   ],
@@ -1648,16 +1617,13 @@
       "test_id": "TC-API-001",
       "test_name": "POST /api/auth/login - 正常",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640876",
-      "end_time": "2026-05-06T07:45:29.640897",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "success": true,
-        "data": {}
-      },
-      "error_message": "API调用成功",
+      "start_time": "2026-07-22T09:49:03.688629",
+      "end_time": "2026-07-22T09:49:03.690741",
+      "duration": 0.002,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/login (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
@@ -1665,15 +1631,13 @@
       "test_id": "TC-API-002",
       "test_name": "POST /api/auth/login - 参数为空",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640900",
-      "end_time": "2026-05-06T07:45:29.640909",
-      "duration": 0.0,
-      "status": "failed",
-      "status_code": 401,
-      "response": {
-        "error": "Unauthorized"
-      },
-      "error_message": "权限验证失败 - 预期失败",
+      "start_time": "2026-07-22T09:49:03.692699",
+      "end_time": "2026-07-22T09:49:03.693491",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/login (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
@@ -1681,15 +1645,13 @@
       "test_id": "TC-API-003",
       "test_name": "POST /api/auth/login - 参数错误",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640912",
-      "end_time": "2026-05-06T07:45:29.640919",
-      "duration": 0.0,
-      "status": "failed",
-      "status_code": 400,
-      "response": {
-        "error": "Invalid parameters"
-      },
-      "error_message": "参数错误 - 预期失败",
+      "start_time": "2026-07-22T09:49:03.695128",
+      "end_time": "2026-07-22T09:49:03.695997",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/login (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
@@ -1697,15 +1659,13 @@
       "test_id": "TC-API-004",
       "test_name": "POST /api/auth/login - 权限验证",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640920",
-      "end_time": "2026-05-06T07:45:29.640931",
-      "duration": 0.0,
-      "status": "failed",
-      "status_code": 401,
-      "response": {
-        "error": "Unauthorized"
-      },
-      "error_message": "权限验证失败 - 预期失败",
+      "start_time": "2026-07-22T09:49:03.697698",
+      "end_time": "2026-07-22T09:49:03.698477",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/login (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
@@ -1713,16 +1673,13 @@
       "test_id": "TC-API-005",
       "test_name": "POST /api/auth/register - 正常",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640932",
-      "end_time": "2026-05-06T07:45:29.640937",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "success": true,
-        "data": {}
-      },
-      "error_message": "API调用成功",
+      "start_time": "2026-07-22T09:49:03.702216",
+      "end_time": "2026-07-22T09:49:03.703029",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/register (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
@@ -1730,15 +1687,13 @@
       "test_id": "TC-API-006",
       "test_name": "POST /api/auth/register - 参数为空",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640939",
-      "end_time": "2026-05-06T07:45:29.640945",
-      "duration": 0.0,
-      "status": "failed",
-      "status_code": 401,
-      "response": {
-        "error": "Unauthorized"
-      },
-      "error_message": "权限验证失败 - 预期失败",
+      "start_time": "2026-07-22T09:49:03.704688",
+      "end_time": "2026-07-22T09:49:03.705438",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/register (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
@@ -1746,15 +1701,13 @@
       "test_id": "TC-API-007",
       "test_name": "POST /api/auth/register - 参数错误",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640946",
-      "end_time": "2026-05-06T07:45:29.640950",
-      "duration": 0.0,
-      "status": "failed",
-      "status_code": 400,
-      "response": {
-        "error": "Invalid parameters"
-      },
-      "error_message": "参数错误 - 预期失败",
+      "start_time": "2026-07-22T09:49:03.707006",
+      "end_time": "2026-07-22T09:49:03.707819",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/register (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
@@ -1762,15 +1715,13 @@
       "test_id": "TC-API-008",
       "test_name": "POST /api/auth/register - 权限验证",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640951",
-      "end_time": "2026-05-06T07:45:29.640955",
-      "duration": 0.0,
-      "status": "failed",
-      "status_code": 401,
-      "response": {
-        "error": "Unauthorized"
-      },
-      "error_message": "权限验证失败 - 预期失败",
+      "start_time": "2026-07-22T09:49:03.709430",
+      "end_time": "2026-07-22T09:49:03.710205",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/auth/register (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
@@ -1778,16 +1729,13 @@
       "test_id": "TC-API-009",
       "test_name": "GET /api/users - 正常",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640956",
-      "end_time": "2026-05-06T07:45:29.640960",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "success": true,
-        "data": {}
-      },
-      "error_message": "API调用成功",
+      "start_time": "2026-07-22T09:49:03.711944",
+      "end_time": "2026-07-22T09:49:03.712781",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
@@ -1795,13 +1743,13 @@
       "test_id": "TC-API-010",
       "test_name": "GET /api/users - 无数据",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640961",
-      "end_time": "2026-05-06T07:45:29.640966",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
+      "start_time": "2026-07-22T09:49:03.715214",
+      "end_time": "2026-07-22T09:49:03.716025",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
       "response": {},
-      "error_message": "测试通过",
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
@@ -1809,15 +1757,13 @@
       "test_id": "TC-API-011",
       "test_name": "GET /api/users - 权限验证",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640967",
-      "end_time": "2026-05-06T07:45:29.640971",
-      "duration": 0.0,
-      "status": "failed",
-      "status_code": 401,
-      "response": {
-        "error": "Unauthorized"
-      },
-      "error_message": "权限验证失败 - 预期失败",
+      "start_time": "2026-07-22T09:49:03.717632",
+      "end_time": "2026-07-22T09:49:03.718379",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
@@ -1825,13 +1771,13 @@
       "test_id": "TC-API-012",
       "test_name": "GET /api/users - 分页",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640973",
-      "end_time": "2026-05-06T07:45:29.640977",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
+      "start_time": "2026-07-22T09:49:03.719956",
+      "end_time": "2026-07-22T09:49:03.720751",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
       "response": {},
-      "error_message": "测试通过",
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
@@ -1839,16 +1785,13 @@
       "test_id": "TC-API-013",
       "test_name": "POST /api/users - 正常",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640979",
-      "end_time": "2026-05-06T07:45:29.640984",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "success": true,
-        "data": {}
-      },
-      "error_message": "API调用成功",
+      "start_time": "2026-07-22T09:49:03.722350",
+      "end_time": "2026-07-22T09:49:03.723152",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
@@ -1856,13 +1799,13 @@
       "test_id": "TC-API-014",
       "test_name": "POST /api/users - 参数为空",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640985",
-      "end_time": "2026-05-06T07:45:29.640990",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
+      "start_time": "2026-07-22T09:49:03.724760",
+      "end_time": "2026-07-22T09:49:03.725512",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
       "response": {},
-      "error_message": "测试通过",
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
@@ -1870,15 +1813,13 @@
       "test_id": "TC-API-015",
       "test_name": "POST /api/users - 参数错误",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640991",
-      "end_time": "2026-05-06T07:45:29.640994",
-      "duration": 0.0,
-      "status": "failed",
-      "status_code": 400,
-      "response": {
-        "error": "Invalid parameters"
-      },
-      "error_message": "参数错误 - 预期失败",
+      "start_time": "2026-07-22T09:49:03.737227",
+      "end_time": "2026-07-22T09:49:03.738062",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
@@ -1886,478 +1827,185 @@
       "test_id": "TC-API-016",
       "test_name": "POST /api/users - 权限验证",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.640996",
-      "end_time": "2026-05-06T07:45:29.640999",
-      "duration": 0.0,
-      "status": "failed",
-      "status_code": 401,
-      "response": {
-        "error": "Unauthorized"
-      },
-      "error_message": "权限验证失败 - 预期失败",
+      "start_time": "2026-07-22T09:49:03.739827",
+      "end_time": "2026-07-22T09:49:03.740689",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
     {
       "test_id": "TC-API-017",
-      "test_name": "GET /api/users/{id} - 正常",
+      "test_name": "GET /api/users/{{id}} - 正常",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641001",
-      "end_time": "2026-05-06T07:45:29.641004",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "success": true,
-        "data": {}
-      },
-      "error_message": "API调用成功",
+      "start_time": "2026-07-22T09:49:03.742322",
+      "end_time": "2026-07-22T09:49:03.743204",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
     {
       "test_id": "TC-API-018",
-      "test_name": "GET /api/users/{id} - 无数据",
+      "test_name": "GET /api/users/{{id}} - 无数据",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641005",
-      "end_time": "2026-05-06T07:45:29.641010",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
+      "start_time": "2026-07-22T09:49:03.744953",
+      "end_time": "2026-07-22T09:49:03.745780",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
       "response": {},
-      "error_message": "测试通过",
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
     {
       "test_id": "TC-API-019",
-      "test_name": "GET /api/users/{id} - 权限验证",
+      "test_name": "GET /api/users/{{id}} - 权限验证",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641011",
-      "end_time": "2026-05-06T07:45:29.641015",
-      "duration": 0.0,
-      "status": "failed",
-      "status_code": 401,
-      "response": {
-        "error": "Unauthorized"
-      },
-      "error_message": "权限验证失败 - 预期失败",
+      "start_time": "2026-07-22T09:49:03.747462",
+      "end_time": "2026-07-22T09:49:03.748291",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
     {
       "test_id": "TC-API-020",
-      "test_name": "GET /api/users/{id} - 分页",
+      "test_name": "GET /api/users/{{id}} - 分页",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641016",
-      "end_time": "2026-05-06T07:45:29.641020",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
+      "start_time": "2026-07-22T09:49:03.750009",
+      "end_time": "2026-07-22T09:49:03.750890",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
       "response": {},
-      "error_message": "测试通过",
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D?page=1&page_size=10 (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
     {
       "test_id": "TC-API-021",
-      "test_name": "PUT /api/users/{id} - 正常",
+      "test_name": "PUT /api/users/{{id}} - 正常",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641021",
-      "end_time": "2026-05-06T07:45:29.641025",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "success": true,
-        "data": {}
-      },
-      "error_message": "API调用成功",
+      "start_time": "2026-07-22T09:49:03.752623",
+      "end_time": "2026-07-22T09:49:03.753446",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
     {
       "test_id": "TC-API-022",
-      "test_name": "PUT /api/users/{id} - 不存在",
+      "test_name": "PUT /api/users/{{id}} - 不存在",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641026",
-      "end_time": "2026-05-06T07:45:29.641030",
-      "duration": 0.0,
-      "status": "failed",
-      "status_code": 404,
-      "response": {
-        "error": "Not found"
-      },
-      "error_message": "资源不存在 - 预期失败",
+      "start_time": "2026-07-22T09:49:03.755184",
+      "end_time": "2026-07-22T09:49:03.756044",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
     {
       "test_id": "TC-API-023",
-      "test_name": "PUT /api/users/{id} - 参数错误",
+      "test_name": "PUT /api/users/{{id}} - 参数错误",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641031",
-      "end_time": "2026-05-06T07:45:29.641036",
-      "duration": 0.0,
-      "status": "failed",
-      "status_code": 400,
-      "response": {
-        "error": "Invalid parameters"
-      },
-      "error_message": "参数错误 - 预期失败",
+      "start_time": "2026-07-22T09:49:03.758090",
+      "end_time": "2026-07-22T09:49:03.758943",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
     {
       "test_id": "TC-API-024",
-      "test_name": "PUT /api/users/{id} - 权限验证",
+      "test_name": "PUT /api/users/{{id}} - 权限验证",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641038",
-      "end_time": "2026-05-06T07:45:29.641041",
-      "duration": 0.0,
-      "status": "failed",
-      "status_code": 401,
-      "response": {
-        "error": "Unauthorized"
-      },
-      "error_message": "权限验证失败 - 预期失败",
+      "start_time": "2026-07-22T09:49:03.760714",
+      "end_time": "2026-07-22T09:49:03.761513",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
     {
       "test_id": "TC-API-025",
-      "test_name": "DELETE /api/users/{id} - 正常",
+      "test_name": "DELETE /api/users/{{id}} - 正常",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641043",
-      "end_time": "2026-05-06T07:45:29.641046",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "success": true,
-        "data": {}
-      },
-      "error_message": "API调用成功",
+      "start_time": "2026-07-22T09:49:03.763144",
+      "end_time": "2026-07-22T09:49:03.764010",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
     {
       "test_id": "TC-API-026",
-      "test_name": "DELETE /api/users/{id} - 不存在",
+      "test_name": "DELETE /api/users/{{id}} - 不存在",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641047",
-      "end_time": "2026-05-06T07:45:29.641051",
-      "duration": 0.0,
-      "status": "failed",
-      "status_code": 404,
-      "response": {
-        "error": "Not found"
-      },
-      "error_message": "资源不存在 - 预期失败",
+      "start_time": "2026-07-22T09:49:03.765712",
+      "end_time": "2026-07-22T09:49:03.766555",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     },
     {
       "test_id": "TC-API-027",
-      "test_name": "DELETE /api/users/{id} - 权限验证",
+      "test_name": "DELETE /api/users/{{id}} - 权限验证",
       "test_type": "API",
-      "start_time": "2026-05-06T07:45:29.641053",
-      "end_time": "2026-05-06T07:45:29.641057",
-      "duration": 0.0,
-      "status": "failed",
-      "status_code": 401,
-      "response": {
-        "error": "Unauthorized"
-      },
-      "error_message": "权限验证失败 - 预期失败",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-UI-028",
-      "test_name": "登录页 - 正常登录",
-      "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641058",
-      "end_time": "2026-05-06T07:45:29.641062",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "elements_found": 5
-      },
-      "error_message": "UI元素验证通过",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-UI-029",
-      "test_name": "登录页 - 错误密码",
-      "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641063",
-      "end_time": "2026-05-06T07:45:29.641067",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "elements_found": 5
-      },
-      "error_message": "UI元素验证通过",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-UI-030",
-      "test_name": "登录页 - 空用户名",
-      "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641068",
-      "end_time": "2026-05-06T07:45:29.641071",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "elements_found": 5
-      },
-      "error_message": "UI元素验证通过",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-UI-031",
-      "test_name": "登录页 - 空密码",
-      "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641072",
-      "end_time": "2026-05-06T07:45:29.641075",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "elements_found": 5
-      },
-      "error_message": "UI元素验证通过",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-UI-032",
-      "test_name": "登录页 - SQL注入",
-      "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641076",
-      "end_time": "2026-05-06T07:45:29.641080",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "elements_found": 5
-      },
-      "error_message": "UI元素验证通过",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-UI-033",
-      "test_name": "注册页 - 正常注册",
-      "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641081",
-      "end_time": "2026-05-06T07:45:29.641096",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "elements_found": 5
-      },
-      "error_message": "UI元素验证通过",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-UI-034",
-      "test_name": "注册页 - 邮箱格式错误",
-      "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641098",
-      "end_time": "2026-05-06T07:45:29.641101",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "elements_found": 5
-      },
-      "error_message": "UI元素验证通过",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-UI-035",
-      "test_name": "注册页 - 密码太短",
-      "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641102",
-      "end_time": "2026-05-06T07:45:29.641105",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "elements_found": 5
-      },
-      "error_message": "UI元素验证通过",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-UI-036",
-      "test_name": "注册页 - 用户名重复",
-      "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641107",
-      "end_time": "2026-05-06T07:45:29.641110",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "elements_found": 5
-      },
-      "error_message": "UI元素验证通过",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-UI-037",
-      "test_name": "用户列表页 - 搜索功能",
-      "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641111",
-      "end_time": "2026-05-06T07:45:29.641114",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "elements_found": 5
-      },
-      "error_message": "UI元素验证通过",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-UI-038",
-      "test_name": "用户列表页 - 分页功能",
-      "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641115",
-      "end_time": "2026-05-06T07:45:29.641118",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "elements_found": 5
-      },
-      "error_message": "UI元素验证通过",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-UI-039",
-      "test_name": "用户列表页 - 新增用户",
-      "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641120",
-      "end_time": "2026-05-06T07:45:29.641123",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "elements_found": 5
-      },
-      "error_message": "UI元素验证通过",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-UI-040",
-      "test_name": "用户列表页 - 编辑用户",
-      "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641124",
-      "end_time": "2026-05-06T07:45:29.641127",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "elements_found": 5
-      },
-      "error_message": "UI元素验证通过",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-UI-041",
-      "test_name": "用户列表页 - 删除用户",
-      "test_type": "UI",
-      "start_time": "2026-05-06T07:45:29.641129",
-      "end_time": "2026-05-06T07:45:29.641132",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "elements_found": 5
-      },
-      "error_message": "UI元素验证通过",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-INT-042",
-      "test_name": "用户注册登录流程",
-      "test_type": "Integration",
-      "start_time": "2026-05-06T07:45:29.641133",
-      "end_time": "2026-05-06T07:45:29.641145",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "steps_completed": 3
-      },
-      "error_message": "集成流程执行成功",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-INT-043",
-      "test_name": "用户CRUD完整流程",
-      "test_type": "Integration",
-      "start_time": "2026-05-06T07:45:29.641147",
-      "end_time": "2026-05-06T07:45:29.641155",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "steps_completed": 3
-      },
-      "error_message": "集成流程执行成功",
-      "screenshots": [],
-      "logs": []
-    },
-    {
-      "test_id": "TC-INT-044",
-      "test_name": "数据权限隔离",
-      "test_type": "Integration",
-      "start_time": "2026-05-06T07:45:29.641157",
-      "end_time": "2026-05-06T07:45:29.641162",
-      "duration": 0.0,
-      "status": "passed",
-      "status_code": 200,
-      "response": {
-        "steps_completed": 3
-      },
-      "error_message": "集成流程执行成功",
+      "start_time": "2026-07-22T09:49:03.768236",
+      "end_time": "2026-07-22T09:49:03.769047",
+      "duration": 0.001,
+      "status": "error",
+      "status_code": null,
+      "response": {},
+      "error_message": "请求异常: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/users/%7B%7Bid%7D%7D (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8000): Failed to establish a new connection: [Errno 111] Connection refused\"))",
       "screenshots": [],
       "logs": []
     }
   ],
-  "report_path": "output/test_report.html",
+  "report_path": "/workspace/output/test_report.html",
   "output_files": {
-    "test_cases": "output/test_cases.csv",
-    "defects": "output/defects.csv",
-    "report": "output/test_report.html"
+    "test_cases_csv": "/workspace/output/test_cases.csv",
+    "test_cases_excel": "/workspace/output/test_cases.xlsx",
+    "defects_csv": "/workspace/output/defects.csv",
+    "defects_excel": "/workspace/output/defects.xlsx",
+    "report": "/workspace/output/test_report.html"
   },
   "summary": {
-    "total_tasks": 7,
-    "completed": 7,
+    "total_tasks": 6,
+    "completed": 6,
     "failed": 0,
     "total_duration": 0.0,
-    "test_cases_count": 44,
-    "defects_count": 16
+    "test_cases_count": 27,
+    "defects_count": 29
   }
 }
