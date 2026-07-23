@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # ============================================================
-# proDemoA 全链路自动化测试平台 - 项目配置文件
+# aiAgent 全链路自动化测试平台 - 项目配置文件
 # ============================================================
 # 使用说明：
 # 1. 测试人员只需修改本文件中的项目信息
@@ -11,10 +11,10 @@
 PROJECT_CONFIG = {
     # ========== 项目基本信息 ==========
     "project": {
-        "project_name": "用户管理系统",
-        "project_code": "UMS-001",
-        "test_type": "全面测试",
-        "test_environment": "test",
+        "project_name": "商户端登录功能",
+        "project_code": "LOGIN-001",
+        "test_type": "UI 功能测试",
+        "test_environment": "dev",
     },
 
     # ========== 需求文档配置 ==========
@@ -123,7 +123,7 @@ PROJECT_CONFIG = {
         # API 基础地址，用于真实 API 测试执行
         "api_base_url": "http://localhost:8000",
         # UI 基础地址
-        "ui_base_url": "http://localhost:3000",
+        "ui_base_url": "https://merchant-dev.nexuscube.cn",
     },
 }
 
