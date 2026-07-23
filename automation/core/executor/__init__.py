@@ -12,11 +12,17 @@ except ImportError:
         def __init__(self, *args, **kwargs):
             raise ImportError("数据库执行器需要安装 sqlalchemy")
 
+try:
+    from .ui_executor import UIExecutor
+except ImportError:
+    UIExecutor = None  # type: ignore
+
 __all__ = [
     "TestExecutor",
     "TestStatus",
     "APIExecutor",
     "DBExecutor",
     "IntegrationExecutor",
+    "UIExecutor",
     "create_executor",
 ]

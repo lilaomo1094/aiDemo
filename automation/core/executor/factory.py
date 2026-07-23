@@ -9,12 +9,18 @@ try:
 except ImportError:
     DBExecutor = None
 
+try:
+    from .ui_executor import UIExecutor
+except ImportError:
+    UIExecutor = None
+
 _REGISTRY = {
     "api": APIExecutor,
     "database": DBExecutor,
     "db": DBExecutor,
     "integration": IntegrationExecutor,
     "e2e": IntegrationExecutor,
+    "ui": UIExecutor,
 }
 
 

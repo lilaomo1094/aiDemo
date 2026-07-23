@@ -166,6 +166,9 @@ class TestGenerator(BaseAgent):
                     "tags": [method, extract_module_from_path(path), test_type],
                 })
 
+        # 根据需求/前端组件生成 UI 测试
+        test_cases.extend(self._generate_ui_tests(requirements, frontend_components))
+
         for model in data_models:
             table = model.get("name", "")
             test_cases.append({
@@ -187,6 +190,131 @@ class TestGenerator(BaseAgent):
             })
 
         return test_cases
+
+    def _generate_ui_tests(self, requirements: List[Dict], frontend_components: List[Dict]) -> List[Dict]:
+        """基于需求关键字和前端组件生成 UI 测试用例."""
+        has_login = any(
+            "登录" in r.get("title", "") or "login" in r.get("title", "").lower() or
+            "登录" in r.get("description", "") or "login" in r.get("description", "").lower()
+            for r in requirements
+        )
+        has_components = bool(frontend_components)
+        if not has_login and not has_components:
+            return []
+
+        ui_base_url = ""
+        if hasattr(self.config, "extra") and self.config.extra:
+            ui_base_url = self.config.extra.get("ui_base_url", "")
+        login_url = f"{ui_base_url.rstrip('/')}/#/login" if ui_base_url else "/#/login"
+
+        cases = [
+            {
+                "id": "TC-UI-001",
+                "type": "UI",
+                "module": "login",
+                "name": "登录页面-正常登录",
+                "description": "输入正确手机号和密码，验证登录成功",
+                "priority": "high",
+                "preconditions": ["登录页面可访问"],
+                "test_steps": ["打开登录页面", "输入手机号", "输入密码", "点击登录按钮"],
+                "expected_result": "页面显示登录成功并跳转",
+                "action": {
+                    "url": login_url,
+                    "steps": [
+                        {"op": "fill", "selector": "#phone", "value": "13411985758"},
+                        {"op": "fill", "selector": "#password", "value": "888888"},
+                        {"op": "click", "selector": "#login-btn"},
+                        {"op": "assert_text", "selector": "#message", "value": "登录成功"},
+                    ],
+                },
+                "tags": ["ui", "login", "positive"],
+            },
+            {
+                "id": "TC-UI-002",
+                "type": "UI",
+                "module": "login",
+                "name": "登录页面-手机号为空",
+                "description": "手机号为空时点击登录，验证给出错误提示",
+                "priority": "high",
+                "preconditions": ["登录页面可访问"],
+                "test_steps": ["打开登录页面", "清空手机号", "输入密码", "点击登录按钮"],
+                "expected_result": "页面提示请输入手机号",
+                "action": {
+                    "url": login_url,
+                    "steps": [
+                        {"op": "fill", "selector": "#phone", "value": ""},
+                        {"op": "fill", "selector": "#password", "value": "888888"},
+                        {"op": "click", "selector": "#login-btn"},
+                        {"op": "assert_text", "selector": "#message", "value": "请输入手机号"},
+                    ],
+                },
+                "tags": ["ui", "login", "validation"],
+            },
+            {
+                "id": "TC-UI-003",
+                "type": "UI",
+                "module": "login",
+                "name": "登录页面-密码为空",
+                "description": "密码为空时点击登录，验证给出错误提示",
+                "priority": "high",
+                "preconditions": ["登录页面可访问"],
+                "test_steps": ["打开登录页面", "输入手机号", "清空密码", "点击登录按钮"],
+                "expected_result": "页面提示请输入密码",
+                "action": {
+                    "url": login_url,
+                    "steps": [
+                        {"op": "fill", "selector": "#phone", "value": "13411985758"},
+                        {"op": "fill", "selector": "#password", "value": ""},
+                        {"op": "click", "selector": "#login-btn"},
+                        {"op": "assert_text", "selector": "#message", "value": "请输入密码"},
+                    ],
+                },
+                "tags": ["ui", "login", "validation"],
+            },
+            {
+                "id": "TC-UI-004",
+                "type": "UI",
+                "module": "login",
+                "name": "登录页面-手机号格式错误",
+                "description": "输入非法手机号，验证给出格式错误提示",
+                "priority": "medium",
+                "preconditions": ["登录页面可访问"],
+                "test_steps": ["打开登录页面", "输入错误格式手机号", "输入密码", "点击登录按钮"],
+                "expected_result": "页面提示手机号格式不正确",
+                "action": {
+                    "url": login_url,
+                    "steps": [
+                        {"op": "fill", "selector": "#phone", "value": "123"},
+                        {"op": "fill", "selector": "#password", "value": "888888"},
+                        {"op": "click", "selector": "#login-btn"},
+                        {"op": "assert_text", "selector": "#message", "value": "手机号格式不正确"},
+                    ],
+                },
+                "tags": ["ui", "login", "validation"],
+            },
+            {
+                "id": "TC-UI-005",
+                "type": "UI",
+                "module": "login",
+                "name": "登录页面-密码错误",
+                "description": "输入错误密码，验证给出账号或密码错误提示",
+                "priority": "high",
+                "preconditions": ["登录页面可访问"],
+                "test_steps": ["打开登录页面", "输入正确手机号", "输入错误密码", "点击登录按钮"],
+                "expected_result": "页面提示账号或密码错误",
+                "action": {
+                    "url": login_url,
+                    "steps": [
+                        {"op": "fill", "selector": "#phone", "value": "13411985758"},
+                        {"op": "fill", "selector": "#password", "value": "wrongpass"},
+                        {"op": "click", "selector": "#login-btn"},
+                        {"op": "assert_text", "selector": "#message", "value": "账号或密码错误"},
+                    ],
+                },
+                "tags": ["ui", "login", "negative"],
+            },
+        ]
+        return cases
 
     def _api_preconditions(self, method: str, path: str) -> List[str]:
         pre = ["API 服务正常运行"]

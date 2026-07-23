@@ -11,6 +11,16 @@ class UIExecutor(TestExecutor):
         super().__init__(config)
         self.base_url = getattr(config, "extra", {}).get("ui_base_url", "")
 
+    def _find_chromium_executable(self) -> str:
+        """查找 Playwright 下载的 Chromium 可执行文件路径."""
+        from pathlib import Path
+        cache_root = Path.home() / ".cache" / "ms-playwright"
+        for name in sorted(cache_root.iterdir() if cache_root.exists() else [], reverse=True):
+            candidate = name / "chrome-linux64" / "chrome"
+            if candidate.exists():
+                return str(candidate)
+        return ""
+
     def execute(self, test_case: Dict, context) -> Dict[str, Any]:
         try:
             from playwright.sync_api import sync_playwright
@@ -23,7 +33,8 @@ class UIExecutor(TestExecutor):
 
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(headless=True)
+                executable_path = self._find_chromium_executable()
+                browser = p.chromium.launch(headless=True, executable_path=executable_path)
                 page = browser.new_page()
                 page.goto(url)
                 results = []

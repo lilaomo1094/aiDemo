@@ -122,8 +122,8 @@ PROJECT_CONFIG = {
     "extra": {
         # API 基础地址，用于真实 API 测试执行
         "api_base_url": "http://localhost:8000",
-        # UI 基础地址
-        "ui_base_url": "https://merchant-dev.nexuscube.cn",
+        # UI 基础地址（本地 mock 登录页面）
+        "ui_base_url": "http://localhost:8080",
     },
 }
 
