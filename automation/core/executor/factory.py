@@ -1,17 +1,18 @@
-# -*- coding: utf-8 -*-
 """测试执行器工厂."""
 
 from .api_executor import APIExecutor
 from .base import TestExecutor
-from .db_executor import DBExecutor
 from .integration_executor import IntegrationExecutor
-from .ui_executor import UIExecutor
+
+try:
+    from .db_executor import DBExecutor
+except ImportError:
+    DBExecutor = None
 
 _REGISTRY = {
     "api": APIExecutor,
     "database": DBExecutor,
     "db": DBExecutor,
-    "ui": UIExecutor,
     "integration": IntegrationExecutor,
     "e2e": IntegrationExecutor,
 }

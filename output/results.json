@@ -1,5 +1,5 @@
 {
-  "run_id": "RUN-20260722094903-95aad6",
+  "run_id": "RUN-20260723083459-315581",
   "status": "completed",
   "test_cases": [
     {
@@ -158,8 +158,8 @@
         "method": "POST",
         "path": "/api/auth/register",
         "data": {
-          "username": "testuserdff1fdf6",
-          "email": "test9db810cd@example.com",
+          "username": "testuser78b8bae6",
+          "email": "test47ac5425@example.com",
           "password": "Test123456"
         },
         "headers": {},
@@ -434,7 +434,7 @@
         "path": "/api/users",
         "data": {
           "username": "newuser",
-          "email": "newb7dbb44e@example.com"
+          "email": "new82e312cb@example.com"
         },
         "headers": {},
         "expected_status": 201
@@ -947,7 +947,7 @@
       "severity": "high",
       "status": "new",
       "type": "authentication",
-      "module": "auth",
+      "module": "POST ",
       "priority": "P2",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -958,7 +958,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770829",
+      "created_at": "2026-07-23T08:35:01.137058",
       "tags": []
     },
     {
@@ -970,7 +970,7 @@
       "severity": "high",
       "status": "new",
       "type": "authentication",
-      "module": "auth",
+      "module": "POST ",
       "priority": "P2",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -981,7 +981,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770844",
+      "created_at": "2026-07-23T08:35:01.137072",
       "tags": []
     },
     {
@@ -993,7 +993,7 @@
       "severity": "high",
       "status": "new",
       "type": "authentication",
-      "module": "auth",
+      "module": "POST ",
       "priority": "P2",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1004,7 +1004,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770856",
+      "created_at": "2026-07-23T08:35:01.137081",
       "tags": []
     },
     {
@@ -1016,7 +1016,7 @@
       "severity": "high",
       "status": "new",
       "type": "authentication",
-      "module": "auth",
+      "module": "POST ",
       "priority": "P2",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1027,7 +1027,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770864",
+      "created_at": "2026-07-23T08:35:01.137089",
       "tags": []
     },
     {
@@ -1039,7 +1039,7 @@
       "severity": "high",
       "status": "new",
       "type": "authentication",
-      "module": "auth",
+      "module": "POST ",
       "priority": "P2",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1050,7 +1050,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770873",
+      "created_at": "2026-07-23T08:35:01.137096",
       "tags": []
     },
     {
@@ -1062,7 +1062,7 @@
       "severity": "high",
       "status": "new",
       "type": "authentication",
-      "module": "auth",
+      "module": "POST ",
       "priority": "P2",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1073,7 +1073,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770883",
+      "created_at": "2026-07-23T08:35:01.137103",
       "tags": []
     },
     {
@@ -1085,7 +1085,7 @@
       "severity": "high",
       "status": "new",
       "type": "authentication",
-      "module": "auth",
+      "module": "POST ",
       "priority": "P2",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1096,7 +1096,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770890",
+      "created_at": "2026-07-23T08:35:01.137110",
       "tags": []
     },
     {
@@ -1108,7 +1108,7 @@
       "severity": "high",
       "status": "new",
       "type": "authentication",
-      "module": "auth",
+      "module": "POST ",
       "priority": "P2",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1119,7 +1119,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770897",
+      "created_at": "2026-07-23T08:35:01.137120",
       "tags": []
     },
     {
@@ -1131,7 +1131,7 @@
       "severity": "low",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "GET ",
       "priority": "P4",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1142,7 +1142,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770906",
+      "created_at": "2026-07-23T08:35:01.137134",
       "tags": []
     },
     {
@@ -1154,7 +1154,7 @@
       "severity": "low",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "GET ",
       "priority": "P4",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1165,7 +1165,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770915",
+      "created_at": "2026-07-23T08:35:01.137143",
       "tags": []
     },
     {
@@ -1177,7 +1177,7 @@
       "severity": "low",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "GET ",
       "priority": "P4",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1188,7 +1188,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770922",
+      "created_at": "2026-07-23T08:35:01.137151",
       "tags": []
     },
     {
@@ -1200,7 +1200,7 @@
       "severity": "low",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "GET ",
       "priority": "P4",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1211,7 +1211,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770930",
+      "created_at": "2026-07-23T08:35:01.137159",
       "tags": []
     },
     {
@@ -1223,7 +1223,7 @@
       "severity": "low",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "POST ",
       "priority": "P4",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1234,7 +1234,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770938",
+      "created_at": "2026-07-23T08:35:01.137166",
       "tags": []
     },
     {
@@ -1246,7 +1246,7 @@
       "severity": "low",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "POST ",
       "priority": "P4",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1257,7 +1257,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770946",
+      "created_at": "2026-07-23T08:35:01.137174",
       "tags": []
     },
     {
@@ -1269,7 +1269,7 @@
       "severity": "low",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "POST ",
       "priority": "P4",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1280,7 +1280,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770953",
+      "created_at": "2026-07-23T08:35:01.137181",
       "tags": []
     },
     {
@@ -1292,7 +1292,7 @@
       "severity": "low",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "POST ",
       "priority": "P4",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1303,7 +1303,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770964",
+      "created_at": "2026-07-23T08:35:01.137188",
       "tags": []
     },
     {
@@ -1315,7 +1315,7 @@
       "severity": "low",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "GET ",
       "priority": "P4",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1326,7 +1326,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770973",
+      "created_at": "2026-07-23T08:35:01.137196",
       "tags": []
     },
     {
@@ -1338,7 +1338,7 @@
       "severity": "low",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "GET ",
       "priority": "P4",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1349,7 +1349,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770981",
+      "created_at": "2026-07-23T08:35:01.137204",
       "tags": []
     },
     {
@@ -1361,7 +1361,7 @@
       "severity": "low",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "GET ",
       "priority": "P4",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1372,7 +1372,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770989",
+      "created_at": "2026-07-23T08:35:01.137215",
       "tags": []
     },
     {
@@ -1384,7 +1384,7 @@
       "severity": "low",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "GET ",
       "priority": "P4",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1395,7 +1395,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.770996",
+      "created_at": "2026-07-23T08:35:01.137223",
       "tags": []
     },
     {
@@ -1407,7 +1407,7 @@
       "severity": "low",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "PUT ",
       "priority": "P4",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1418,7 +1418,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.771006",
+      "created_at": "2026-07-23T08:35:01.137230",
       "tags": []
     },
     {
@@ -1430,7 +1430,7 @@
       "severity": "low",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "PUT ",
       "priority": "P4",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1441,7 +1441,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.771014",
+      "created_at": "2026-07-23T08:35:01.137237",
       "tags": []
     },
     {
@@ -1453,7 +1453,7 @@
       "severity": "low",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "PUT ",
       "priority": "P4",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1464,7 +1464,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.771023",
+      "created_at": "2026-07-23T08:35:01.137245",
       "tags": []
     },
     {
@@ -1476,7 +1476,7 @@
       "severity": "low",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "PUT ",
       "priority": "P4",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1487,7 +1487,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.771031",
+      "created_at": "2026-07-23T08:35:01.137252",
       "tags": []
     },
     {
@@ -1499,7 +1499,7 @@
       "severity": "critical",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "DELETE ",
       "priority": "P1",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1510,7 +1510,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.771039",
+      "created_at": "2026-07-23T08:35:01.137259",
       "tags": []
     },
     {
@@ -1522,7 +1522,7 @@
       "severity": "critical",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "DELETE ",
       "priority": "P1",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1533,7 +1533,7 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.771048",
+      "created_at": "2026-07-23T08:35:01.137266",
       "tags": []
     },
     {
@@ -1545,7 +1545,7 @@
       "severity": "critical",
       "status": "new",
       "type": "functional",
-      "module": "users",
+      "module": "DELETE ",
       "priority": "P1",
       "steps_to_reproduce": [
         "1. 准备测试环境",
@@ -1556,22 +1556,22 @@
       "expected_result": "按需求正常工作",
       "root_cause": "",
       "suggested_fix": "",
-      "created_at": "2026-07-22T09:49:03.771056",
+      "created_at": "2026-07-23T08:35:01.137275",
       "tags": []
     },
     {
       "id": "DEF-SYS-001",
       "test_id": "N/A",
-      "test_name": "auth 模块系统性缺陷",
-      "title": "auth 模块存在系统性缺陷",
-      "description": "检测到 auth 模块存在 8 个相关缺陷，可能存在系统性问题",
+      "test_name": "POST  模块系统性缺陷",
+      "title": "POST  模块存在系统性缺陷",
+      "description": "检测到 POST  模块存在 12 个相关缺陷，可能存在系统性问题",
       "severity": "high",
       "status": "new",
       "type": "systemic",
-      "module": "auth",
+      "module": "POST ",
       "priority": "P2",
       "steps_to_reproduce": [
-        "执行 auth 相关测试",
+        "执行 POST  相关测试",
         "观察多个测试失败",
         "分析失败模式"
       ],
@@ -1579,25 +1579,25 @@
       "expected_result": "所有测试通过",
       "root_cause": "需要进一步分析",
       "suggested_fix": "建议进行代码审查",
-      "created_at": "2026-07-22T09:49:03.771084",
+      "created_at": "2026-07-23T08:35:01.137325",
       "tags": [
         "systemic",
-        "auth"
+        "POST "
       ]
     },
     {
       "id": "DEF-SYS-002",
       "test_id": "N/A",
-      "test_name": "users 模块系统性缺陷",
-      "title": "users 模块存在系统性缺陷",
-      "description": "检测到 users 模块存在 19 个相关缺陷，可能存在系统性问题",
+      "test_name": "GET  模块系统性缺陷",
+      "title": "GET  模块存在系统性缺陷",
+      "description": "检测到 GET  模块存在 8 个相关缺陷，可能存在系统性问题",
       "severity": "high",
       "status": "new",
       "type": "systemic",
-      "module": "users",
+      "module": "GET ",
       "priority": "P2",
       "steps_to_reproduce": [
-        "执行 users 相关测试",
+        "执行 GET  相关测试",
         "观察多个测试失败",
         "分析失败模式"
       ],
@@ -1605,10 +1605,36 @@
       "expected_result": "所有测试通过",
       "root_cause": "需要进一步分析",
       "suggested_fix": "建议进行代码审查",
-      "created_at": "2026-07-22T09:49:03.771090",
+      "created_at": "2026-07-23T08:35:01.137338",
       "tags": [
         "systemic",
-        "users"
+        "GET "
+      ]
+    },
+    {
+      "id": "DEF-SYS-003",
+      "test_id": "N/A",
+      "test_name": "PUT  模块系统性缺陷",
+      "title": "PUT  模块存在系统性缺陷",
+      "description": "检测到 PUT  模块存在 4 个相关缺陷，可能存在系统性问题",
+      "severity": "high",
+      "status": "new",
+      "type": "systemic",
+      "module": "PUT ",
+      "priority": "P2",
+      "steps_to_reproduce": [
+        "执行 PUT  相关测试",
+        "观察多个测试失败",
+        "分析失败模式"
+      ],
+      "actual_result": "多个测试失败",
+      "expected_result": "所有测试通过",
+      "root_cause": "需要进一步分析",
+      "suggested_fix": "建议进行代码审查",
+      "created_at": "2026-07-23T08:35:01.137347",
+      "tags": [
+        "systemic",
+        "PUT "
       ]
     }
   ],
@@ -1617,9 +1643,9 @@
       "test_id": "TC-API-001",
       "test_name": "POST /api/auth/login - 正常",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.688629",
-      "end_time": "2026-07-22T09:49:03.690741",
-      "duration": 0.002,
+      "start_time": "2026-07-23T08:35:01.066264",
+      "end_time": "2026-07-23T08:35:01.069591",
+      "duration": 0.003,
       "status": "error",
       "status_code": null,
       "response": {},
@@ -1631,8 +1657,8 @@
       "test_id": "TC-API-002",
       "test_name": "POST /api/auth/login - 参数为空",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.692699",
-      "end_time": "2026-07-22T09:49:03.693491",
+      "start_time": "2026-07-23T08:35:01.071716",
+      "end_time": "2026-07-23T08:35:01.072518",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1645,8 +1671,8 @@
       "test_id": "TC-API-003",
       "test_name": "POST /api/auth/login - 参数错误",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.695128",
-      "end_time": "2026-07-22T09:49:03.695997",
+      "start_time": "2026-07-23T08:35:01.074131",
+      "end_time": "2026-07-23T08:35:01.074965",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1659,8 +1685,8 @@
       "test_id": "TC-API-004",
       "test_name": "POST /api/auth/login - 权限验证",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.697698",
-      "end_time": "2026-07-22T09:49:03.698477",
+      "start_time": "2026-07-23T08:35:01.076634",
+      "end_time": "2026-07-23T08:35:01.077412",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1673,8 +1699,8 @@
       "test_id": "TC-API-005",
       "test_name": "POST /api/auth/register - 正常",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.702216",
-      "end_time": "2026-07-22T09:49:03.703029",
+      "start_time": "2026-07-23T08:35:01.079005",
+      "end_time": "2026-07-23T08:35:01.079851",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1687,8 +1713,8 @@
       "test_id": "TC-API-006",
       "test_name": "POST /api/auth/register - 参数为空",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.704688",
-      "end_time": "2026-07-22T09:49:03.705438",
+      "start_time": "2026-07-23T08:35:01.081463",
+      "end_time": "2026-07-23T08:35:01.082214",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1701,8 +1727,8 @@
       "test_id": "TC-API-007",
       "test_name": "POST /api/auth/register - 参数错误",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.707006",
-      "end_time": "2026-07-22T09:49:03.707819",
+      "start_time": "2026-07-23T08:35:01.083870",
+      "end_time": "2026-07-23T08:35:01.084694",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1715,8 +1741,8 @@
       "test_id": "TC-API-008",
       "test_name": "POST /api/auth/register - 权限验证",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.709430",
-      "end_time": "2026-07-22T09:49:03.710205",
+      "start_time": "2026-07-23T08:35:01.086350",
+      "end_time": "2026-07-23T08:35:01.087110",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1729,8 +1755,8 @@
       "test_id": "TC-API-009",
       "test_name": "GET /api/users - 正常",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.711944",
-      "end_time": "2026-07-22T09:49:03.712781",
+      "start_time": "2026-07-23T08:35:01.088738",
+      "end_time": "2026-07-23T08:35:01.089560",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1743,8 +1769,8 @@
       "test_id": "TC-API-010",
       "test_name": "GET /api/users - 无数据",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.715214",
-      "end_time": "2026-07-22T09:49:03.716025",
+      "start_time": "2026-07-23T08:35:01.091201",
+      "end_time": "2026-07-23T08:35:01.092031",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1757,8 +1783,8 @@
       "test_id": "TC-API-011",
       "test_name": "GET /api/users - 权限验证",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.717632",
-      "end_time": "2026-07-22T09:49:03.718379",
+      "start_time": "2026-07-23T08:35:01.093696",
+      "end_time": "2026-07-23T08:35:01.094468",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1771,8 +1797,8 @@
       "test_id": "TC-API-012",
       "test_name": "GET /api/users - 分页",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.719956",
-      "end_time": "2026-07-22T09:49:03.720751",
+      "start_time": "2026-07-23T08:35:01.096123",
+      "end_time": "2026-07-23T08:35:01.097101",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1785,8 +1811,8 @@
       "test_id": "TC-API-013",
       "test_name": "POST /api/users - 正常",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.722350",
-      "end_time": "2026-07-22T09:49:03.723152",
+      "start_time": "2026-07-23T08:35:01.098745",
+      "end_time": "2026-07-23T08:35:01.099559",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1799,8 +1825,8 @@
       "test_id": "TC-API-014",
       "test_name": "POST /api/users - 参数为空",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.724760",
-      "end_time": "2026-07-22T09:49:03.725512",
+      "start_time": "2026-07-23T08:35:01.101323",
+      "end_time": "2026-07-23T08:35:01.102209",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1813,8 +1839,8 @@
       "test_id": "TC-API-015",
       "test_name": "POST /api/users - 参数错误",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.737227",
-      "end_time": "2026-07-22T09:49:03.738062",
+      "start_time": "2026-07-23T08:35:01.103829",
+      "end_time": "2026-07-23T08:35:01.104687",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1827,8 +1853,8 @@
       "test_id": "TC-API-016",
       "test_name": "POST /api/users - 权限验证",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.739827",
-      "end_time": "2026-07-22T09:49:03.740689",
+      "start_time": "2026-07-23T08:35:01.106309",
+      "end_time": "2026-07-23T08:35:01.107084",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1841,8 +1867,8 @@
       "test_id": "TC-API-017",
       "test_name": "GET /api/users/{{id}} - 正常",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.742322",
-      "end_time": "2026-07-22T09:49:03.743204",
+      "start_time": "2026-07-23T08:35:01.108751",
+      "end_time": "2026-07-23T08:35:01.109630",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1855,8 +1881,8 @@
       "test_id": "TC-API-018",
       "test_name": "GET /api/users/{{id}} - 无数据",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.744953",
-      "end_time": "2026-07-22T09:49:03.745780",
+      "start_time": "2026-07-23T08:35:01.111312",
+      "end_time": "2026-07-23T08:35:01.112290",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1869,8 +1895,8 @@
       "test_id": "TC-API-019",
       "test_name": "GET /api/users/{{id}} - 权限验证",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.747462",
-      "end_time": "2026-07-22T09:49:03.748291",
+      "start_time": "2026-07-23T08:35:01.114197",
+      "end_time": "2026-07-23T08:35:01.115025",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1883,8 +1909,8 @@
       "test_id": "TC-API-020",
       "test_name": "GET /api/users/{{id}} - 分页",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.750009",
-      "end_time": "2026-07-22T09:49:03.750890",
+      "start_time": "2026-07-23T08:35:01.116692",
+      "end_time": "2026-07-23T08:35:01.117512",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1897,8 +1923,8 @@
       "test_id": "TC-API-021",
       "test_name": "PUT /api/users/{{id}} - 正常",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.752623",
-      "end_time": "2026-07-22T09:49:03.753446",
+      "start_time": "2026-07-23T08:35:01.119192",
+      "end_time": "2026-07-23T08:35:01.120061",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1911,8 +1937,8 @@
       "test_id": "TC-API-022",
       "test_name": "PUT /api/users/{{id}} - 不存在",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.755184",
-      "end_time": "2026-07-22T09:49:03.756044",
+      "start_time": "2026-07-23T08:35:01.121767",
+      "end_time": "2026-07-23T08:35:01.122595",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1925,8 +1951,8 @@
       "test_id": "TC-API-023",
       "test_name": "PUT /api/users/{{id}} - 参数错误",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.758090",
-      "end_time": "2026-07-22T09:49:03.758943",
+      "start_time": "2026-07-23T08:35:01.124331",
+      "end_time": "2026-07-23T08:35:01.125183",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1939,8 +1965,8 @@
       "test_id": "TC-API-024",
       "test_name": "PUT /api/users/{{id}} - 权限验证",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.760714",
-      "end_time": "2026-07-22T09:49:03.761513",
+      "start_time": "2026-07-23T08:35:01.126918",
+      "end_time": "2026-07-23T08:35:01.127763",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1953,8 +1979,8 @@
       "test_id": "TC-API-025",
       "test_name": "DELETE /api/users/{{id}} - 正常",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.763144",
-      "end_time": "2026-07-22T09:49:03.764010",
+      "start_time": "2026-07-23T08:35:01.129400",
+      "end_time": "2026-07-23T08:35:01.130216",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1967,8 +1993,8 @@
       "test_id": "TC-API-026",
       "test_name": "DELETE /api/users/{{id}} - 不存在",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.765712",
-      "end_time": "2026-07-22T09:49:03.766555",
+      "start_time": "2026-07-23T08:35:01.131939",
+      "end_time": "2026-07-23T08:35:01.132777",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1981,8 +2007,8 @@
       "test_id": "TC-API-027",
       "test_name": "DELETE /api/users/{{id}} - 权限验证",
       "test_type": "API",
-      "start_time": "2026-07-22T09:49:03.768236",
-      "end_time": "2026-07-22T09:49:03.769047",
+      "start_time": "2026-07-23T08:35:01.134479",
+      "end_time": "2026-07-23T08:35:01.135282",
       "duration": 0.001,
       "status": "error",
       "status_code": null,
@@ -1995,9 +2021,9 @@
   "report_path": "/workspace/output/test_report.html",
   "output_files": {
     "test_cases_csv": "/workspace/output/test_cases.csv",
-    "test_cases_excel": "/workspace/output/test_cases.xlsx",
+    "test_cases_excel": "",
     "defects_csv": "/workspace/output/defects.csv",
-    "defects_excel": "/workspace/output/defects.xlsx",
+    "defects_excel": "",
     "report": "/workspace/output/test_report.html"
   },
   "summary": {
@@ -2006,6 +2032,6 @@
     "failed": 0,
     "total_duration": 0.0,
     "test_cases_count": 27,
-    "defects_count": 29
+    "defects_count": 30
   }
 }

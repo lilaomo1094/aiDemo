@@ -8,7 +8,10 @@ import tempfile
 from pathlib import Path
 from typing import Dict, List
 
-from git import Repo
+try:
+    from git import Repo
+except ImportError:
+    Repo = None
 
 from .base import CodeParseResult, RepositoryParser
 from .openapi_parser import OpenAPIParser
@@ -46,6 +49,9 @@ class GitRepositoryParser(RepositoryParser):
             return repo_config.local_path
 
         if not repo_config.url:
+            return ""
+
+        if Repo is None:
             return ""
 
         repo_name = repo_config.url.rstrip("/").split("/")[-1].replace(".git", "")

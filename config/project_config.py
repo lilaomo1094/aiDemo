@@ -128,15 +128,3 @@ PROJECT_CONFIG = {
 }
 
 
-# ============================================================
-# 快速配置示例
-# ============================================================
-
-# 示例1：最小配置（仅测试需求文档）
-MINIMAL_CONFIG = {
-    "project": {"project_name": "我的项目", "project_code": "PRJ-001"},
-    "requirement": {"requirement_doc": "# 需求文档\n## 功能1\n需求描述..."},
-    "database": {"enabled": False},
-    "frontend_repo": {"enabled": False},
-    "backend_repo": {"enabled": False},
-}

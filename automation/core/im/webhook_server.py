@@ -9,16 +9,12 @@
 - 通用 /webhook/<provider> 端点
 """
 
-import hashlib
-import hmac
 import json
 import threading
 import urllib.parse
+import xml.etree.ElementTree as ET
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Any, Callable, Dict
-
-from .base import IMMessage
-from .factory import create_im_provider
+from typing import Callable, Dict
 
 
 class WebhookHandler(BaseHTTPRequestHandler):
@@ -51,6 +47,17 @@ class WebhookHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers.get("Content-Length", 0))
         return self.rfile.read(content_length)
 
+    def _handle_payload(self, payload: Dict, handler: Callable[[Dict], Dict]) -> None:
+        if self.bot_service is None:
+            self._send_json(500, {"error": "bot service not configured"})
+            return
+        try:
+            result = handler(payload)
+            self._send_json(200, result)
+        except Exception as e:
+            print(f"[Webhook] handle payload error: {e}")
+            self._send_json(500, {"error": str(e)})
+
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         params = urllib.parse.parse_qs(parsed.query)
@@ -67,18 +74,18 @@ class WebhookHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
+        body = self._read_body()
 
         if path == "/webhook/lark" or path == "/webhook/feishu":
-            self._handle_lark()
+            self._handle_lark(body)
         elif path == "/webhook/wechat":
-            self._handle_wechat()
+            self._handle_wechat(body)
         elif path == "/webhook/generic":
-            self._handle_generic()
+            self._handle_generic(body)
         else:
             self._send_json(404, {"error": "unknown webhook endpoint"})
 
-    def _handle_lark(self):
-        body = self._read_body()
+    def _handle_lark(self, body: bytes):
         try:
             payload = json.loads(body.decode("utf-8")) if body else {}
         except Exception as e:
@@ -87,60 +94,29 @@ class WebhookHandler(BaseHTTPRequestHandler):
 
         # 飞书 challenge 校验
         if payload.get("type") == "url_verification":
-            challenge = payload.get("challenge", "")
-            self._send_json(200, {"challenge": challenge})
+            self._send_json(200, {"challenge": payload.get("challenge", "")})
             return
 
-        if self.bot_service is None:
-            self._send_json(500, {"error": "bot service not configured"})
-            return
+        self._handle_payload(payload, self.bot_service.handle_webhook_payload)
 
+    def _handle_wechat(self, body: bytes):
         try:
-            result = self.bot_service.handle_webhook_payload(payload)
-            self._send_json(200, result)
-        except Exception as e:
-            print(f"[Webhook] handle lark payload error: {e}")
-            self._send_json(500, {"error": str(e)})
-
-    def _handle_wechat(self):
-        body = self._read_body()
-        try:
-            import xml.etree.ElementTree as ET
-
             root = ET.fromstring(body.decode("utf-8"))
             payload = {child.tag: child.text or "" for child in root}
         except Exception as e:
             self._send_json(400, {"error": f"invalid xml: {e}"})
             return
 
-        if self.bot_service is None:
-            self._send_json(500, {"error": "bot service not configured"})
-            return
+        self._handle_payload(payload, self.bot_service.handle_webhook_payload)
 
-        try:
-            result = self.bot_service.handle_webhook_payload(payload)
-            self._send_json(200, result)
-        except Exception as e:
-            print(f"[Webhook] handle wechat payload error: {e}")
-            self._send_json(500, {"error": str(e)})
-
-    def _handle_generic(self):
-        body = self._read_body()
+    def _handle_generic(self, body: bytes):
         try:
             payload = json.loads(body.decode("utf-8")) if body else {}
         except Exception as e:
             self._send_json(400, {"error": f"invalid json: {e}"})
             return
 
-        if self.bot_service is None:
-            self._send_json(500, {"error": "bot service not configured"})
-            return
-
-        try:
-            result = self.bot_service.handle_webhook_payload(payload)
-            self._send_json(200, result)
-        except Exception as e:
-            self._send_json(500, {"error": str(e)})
+        self._handle_payload(payload, self.bot_service.handle_webhook_payload)
 
 
 class WebhookServer:
@@ -157,7 +133,6 @@ class WebhookServer:
         WebhookHandler.bot_service = self.bot_service
         WebhookHandler.provider_type = self.bot_service.provider_type
         self.server = HTTPServer((self.host, self.port), WebhookHandler)
-        self.server.allow_reuse_address = True
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.thread.start()
         print(f"[WebhookServer] started at http://{self.host}:{self.port}")

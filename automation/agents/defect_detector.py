@@ -5,6 +5,8 @@ from collections import Counter
 from datetime import datetime
 from typing import Dict, List
 
+from automation.core.utils import calculate_pass_rate, compact_json, count_by, extract_module_from_path, truncate_list
+
 from .base import BaseAgent
 
 
@@ -27,7 +29,7 @@ class DefectDetector(BaseAgent):
         execution_results = getattr(context, "execution_results", []) or []
         defects = []
 
-        # 基于 LLM 分析失败结果
+        # 基于 LLM 分析失败结果（压缩上下文避免 token 爆炸）
         failed_results = [r for r in execution_results if r.get("status") in {"failed", "error"}]
         if self.llm and failed_results:
             llm_defects = self._analyze_with_llm(failed_results)
@@ -50,16 +52,23 @@ class DefectDetector(BaseAgent):
             "defects": defects,
             "summary": {
                 "total_defects": len(defects),
-                "by_severity": self._count_by(defects, "severity"),
-                "by_type": self._count_by(defects, "type"),
-                "by_module": self._count_by(defects, "module"),
+                "by_severity": count_by(defects, "severity"),
+                "by_type": count_by(defects, "type"),
+                "by_module": count_by(defects, "module"),
+                "pass_rate": calculate_pass_rate(execution_results),
             },
         }
 
     def _analyze_with_llm(self, failed_results: List[Dict]) -> List[Dict]:
-        import json
-        prompt = "请分析以下失败的测试执行结果，识别缺陷并给出根因与修复建议：\n\n" + json.dumps(failed_results, ensure_ascii=False, indent=2)
-        return self._call_llm_json(prompt, system=self.SYSTEM_PROMPT, fallback=[])
+        # 只保留关键字段，避免长响应导致 token 过多
+        compact_results = truncate_list(
+            failed_results,
+            max_tokens=1500,
+            keep_fields=["test_id", "test_name", "test_type", "status", "error_message", "status_code"],
+        )
+        prompt = "请分析以下失败的测试执行结果，识别缺陷并给出根因与修复建议：\n\n" + compact_json(compact_results)
+        system = self._build_system_prompt(self.SYSTEM_PROMPT, query="缺陷分析 测试失败")
+        return self._call_llm_json(prompt, system=system, fallback=[])
 
     def _rule_based_detect(self, execution_results: List[Dict]) -> List[Dict]:
         defects = []
@@ -77,7 +86,7 @@ class DefectDetector(BaseAgent):
                 "severity": self._determine_severity(test_name),
                 "status": "new",
                 "type": self._determine_type(test_name),
-                "module": self._extract_module(test_name),
+                "module": extract_module_from_path(test_name),
                 "priority": self._determine_priority(test_name),
                 "steps_to_reproduce": [
                     "1. 准备测试环境",
@@ -147,17 +156,3 @@ class DefectDetector(BaseAgent):
     def _determine_priority(self, test_name: str) -> str:
         mapping = {"critical": "P1", "high": "P2", "medium": "P3", "low": "P4"}
         return mapping.get(self._determine_severity(test_name), "P3")
-
-    def _extract_module(self, test_name: str) -> str:
-        parts = test_name.split()
-        for part in parts:
-            if part.startswith("/api/"):
-                return part.replace("/api/", "").split("/")[0]
-        return "common"
-
-    def _count_by(self, defects: List[Dict], key: str) -> Dict:
-        counts = {}
-        for d in defects:
-            value = d.get(key, "unknown")
-            counts[value] = counts.get(value, 0) + 1
-        return counts

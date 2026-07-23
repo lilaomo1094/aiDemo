@@ -5,6 +5,8 @@ import json
 import uuid
 from typing import Dict, List
 
+from automation.core.utils import compact_json, count_by, extract_module_from_path, truncate_list
+
 from .base import BaseAgent
 
 
@@ -33,10 +35,6 @@ class TestGenerator(BaseAgent):
 
     def execute(self, task, context) -> Dict:
         requirements = context.metadata.get("requirements", [])
-        api_endpoints = []
-        data_models = []
-        frontend_components = []
-
         code_info = getattr(context, "code_info", {}) or {}
         backend = code_info.get("backend", {})
         database = code_info.get("database", {})
@@ -64,7 +62,7 @@ class TestGenerator(BaseAgent):
             "test_cases": test_cases,
             "summary": {
                 "total_cases": len(test_cases),
-                "by_type": self._count_by_type(test_cases),
+                "by_type": count_by(test_cases, "type"),
             },
         }
 
@@ -76,7 +74,9 @@ class TestGenerator(BaseAgent):
         frontend_components: List[Dict],
     ) -> List[Dict]:
         prompt = self._build_prompt(requirements, api_endpoints, data_models, frontend_components)
-        result = self._call_llm_json(prompt, system=self.SYSTEM_PROMPT, fallback=[])
+        query = " ".join(r.get("title", "") for r in requirements[:3])
+        system = self._build_system_prompt(self.SYSTEM_PROMPT, query=query)
+        result = self._call_llm_json(prompt, system=system, fallback=[])
         if not isinstance(result, list):
             return []
         for idx, tc in enumerate(result):
@@ -91,19 +91,26 @@ class TestGenerator(BaseAgent):
         data_models: List[Dict],
         frontend_components: List[Dict],
     ) -> str:
+        # 压缩上下文：限制 token 预算，避免 LLM prompt 过长
+        max_tokens_per_section = 1200
+        req_json = compact_json(truncate_list(requirements, max_tokens_per_section, ["id", "title", "priority", "test_type"]), max_tokens_per_section)
+        api_json = compact_json(truncate_list(api_endpoints, max_tokens_per_section, ["method", "path", "summary", "parameters"]), max_tokens_per_section)
+        model_json = compact_json(truncate_list(data_models, max_tokens_per_section, ["name", "columns"]), max_tokens_per_section)
+        frontend_json = compact_json(truncate_list(frontend_components, max_tokens_per_section, ["name", "type"]), max_tokens_per_section)
+
         return f"""请根据以下信息生成测试用例：
 
 ## 需求列表
-{json.dumps(requirements, ensure_ascii=False, indent=2)}
+{req_json}
 
 ## API 接口
-{json.dumps(api_endpoints, ensure_ascii=False, indent=2)}
+{api_json}
 
 ## 数据模型
-{json.dumps(data_models, ensure_ascii=False, indent=2)}
+{model_json}
 
 ## 前端组件
-{json.dumps(frontend_components, ensure_ascii=False, indent=2)}
+{frontend_json}
 """
 
     def _generate_rule_based(
@@ -141,7 +148,7 @@ class TestGenerator(BaseAgent):
                 test_cases.append({
                     "id": tc_id,
                     "type": "API",
-                    "module": self._extract_module(path),
+                    "module": extract_module_from_path(path),
                     "name": f"{method} {path} - {test_type}",
                     "description": f"API 接口 {method} {path} 的{test_type}测试",
                     "priority": priority,
@@ -156,7 +163,7 @@ class TestGenerator(BaseAgent):
                         "headers": {},
                         "expected_status": expected_status,
                     },
-                    "tags": [method, self._extract_module(path), test_type],
+                    "tags": [method, extract_module_from_path(path), test_type],
                 })
 
         for model in data_models:
@@ -180,10 +187,6 @@ class TestGenerator(BaseAgent):
             })
 
         return test_cases
-
-    def _extract_module(self, path: str) -> str:
-        parts = path.split("/")
-        return parts[2] if len(parts) > 2 else "common"
 
     def _api_preconditions(self, method: str, path: str) -> List[str]:
         pre = ["API 服务正常运行"]
@@ -250,10 +253,3 @@ class TestGenerator(BaseAgent):
                 return {"username": "newuser", "email": f"new{uuid.uuid4().hex[:8]}@example.com"}
             return {"page": 1, "page_size": 10}
         return {}
-
-    def _count_by_type(self, test_cases: List[Dict]) -> Dict:
-        counts = {}
-        for tc in test_cases:
-            t = tc.get("type", "Unknown")
-            counts[t] = counts.get(t, 0) + 1
-        return counts

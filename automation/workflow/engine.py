@@ -70,11 +70,14 @@ class WorkflowContext:
 
 
 class WorkflowEngine:
-    def __init__(self, config: Any):
+    def __init__(self, config: Any, knowledge_store=None):
         self.config = config
+        self.knowledge_store = knowledge_store
         self.tasks: Dict[str, WorkflowTask] = {}
         self.context: Optional[WorkflowContext] = None
         self.listeners: List[Callable] = []
+        # 延迟初始化 agent 工厂，避免重复 import
+        self._agent_factory_cache = None
 
     def register_listener(self, listener: Callable):
         self.listeners.append(listener)
@@ -203,25 +206,31 @@ class WorkflowEngine:
             task.end_time = datetime.now()
             self.notify("task_failed", {"task": task.name, "task_id": task.task_id, "error": str(e)})
 
-    def _run_agent(self, task: WorkflowTask) -> Dict:
-        from automation.agents.requirement_analyzer import RequirementAnalyzer
-        from automation.agents.code_parser import CodeParser
-        from automation.agents.test_generator import TestGenerator
-        from automation.agents.test_executor import TestExecutor
-        from automation.agents.defect_detector import DefectDetector
-        from automation.agents.report_generator import ReportGenerator
+    def _get_agent_factory(self):
+        if self._agent_factory_cache is None:
+            from automation.agents.requirement_analyzer import RequirementAnalyzer
+            from automation.agents.code_parser import CodeParser
+            from automation.agents.test_generator import TestGenerator
+            from automation.agents.test_executor import TestExecutor
+            from automation.agents.defect_detector import DefectDetector
+            from automation.agents.report_generator import ReportGenerator
 
-        agents_map = {
-            AgentType.REQUIREMENT_ANALYZER: RequirementAnalyzer(self.config),
-            AgentType.CODE_PARSER: CodeParser(self.config),
-            AgentType.TEST_GENERATOR: TestGenerator(self.config),
-            AgentType.TEST_EXECUTOR: TestExecutor(self.config),
-            AgentType.DEFECT_DETECTOR: DefectDetector(self.config),
-            AgentType.REPORT_GENERATOR: ReportGenerator(self.config),
-        }
-        agent = agents_map.get(task.agent_type)
-        if not agent:
+            self._agent_factory_cache = {
+                AgentType.REQUIREMENT_ANALYZER: RequirementAnalyzer,
+                AgentType.CODE_PARSER: CodeParser,
+                AgentType.TEST_GENERATOR: TestGenerator,
+                AgentType.TEST_EXECUTOR: TestExecutor,
+                AgentType.DEFECT_DETECTOR: DefectDetector,
+                AgentType.REPORT_GENERATOR: ReportGenerator,
+            }
+        return self._agent_factory_cache
+
+    def _run_agent(self, task: WorkflowTask) -> Dict:
+        factory = self._get_agent_factory()
+        agent_cls = factory.get(task.agent_type)
+        if not agent_cls:
             raise ValueError(f"Unknown agent type: {task.agent_type}")
+        agent = agent_cls(self.config, knowledge_store=self.knowledge_store)
         return agent.execute(task, self.context)
 
     def _update_context(self, task: WorkflowTask):
@@ -256,5 +265,5 @@ class WorkflowEngine:
         }
 
 
-def create_workflow(config) -> WorkflowEngine:
-    return WorkflowEngine(config)
+def create_workflow(config, knowledge_store=None) -> WorkflowEngine:
+    return WorkflowEngine(config, knowledge_store=knowledge_store)

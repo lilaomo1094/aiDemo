@@ -4,6 +4,8 @@
 import re
 from typing import Dict, List
 
+from automation.core.utils import truncate_text
+
 from .base import BaseAgent
 
 
@@ -31,7 +33,7 @@ class RequirementAnalyzer(BaseAgent):
         fallback = self._rule_based_parse(requirement_doc)
         llm_result = self._call_llm_json(
             self._build_prompt(requirement_doc),
-            system=self.SYSTEM_PROMPT,
+            system=self._build_system_prompt(self.SYSTEM_PROMPT, query=requirement_doc[:200]),
             fallback=fallback,
         )
 
@@ -52,10 +54,11 @@ class RequirementAnalyzer(BaseAgent):
         }
 
     def _build_prompt(self, doc: str) -> str:
-        return f"""请分析以下需求文档并提取结构化信息：
-
-{doc}
-"""
+        # 压缩上下文，避免超长需求文档导致 token 爆炸
+        max_tokens = self.config.llm.max_tokens if hasattr(self.config, "llm") else 4000
+        # 保留约 1/3 的 token 预算给需求文档
+        truncated = truncate_text(doc, max_tokens=max_tokens // 3)
+        return f"""请分析以下需求文档并提取结构化信息：\n\n{truncated}\n"""
 
     def _rule_based_parse(self, doc: str) -> Dict:
         requirements = []

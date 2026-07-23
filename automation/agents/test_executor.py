@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Any, Dict, List
 
 from automation.core.executor import TestStatus, create_executor
+from automation.core.utils import calculate_pass_rate
 
 from .base import BaseAgent
 
@@ -74,8 +75,4 @@ class TestExecutor(BaseAgent):
         return execution
 
     def _calculate_pass_rate(self, results: List[Dict]) -> float:
-        total = len(results)
-        if total == 0:
-            return 0.0
-        passed = sum(1 for r in results if r["status"] == TestStatus.PASSED.value)
-        return round(passed / total * 100, 2)
+        return calculate_pass_rate(results, passed_status=TestStatus.PASSED.value)

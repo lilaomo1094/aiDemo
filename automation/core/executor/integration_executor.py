@@ -5,14 +5,18 @@ from typing import Any, Dict, List
 
 from .api_executor import APIExecutor
 from .base import TestExecutor, TestStatus
-from .db_executor import DBExecutor
+
+try:
+    from .db_executor import DBExecutor
+except ImportError:
+    DBExecutor = None
 
 
 class IntegrationExecutor(TestExecutor):
     def __init__(self, config):
         super().__init__(config)
         self.api = APIExecutor(config)
-        self.db = DBExecutor(config)
+        self.db = DBExecutor(config) if DBExecutor else None
 
     def execute(self, test_case: Dict, context) -> Dict[str, Any]:
         action = test_case.get("action", {}) or test_case.get("test_data", {})
@@ -29,8 +33,11 @@ class IntegrationExecutor(TestExecutor):
                 result = self.api.execute(step, context)
                 self._extract_variables(result.get("response", {}), step.get("extract", {}), variables)
             elif step_type == "db":
-                result = self.db.execute(step, context)
-                self._extract_variables(result.get("rows", []), step.get("extract", {}), variables)
+                if self.db is None:
+                    result = self._make_result(TestStatus.ERROR, "数据库执行器不可用，请安装 sqlalchemy")
+                else:
+                    result = self.db.execute(step, context)
+                    self._extract_variables(result.get("rows", []), step.get("extract", {}), variables)
             else:
                 result = self._make_result(TestStatus.SKIPPED, f"不支持的步骤类型: {step_type}")
             results.append({"step": idx + 1, "type": step_type, **result})

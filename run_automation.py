@@ -19,6 +19,7 @@ sys.path.insert(0, str(script_dir))
 
 from automation.core.config import PlatformConfig, load_config, merge_with_framework_config
 from automation.core.output import OutputFormatter
+from automation.core.rag import AgentKnowledgeStore
 from automation.workflow.engine import WorkflowContext, create_workflow
 
 
@@ -39,12 +40,27 @@ def prepare_input_data(config: PlatformConfig) -> dict:
     }
 
 
+def load_knowledge_store(enabled: bool = True):
+    """可选加载 Agent 专家知识库."""
+    if not enabled:
+        return None
+    try:
+        store = AgentKnowledgeStore()
+        count = store.load()
+        print(f"📚 已加载 {count} 个专家知识文档到 RAG 库")
+        return store
+    except Exception as e:
+        print(f"⚠️  加载知识库失败: {e}")
+        return None
+
+
 class AutomationTestPlatform:
     """全链路自动化测试平台主类."""
 
-    def __init__(self, config_path: str = "config/project_config.py"):
+    def __init__(self, config_path: str = "config/project_config.py", use_knowledge: bool = True):
         self.config = load_project_config(config_path)
-        self.workflow = create_workflow(self.config)
+        self.knowledge_store = load_knowledge_store(use_knowledge)
+        self.workflow = create_workflow(self.config, knowledge_store=self.knowledge_store)
         self.output_dir = self.config.base_dir / "output"
         self.output_dir.mkdir(exist_ok=True)
 

@@ -5,6 +5,7 @@ import json
 from typing import Dict, List
 
 from automation.core.output import OutputFormatter
+from automation.core.utils import calculate_pass_rate
 
 from .base import BaseAgent
 
@@ -90,7 +91,4 @@ class ReportGenerator(BaseAgent):
         return rows
 
     def _calculate_pass_rate(self, execution_results: List[Dict]) -> float:
-        if not execution_results:
-            return 0.0
-        passed = sum(1 for r in execution_results if r.get("status") == "passed")
-        return round(passed / len(execution_results) * 100, 2)
+        return calculate_pass_rate(execution_results, passed_status="passed")

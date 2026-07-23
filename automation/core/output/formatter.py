@@ -7,7 +7,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from jinja2 import Template
+try:
+    from jinja2 import Template
+except ImportError:
+    Template = None
 
 
 class OutputFormatter:
@@ -66,6 +69,9 @@ class OutputFormatter:
         test_cases = getattr(context, "test_cases", []) or []
         defects = getattr(context, "defects", []) or []
         project = getattr(context, "project_info", {})
+
+        if Template is None:
+            return self._render_simple_html(project, test_cases, passed, failed, pass_rate, defects, execution_results)
 
         template = Template("""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -154,3 +160,22 @@ class OutputFormatter:
             defects=defects,
             execution_results=execution_results,
         )
+
+    def _render_simple_html(self, project, test_cases, passed, failed, pass_rate, defects, execution_results) -> str:
+        """jinja2 缺失时的极简 HTML 报告."""
+        rows = []
+        for r in execution_results:
+            rows.append(
+                f"<tr><td>{r.get('test_id', '')}</td><td>{r.get('test_name', '')}</td>"
+                f"<td>{r.get('status', '')}</td><td>{r.get('duration', 0)}s</td></tr>"
+            )
+        return f"""<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>测试报告</title></head>
+<body>
+<h1>测试报告 - {project.get('project_name', '项目')}</h1>
+<p>总用例: {len(test_cases)} | 通过: {passed} | 失败: {failed} | 通过率: {pass_rate}%</p>
+<h2>执行详情</h2>
+<table border="1"><tr><th>ID</th><th>名称</th><th>状态</th><th>耗时</th></tr>
+{''.join(rows)}
+</table>
+</body></html>"""

@@ -17,14 +17,21 @@
 import re
 import shlex
 import threading
+from dataclasses import dataclass, field
 from pathlib import Path
-from types import SimpleNamespace
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from automation.core.scheduler import TaskScheduler
 
 from .base import IMMessage
 from .factory import create_im_provider
+
+
+@dataclass
+class _EventHook:
+    name: str
+    event_filter: List[str] = field(default_factory=list)
+    handler: Callable = field(default=lambda *args, **kwargs: None)
 
 
 class IntentParser:
@@ -189,7 +196,7 @@ class IMBotService:
                 self.provider.send_file(receiver, str(report_path))
 
         self.scheduler.hook_manager.register(
-            SimpleNamespace(
+            _EventHook(
                 name="im_notifier",
                 event_filter=["task_completed", "task_failed"],
                 handler=im_notifier,
