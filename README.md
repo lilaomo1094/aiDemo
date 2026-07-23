@@ -1,4 +1,4 @@
-# proDemoA 全链路自动化测试平台
+# aiAgent 全链路自动化测试平台
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" alt="Python">
@@ -8,12 +8,12 @@
 
 ## 📋 项目简介
 
-proDemoA 是一个基于AI Agent的全链路自动化测试平台，通过联动多个AI专家Agent，实现从需求文档到测试报告的全流程自动化。测试人员仅需修改配置文件即可开始测试工作。
+aiAgent 是一个基于AI Agent的全链路自动化测试平台，通过联动多个AI专家Agent，实现从需求文档到测试报告的全流程自动化。测试人员仅需修改配置文件即可开始测试工作。
 
 ## 🏗️ 项目架构
 
 ```
-proDemoA/
+aiAgent/
 ├── config/                          # ⭐ 项目配置（测试人员仅需修改这里）
 │   ├── project_config.py            # 项目配置文件
 │   └── requirement.md              # 需求文档模板
@@ -484,4 +484,4 @@ MIT License
 
 ---
 
-<p align="center">🚀 使用proDemoA，让测试工作更高效！</p>
+<p align="center">🚀 使用aiAgent，让测试工作更高效！</p>
