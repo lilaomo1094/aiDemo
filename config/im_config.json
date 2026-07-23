@@ -1,0 +1,11 @@
+{
+  "provider": "lark",
+  "mock": true,
+  "default_config_path": "config/project_config.py",
+  "admin_users": ["cli_user"],
+  "project_aliases": {
+    "电商项目": "config/ecommerce.py",
+    "登录模块": "config/login_module.py",
+    "默认项目": "config/project_config.py"
+  }
+}

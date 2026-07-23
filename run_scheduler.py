@@ -4,10 +4,13 @@
 
 用法:
     # 启动调度器（仅本地多线程执行任务）
-    python run_scheduler.py --config config/project_config.py
+    python run_scheduler.py --max-workers 4
 
     # 启动调度器并开启 IM 机器人（支持飞书/企业微信 webhook）
     python run_scheduler.py --im-provider lark --im-config config/im_config.json
+
+    # 启动 webhook server 接收外部消息
+    python run_scheduler.py --im-provider lark --im-config config/im_config.json --webhook-port 8000
 
     # 提交单个任务
     python run_scheduler.py --submit config/project_config.py --priority 3
@@ -23,7 +26,7 @@ script_dir = Path(__file__).parent.resolve()
 sys.path.insert(0, str(script_dir))
 
 from automation.core.config import load_config
-from automation.core.im import IMBotService, create_im_provider
+from automation.core.im import IMBotService, WebhookServer
 from automation.core.scheduler import TaskScheduler
 
 
@@ -37,12 +40,17 @@ def start_scheduler(args):
     scheduler.start()
     print(f"调度器已启动，工作线程数: {args.max_workers}")
 
+    webhook = None
     bot = None
     if args.im_provider:
         im_config = load_im_config(args.im_config) if args.im_config else {"provider": args.im_provider, "mock": True}
         im_config.setdefault("provider", args.im_provider)
         bot = IMBotService(scheduler, im_config)
         print(f"IM Bot 已接入: {args.im_provider}")
+
+        if args.webhook_port:
+            webhook = WebhookServer(bot, host=args.webhook_host, port=args.webhook_port)
+            webhook.start()
 
     if args.submit:
         task_id = scheduler.submit(args.submit, priority=args.priority)
@@ -56,6 +64,8 @@ def start_scheduler(args):
             time.sleep(1)
     except KeyboardInterrupt:
         print("\n正在停止调度器...")
+        if webhook:
+            webhook.stop()
         scheduler.stop()
 
 
@@ -78,6 +88,8 @@ def parse_cli():
     parser.add_argument("--timeout", type=float, default=3600, help="等待任务完成超时时间（秒）")
     parser.add_argument("--im-provider", choices=["lark", "feishu", "wechat", "wecom"], help="IM 提供商")
     parser.add_argument("--im-config", help="IM 配置文件路径（JSON）")
+    parser.add_argument("--webhook-host", default="0.0.0.0", help="Webhook 监听地址")
+    parser.add_argument("--webhook-port", type=int, default=8000, help="Webhook 监听端口，0 表示不启动 HTTP 服务")
     return parser.parse_args()
 
 

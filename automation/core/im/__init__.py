@@ -4,6 +4,7 @@ from .bot_service import IMBotService
 from .factory import create_im_provider, register_im_provider
 from .lark_provider import LarkProvider
 from .wechat_provider import WeChatProvider
+from .webhook_server import WebhookServer
 
 __all__ = [
     "IMMessage",
@@ -13,4 +14,5 @@ __all__ = [
     "LarkProvider",
     "WeChatProvider",
     "IMBotService",
+    "WebhookServer",
 ]

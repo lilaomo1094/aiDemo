@@ -2,22 +2,158 @@
 """IM Bot 服务：接收外部消息指令，调用任务调度器并推送结果.
 
 支持命令：
-- /run <config_path> [priority]   提交测试任务
-- /status [task_id]               查询任务状态
-- /list                           列出所有任务
-- /cancel <task_id>               取消任务
-- /help                           帮助信息
+- /run <config_path|项目别名> [priority] [--env env]   提交测试任务
+- /status [task_id]                                    查询任务状态
+- /list                                                列出所有任务
+- /cancel <task_id>                                    取消任务
+- /help                                                帮助信息
+
+也支持自然语言：
+- "测试一下电商项目，优先级3"
+- "跑一下登录模块的功能测试"
+- "帮我执行 config/ecommerce.py"
 """
 
 import re
+import shlex
 import threading
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from types import SimpleNamespace
+from typing import Any, Dict, List, Optional, Tuple
 
 from automation.core.scheduler import TaskScheduler
 
 from .base import IMMessage
 from .factory import create_im_provider
+
+
+class IntentParser:
+    """轻量自然语言意图解析器."""
+
+    RUN_KEYWORDS = ["测试", "跑", "执行", "运行", "测一下", "跑一下", "执行一下", "运行一下"]
+    STATUS_KEYWORDS = ["状态", "进度", "怎么样了", "查一下"]
+    CANCEL_KEYWORDS = ["取消", "停止", "终止"]
+    LIST_KEYWORDS = ["列表", "所有任务", "任务列表"]
+    HELP_KEYWORDS = ["帮助", "怎么用", "help"]
+
+    def __init__(self, project_aliases: Dict[str, str], default_config_path: str):
+        self.project_aliases = project_aliases
+        self.default_config_path = default_config_path
+
+    def parse(self, content: str) -> Tuple[str, Dict[str, Any]]:
+        """解析消息，返回 (intent, params)."""
+        text = content.strip()
+
+        # 1. 优先处理 / 命令
+        if text.startswith("/"):
+            return self._parse_slash(text)
+
+        # 2. 自然语言意图识别
+        if any(kw in text for kw in self.RUN_KEYWORDS):
+            return "run", self._extract_run_params(text)
+        if any(kw in text for kw in self.STATUS_KEYWORDS):
+            task_id = self._extract_task_id(text)
+            return "status", {"task_id": task_id}
+        if any(kw in text for kw in self.CANCEL_KEYWORDS):
+            task_id = self._extract_task_id(text)
+            return "cancel", {"task_id": task_id}
+        if any(kw in text for kw in self.LIST_KEYWORDS):
+            return "list", {}
+        if any(kw in text for kw in self.HELP_KEYWORDS):
+            return "help", {}
+
+        return "unknown", {}
+
+    def _parse_slash(self, text: str) -> Tuple[str, Dict[str, Any]]:
+        text = text[1:].strip()
+        try:
+            parts = shlex.split(text)
+        except ValueError:
+            parts = text.split()
+        if not parts:
+            return "help", {}
+
+        command = parts[0].lower()
+        args = parts[1:]
+
+        if command in ("run", "执行测试"):
+            return "run", self._parse_run_args(args)
+        if command == "status":
+            return "status", {"task_id": args[0] if args else None}
+        if command == "list":
+            return "list", {}
+        if command == "cancel":
+            return "cancel", {"task_id": args[0] if args else None}
+        if command == "help":
+            return "help", {}
+
+        return "unknown", {"command": command}
+
+    def _parse_run_args(self, args: List[str]) -> Dict[str, Any]:
+        params = {"target": None, "priority": 5, "env": None}
+        if args:
+            params["target"] = args[0]
+        i = 1
+        while i < len(args):
+            arg = args[i]
+            if arg in ("--priority", "-p"):
+                i += 1
+                if i < len(args):
+                    try:
+                        params["priority"] = int(args[i])
+                    except ValueError:
+                        pass
+            elif arg in ("--env", "-e"):
+                i += 1
+                if i < len(args):
+                    params["env"] = args[i]
+            elif arg.isdigit() and params["priority"] == 5:
+                params["priority"] = int(arg)
+            i += 1
+        return params
+
+    def _extract_run_params(self, text: str) -> Dict[str, Any]:
+        params = {"target": None, "priority": 5, "env": None}
+
+        # 优先级
+        priority_match = re.search(r"优先级\s*(\d+)", text)
+        if not priority_match:
+            priority_match = re.search(r"priority\s*(\d+)", text, re.IGNORECASE)
+        if priority_match:
+            params["priority"] = int(priority_match.group(1))
+
+        # 环境
+        env_match = re.search(r"环境\s*([a-zA-Z0-9_\-]+)", text)
+        if not env_match:
+            env_match = re.search(r"--env\s+([a-zA-Z0-9_\-]+)", text)
+        if env_match:
+            params["env"] = env_match.group(1)
+
+        # 目标：项目别名 或 配置文件路径
+        target = self._extract_target(text)
+        params["target"] = target
+        return params
+
+    def _extract_target(self, text: str) -> Optional[str]:
+        # 直接包含 config/ 或 .py 的路径
+        path_match = re.search(r"[\w\-/]+\.py", text)
+        if path_match:
+            return path_match.group(0)
+
+        # 项目别名匹配（取最长匹配）
+        matched_alias = None
+        for alias in sorted(self.project_aliases.keys(), key=len, reverse=True):
+            if alias in text:
+                matched_alias = alias
+                break
+        if matched_alias:
+            return self.project_aliases[matched_alias]
+
+        return self.default_config_path
+
+    def _extract_task_id(self, text: str) -> Optional[str]:
+        match = re.search(r"TASK-[a-f0-9]+", text, re.IGNORECASE)
+        return match.group(0) if match else None
 
 
 class IMBotService:
@@ -29,7 +165,9 @@ class IMBotService:
         self.provider_type = im_config.get("provider", "lark")
         self.provider = create_im_provider(self.provider_type, im_config)
         self.default_config_path = im_config.get("default_config_path", "config/project_config.py")
+        self.project_aliases = im_config.get("project_aliases", {})
         self.admin_users = set(im_config.get("admin_users", []))
+        self.intent_parser = IntentParser(self.project_aliases, self.default_config_path)
         self._lock = threading.Lock()
         self._register_hooks()
 
@@ -51,11 +189,11 @@ class IMBotService:
                 self.provider.send_file(receiver, str(report_path))
 
         self.scheduler.hook_manager.register(
-            type("EventHook", (), {
-                "name": "im_notifier",
-                "event_filter": ["task_completed", "task_failed"],
-                "handler": im_notifier,
-            })()
+            SimpleNamespace(
+                name="im_notifier",
+                event_filter=["task_completed", "task_failed"],
+                handler=im_notifier,
+            )
         )
 
     def _find_report_path(self, task: Dict) -> Optional[str]:
@@ -63,7 +201,6 @@ class IMBotService:
         nodes = tracker.get("nodes", {})
         report_node = nodes.get("report_generated", {})
         output = report_node.get("output_summary", "")
-        # 简单匹配 report_path
         match = re.search(r'"report_path":\s*"([^"]+)"', output)
         if match:
             return match.group(1)
@@ -92,48 +229,45 @@ class IMBotService:
 
     def handle_message(self, message: IMMessage) -> str:
         """处理单条 IM 消息，返回回复文本."""
-        if not message.is_command():
+        intent, params = self.intent_parser.parse(message.content)
+
+        if intent == "run":
+            return self._cmd_run(message, params)
+        elif intent == "status":
+            return self._cmd_status(params.get("task_id"))
+        elif intent == "list":
+            return self._cmd_list()
+        elif intent == "cancel":
+            return self._cmd_cancel(message, params.get("task_id"))
+        elif intent == "help":
+            return self._cmd_help()
+        elif intent == "unknown":
+            if message.content.strip().startswith("/"):
+                return f"未知命令: {params.get('command', '')}，发送 /help 查看帮助。"
+            return "未识别为指令，发送 /help 查看可用命令。"
+        else:
             return "未识别为指令，发送 /help 查看可用命令。"
 
-        command = message.get_command()
-        args = self._parse_args(message.content)
+    def _resolve_config_path(self, target: Optional[str]) -> str:
+        if not target:
+            return self.default_config_path
+        if Path(target).exists():
+            return target
+        if target in self.project_aliases:
+            return self.project_aliases[target]
+        alias_path = self.project_aliases.get(target)
+        if alias_path and Path(alias_path).exists():
+            return alias_path
+        return self.default_config_path
 
-        if command in ("run", "执行测试"):
-            return self._cmd_run(message, args)
-        elif command == "status":
-            return self._cmd_status(args)
-        elif command == "list":
-            return self._cmd_list()
-        elif command == "cancel":
-            return self._cmd_cancel(message, args)
-        elif command == "help":
-            return self._cmd_help()
-        else:
-            return f"未知命令: {command}，发送 /help 查看帮助。"
-
-    def _parse_args(self, content: str) -> List[str]:
-        text = content.strip()
-        if text.startswith("/"):
-            text = text[1:]
-        # 去掉中文指令前缀
-        for prefix in ["执行测试", "运行测试"]:
-            if text.startswith(prefix):
-                text = text[len(prefix):].strip()
-        parts = text.split()
-        # 第一个词是命令本身，仅保留后续参数
-        return parts[1:] if parts else []
-
-    def _cmd_run(self, message: IMMessage, args: List[str]) -> str:
+    def _cmd_run(self, message: IMMessage, params: Dict[str, Any]) -> str:
         if self.admin_users and message.sender_id not in self.admin_users:
             return "您没有权限提交测试任务。"
 
-        config_path = args[0] if args else self.default_config_path
-        priority = 5
-        if len(args) >= 2:
-            try:
-                priority = int(args[1])
-            except ValueError:
-                pass
+        target = params.get("target")
+        config_path = self._resolve_config_path(target)
+        priority = params.get("priority", 5)
+        env = params.get("env")
 
         if not Path(config_path).exists():
             return f"配置文件不存在: {config_path}"
@@ -143,10 +277,13 @@ class IMBotService:
             "im_receiver": message.sender_id,
         }
         task_id = self.scheduler.submit(config_path, priority=priority, callback_info=callback_info)
-        return f"已提交测试任务\n任务ID: {task_id}\n配置: {config_path}\n优先级: {priority}"
+        reply = f"已提交测试任务\n任务ID: {task_id}\n配置: {config_path}\n优先级: {priority}"
+        if env:
+            reply += f"\n环境: {env}"
+        return reply
 
-    def _cmd_status(self, args: List[str]) -> str:
-        if not args:
+    def _cmd_status(self, task_id: Optional[str]) -> str:
+        if not task_id:
             tasks = self.scheduler.list_tasks()
             if not tasks:
                 return "当前没有任务。"
@@ -155,33 +292,36 @@ class IMBotService:
                 lines.append(f"- {task.task_id}: {task.status.value} (优先级 {task.priority})")
             return "\n".join(lines)
 
-        task_id = args[0]
         task = self.scheduler.get_task(task_id)
         if not task:
             return f"未找到任务: {task_id}"
         return self._format_task_summary(task.to_dict())
 
     def _cmd_list(self) -> str:
-        return self._cmd_status([])
+        return self._cmd_status(None)
 
-    def _cmd_cancel(self, message: IMMessage, args: List[str]) -> str:
+    def _cmd_cancel(self, message: IMMessage, task_id: Optional[str]) -> str:
         if self.admin_users and message.sender_id not in self.admin_users:
             return "您没有权限取消任务。"
-        if not args:
+        if not task_id:
             return "用法: /cancel <task_id>"
-        task_id = args[0]
         if self.scheduler.cancel_task(task_id):
             return f"已取消任务: {task_id}"
         return f"取消失败，任务不存在或已不在队列中: {task_id}"
 
     def _cmd_help(self) -> str:
+        aliases = "\n".join(f"  {k}: {v}" for k, v in self.project_aliases.items()) or "  （暂无）"
         return (
             "可用命令:\n"
-            "/run <config_path> [priority] - 提交测试任务\n"
+            "/run <项目别名|配置路径> [priority] [--env env]\n"
             "/status [task_id]             - 查询任务状态\n"
             "/list                         - 列出所有任务\n"
             "/cancel <task_id>             - 取消任务\n"
-            "/help                         - 帮助"
+            "/help                         - 帮助\n\n"
+            "也支持自然语言，例如:\n"
+            "  测试一下电商项目，优先级3\n"
+            "  跑一下登录模块\n\n"
+            "已配置的项目别名:\n" + aliases
         )
 
     def handle_webhook_payload(self, payload: Dict[str, Any]) -> Dict[str, Any]:
@@ -190,4 +330,4 @@ class IMBotService:
         reply = self.handle_message(message)
         if message.sender_id:
             self.provider.send_text(message.sender_id, reply)
-        return {"message": reply, "command": message.get_command()}
+        return {"message": reply, "intent": "run" if "已提交测试任务" in reply else "other"}
