@@ -199,6 +199,26 @@ PROJECT_CONFIG = {
         "function_calling": False,
     },
 
+    # ========== 网络环境配置 ==========
+    # type: public(公网) | private(公司内网) | vpn(VPN接入内网)
+    # browser_mode: headed(有界面，便于内网本地监控) | headless(无头，适用于CI/公网)
+    "network": {
+        "type": "public",
+        "browser_mode": "headless",
+        # 代理配置示例："http://proxy.company.com:8080"
+        "proxy": None,
+        "bypass_hosts": [],
+        # 内网场景建议开启视频录制与 HAR，便于回溯
+        "record_video": False,
+        "record_har": False,
+        "capture_console": True,
+        "capture_network": False,
+        # 内网监控时放慢操作节奏（毫秒）
+        "slow_mo": 0,
+        # 指定本地浏览器路径（如 Chrome/Edge 可执行文件）
+        "local_browser_path": None,
+    },
+
     # ========== 扩展配置 ==========
     "extra": {
         # API 基础地址，用于真实 API 测试执行

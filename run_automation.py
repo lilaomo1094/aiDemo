@@ -171,7 +171,7 @@ class AutomationTestPlatform:
             self._print_summary(results)
 
             output_files = dict(context.metadata.get("output_files", {}))
-            self._collect_screenshots(context, output_files)
+            self._collect_ui_evidence(context, output_files)
 
             output_info = {
                 "run_id": run_id,
@@ -192,16 +192,25 @@ class AutomationTestPlatform:
         finally:
             self.config.output = original_output
 
-    def _collect_screenshots(self, context, output_files: Dict):
-        """把 UI 测试截图统一收集到 output_files，方便报告展示."""
+    def _collect_ui_evidence(self, context, output_files: Dict):
+        """把 UI 测试截图、视频、HAR 统一收集到 output_files，方便报告展示."""
         seen = set(output_files.values())
-        counter = 1
+        shot_counter = 1
         for result in getattr(context, "execution_results", []) or []:
+            test_id = result.get("test_id", "unknown")
             for shot in result.get("screenshots", []) or []:
                 if shot and shot not in seen:
-                    output_files[f"screenshot_{counter:03d}_{result.get('test_id', 'unknown')}"] = shot
+                    output_files[f"screenshot_{shot_counter:03d}_{test_id}"] = shot
                     seen.add(shot)
-                    counter += 1
+                    shot_counter += 1
+            video = result.get("video_path")
+            if video and video not in seen:
+                output_files[f"video_{test_id}"] = video
+                seen.add(video)
+            har = result.get("har_path")
+            if har and har not in seen:
+                output_files[f"har_{test_id}"] = har
+                seen.add(har)
 
     def _print_start(self, project_info: Dict, run_id: str, version: Optional[str]):
         print(f"\n{'=' * 60}")
@@ -213,6 +222,11 @@ class AutomationTestPlatform:
         if version:
             print(f"🏷️  版本: {version}")
         print(f"📋 运行ID: {run_id}")
+        network = getattr(self.config, "network", None)
+        if network:
+            net_type = getattr(network, "type", "public")
+            browser_mode = getattr(network, "browser_mode", "headless")
+            print(f"🌐 网络环境: {net_type} | 浏览器模式: {browser_mode}")
         print(f"📅 开始时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"{'=' * 60}\n")
 
@@ -270,6 +284,7 @@ def main():
     parser.add_argument("--create-version", default=None, help="仅创建新版本并写入需求文档（需配合 --requirement）")
     parser.add_argument("--requirement", default=None, help="创建版本时使用的外部需求文档路径")
     parser.add_argument("--compare", nargs=2, metavar=("FROM", "TO"), help="对比两个版本，例如 --compare v1.0.0 v1.1.0")
+    parser.add_argument("--network", default=None, choices=["public", "private", "vpn"], help="覆盖网络环境类型")
     args = parser.parse_args()
 
     print("""
@@ -283,6 +298,10 @@ def main():
 
     try:
         platform = AutomationTestPlatform(config_path=args.config)
+
+        if args.network:
+            platform.config.network.type = args.network
+            print(f"🌐 命令行指定网络环境: {args.network}")
 
         if args.compare:
             vm = VersionManager(
