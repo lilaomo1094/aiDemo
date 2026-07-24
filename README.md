@@ -19,7 +19,7 @@ aiAgent/
 │   └── requirement.md              # 需求文档模板
 │
 ├── automation/                      # 自动化测试核心引擎
-│   ├── agents/                      # 6个AI Agent实现
+│   ├── agents/                      # 7个AI Agent实现
 │   │   ├── base.py                  # Agent 抽象基类
 │   │   ├── requirement_analyzer.py  # 需求分析Agent
 │   │   ├── code_parser.py          # 代码解析Agent
@@ -109,7 +109,7 @@ aiAgent/
 
 | 目录 | 说明 |
 |------|------|
-| `agents/` | 6个AI Agent实现，负责需求分析、代码解析、测试生成、执行、缺陷发现、报告生成 |
+| `agents/` | 7个AI Agent实现，负责需求分析、代码解析、测试生成、执行、缺陷发现、报告生成 |
 | `core/` | 框架核心能力：统一配置、LLM Provider、代码/API/DB 解析器、可插拔执行器、输出格式化 |
 | `workflow/` | 工作流引擎，负责 DAG 任务调度和流程控制 |
 
@@ -430,8 +430,14 @@ register_executor("my", MyExecutor)
 框架自身包含 80+ 单元/集成测试，可验证框架功能：
 
 ```bash
-# 安装依赖
+# 安装生产依赖
 pip install -r requirements.txt
+
+# 安装浏览器（UI 测试必需）
+playwright install chromium
+
+# 安装测试依赖（开发/CI 使用）
+pip install -r requirements-test.txt
 
 # 运行所有测试
 pytest

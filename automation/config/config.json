@@ -1,7 +1,7 @@
 {
   "project": {
-    "project_name": "proDemoA 全链路自动化测试平台",
-    "project_code": "PRODEMA",
+    "project_name": "aiAgent 全链路自动化测试平台",
+    "project_code": "AIAGENT",
     "test_type": "功能测试",
     "test_environment": "test"
   },

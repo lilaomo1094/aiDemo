@@ -154,7 +154,9 @@ class PlatformConfig(BaseModel):
 
     @property
     def base_dir(self) -> Path:
-        return Path(os.environ.get("PRODEMA_BASE_DIR", Path.cwd())).resolve()
+        # 优先使用新环境变量，兼容旧变量名
+        base_dir = os.environ.get("AIAGENT_BASE_DIR") or os.environ.get("PRODEMA_BASE_DIR")
+        return Path(base_dir or Path.cwd()).resolve()
 
     def to_dict(self) -> Dict[str, Any]:
         return self.model_dump(by_alias=True)

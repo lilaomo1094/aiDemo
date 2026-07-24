@@ -54,7 +54,7 @@ class TaskScheduler:
 
     def start(self):
         """启动调度器，持续消费任务队列."""
-        self.executor = ThreadPoolExecutor(max_workers=self.max_workers, thread_name_prefix="proDemoA-worker-")
+        self.executor = ThreadPoolExecutor(max_workers=self.max_workers, thread_name_prefix="aiAgent-worker-")
         self._shutdown = False
         threading.Thread(target=self._consume_loop, daemon=True).start()
 

@@ -9,11 +9,4 @@ openpyxl>=3.0.0
 Jinja2>=3.1.0
 GitPython>=3.1.0
 PyYAML>=6.0
-pytest
-pytest-asyncio
-pytest-html
-pytest-mock
-locust
-pytest-benchmark
-faker
-responses
+playwright>=1.60.0

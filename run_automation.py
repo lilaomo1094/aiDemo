@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""proDemoA 全链路自动化测试平台 - 主入口.
+"""aiAgent 全链路自动化测试平台 - 主入口.
 
 用法:
     python run_automation.py [--config config/project_config.py]
@@ -108,7 +108,7 @@ class AutomationTestPlatform:
 
     def _print_start(self, project_info: dict, run_id: str):
         print(f"\n{'=' * 60}")
-        print("🚀 proDemoA 全链路自动化测试平台")
+        print("🚀 aiAgent 全链路自动化测试平台")
         print(f"{'=' * 60}")
         print(f"📋 项目名称: {project_info['project_name']}")
         print(f"📋 项目代码: {project_info['project_code']}")
@@ -145,13 +145,13 @@ class AutomationTestPlatform:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="proDemoA 全链路自动化测试平台")
+    parser = argparse.ArgumentParser(description="aiAgent 全链路自动化测试平台")
     parser.add_argument("--config", default="config/project_config.py", help="配置文件路径")
     args = parser.parse_args()
 
     print("""
     ╔══════════════════════════════════════════════════════════╗
-    ║         proDemoA 全链路自动化测试平台                    ║
+    ║         aiAgent 全链路自动化测试平台                   ║
     ║                                                          ║
     ║  配置: config/project_config.py                          ║
     ║  运行: python run_automation.py                         ║

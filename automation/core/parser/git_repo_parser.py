@@ -55,7 +55,7 @@ class GitRepositoryParser(RepositoryParser):
             return ""
 
         repo_name = repo_config.url.rstrip("/").split("/")[-1].replace(".git", "")
-        target = Path(self.work_dir) / f"proDemoA_repo_{repo_name}"
+        target = Path(self.work_dir) / f"aiAgent_repo_{repo_name}"
 
         if target.exists():
             try:

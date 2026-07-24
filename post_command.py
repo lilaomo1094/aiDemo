@@ -72,7 +72,7 @@ def run_local(text: str, im_config_path: str):
 
 
 def parse_cli():
-    parser = argparse.ArgumentParser(description="proDemoA 命令发布入口")
+    parser = argparse.ArgumentParser(description="aiAgent 命令发布入口")
     parser.add_argument("--text", required=True, help="要发送的指令文本")
     parser.add_argument("--url", default="http://localhost:8000/webhook/lark", help="Webhook 地址")
     parser.add_argument("--local", action="store_true", help="本地直接调用 BotService，不经过 HTTP")

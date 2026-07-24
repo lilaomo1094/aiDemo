@@ -80,7 +80,7 @@ def submit_only(args):
 
 
 def parse_cli():
-    parser = argparse.ArgumentParser(description="proDemoA 多任务调度器")
+    parser = argparse.ArgumentParser(description="aiAgent 多任务调度器")
     parser.add_argument("--max-workers", type=int, default=4, help="并发工作线程数")
     parser.add_argument("--state-dir", default="output/scheduler", help="任务状态持久化目录")
     parser.add_argument("--submit", help="提交单个测试任务配置文件")
