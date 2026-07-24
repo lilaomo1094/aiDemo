@@ -199,6 +199,37 @@ class IMConfig(BaseModel):
     function_calling: bool = False
 
 
+class NetworkConfig(BaseModel):
+    """网络环境配置：区分公网、内网、VPN 等场景."""
+
+    type: str = "public"  # public | private | vpn
+    browser_mode: str = "headless"  # headed | headless
+    proxy: Optional[str] = None
+    bypass_hosts: List[str] = Field(default_factory=list)
+    record_video: bool = False
+    record_har: bool = False
+    capture_console: bool = True
+    capture_network: bool = False
+    slow_mo: int = 0
+    local_browser_path: Optional[str] = None
+
+    @field_validator("type")
+    @classmethod
+    def _validate_type(cls, v: str) -> str:
+        allowed = {"public", "private", "vpn"}
+        if v.lower() not in allowed:
+            raise ValueError(f"不支持的网络类型: {v}，支持: {allowed}")
+        return v.lower()
+
+    @field_validator("browser_mode")
+    @classmethod
+    def _validate_browser_mode(cls, v: str) -> str:
+        allowed = {"headed", "headless"}
+        if v.lower() not in allowed:
+            raise ValueError(f"不支持的浏览器模式: {v}，支持: {allowed}")
+        return v.lower()
+
+
 class PlatformConfig(BaseModel):
     project: ProjectInfo = Field(default_factory=ProjectInfo)
     requirement: RequirementConfig = Field(default_factory=RequirementConfig)
@@ -213,6 +244,7 @@ class PlatformConfig(BaseModel):
     function_calling: FunctionCallingConfig = Field(default_factory=FunctionCallingConfig)
     version: VersionConfig = Field(default_factory=VersionConfig)
     im: IMConfig = Field(default_factory=IMConfig)
+    network: NetworkConfig = Field(default_factory=NetworkConfig)
     extra: Dict[str, Any] = Field(default_factory=dict)
 
     model_config = {"populate_by_name": True, "validate_assignment": True}

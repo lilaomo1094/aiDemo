@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-"""UI 测试执行器（基于 Playwright，可选安装）."""
+"""UI 测试执行器（基于 Playwright，支持内网/公网多环境）."""
 
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
+
+from automation.core.network import NetworkManager
 
 from .base import TestExecutor, TestStatus
 
@@ -13,6 +15,7 @@ class UIExecutor(TestExecutor):
         super().__init__(config)
         self.base_url = getattr(config, "extra", {}).get("ui_base_url", "")
         self.screenshot_enabled = getattr(config, "extra", {}).get("ui_auto_screenshot", True)
+        self.network = NetworkManager(config)
 
     def _find_chromium_executable(self) -> str:
         """查找 Playwright 下载的 Chromium 可执行文件路径."""
@@ -38,34 +41,39 @@ class UIExecutor(TestExecutor):
         except Exception:
             return False
 
-    def _resolve_screenshot_dir(self, context, test_case: Dict) -> Path:
-        """确定截图保存目录：优先版本化输出目录，回退 output/screenshots."""
+    def _resolve_output_dir(self, context, test_case: Dict) -> Path:
+        """确定本次用例的输出目录：优先版本化输出目录."""
         run_id = getattr(context, "run_id", "unknown")
         test_id = test_case.get("id", "unknown")
         base_dir = getattr(self.config, "base_dir", Path.cwd())
         output_dir = base_dir / "output"
-        # 若配置中有版本化报告路径，则放在同版本目录下
         report_file = getattr(getattr(self.config, "output", None), "report_file", None)
         if report_file:
             report_path = Path(report_file)
             if report_path.parent.exists():
                 output_dir = report_path.parent
-        screenshot_dir = output_dir / "screenshots" / run_id / test_id
-        screenshot_dir.mkdir(parents=True, exist_ok=True)
-        return screenshot_dir
+        return output_dir / "ui_evidence" / run_id / test_id
 
-    def _take_screenshot(self, page, screenshot_dir: Path, name: str) -> str:
+    def _take_screenshot(self, page, output_dir: Path, name: str) -> str:
         """截图并返回相对路径."""
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         filename = f"{name}_{timestamp}.png"
-        full_path = screenshot_dir / filename
+        full_path = output_dir / filename
         page.screenshot(path=str(full_path))
         base_dir = getattr(self.config, "base_dir", Path.cwd())
         try:
-            rel_path = str(full_path.relative_to(base_dir))
+            return str(full_path.relative_to(base_dir))
         except ValueError:
-            rel_path = str(full_path)
-        return rel_path
+            return str(full_path)
+
+    def _collect_console_logs(self, page) -> List[Dict[str, Any]]:
+        """收集浏览器控制台日志."""
+        if not self.network.profile.capture_console:
+            return []
+        logs = []
+        for log in page.event_data.get("console", []) if hasattr(page, "event_data") else []:
+            logs.append({"type": log.type, "text": log.text})
+        return logs
 
     def execute(self, test_case: Dict, context) -> Dict[str, Any]:
         try:
@@ -79,11 +87,14 @@ class UIExecutor(TestExecutor):
         if not url:
             return self._make_result(TestStatus.BLOCKED, "未配置 UI 测试目标 URL")
 
-        # 是否启用关键场景截图：test_case 显式指定，或全局开启
+        # 关键场景强制截图与监控
         capture = action.get("capture_screenshots", self.screenshot_enabled)
         is_critical = test_case.get("critical", False) or "登录" in test_case.get("name", "")
         if is_critical:
             capture = True
+            # 登录类关键场景默认开启控制台与网络监控
+            if not self.network.profile.capture_console:
+                self.network.profile.capture_console = True
 
         # 若未找到浏览器，尝试自动安装一次
         executable_path = self._find_chromium_executable()
@@ -91,21 +102,41 @@ class UIExecutor(TestExecutor):
             self._install_browsers()
             executable_path = self._find_chromium_executable()
 
-        launch_kwargs = {"headless": True}
-        if executable_path:
-            launch_kwargs["executable_path"] = executable_path
+        output_dir = self._resolve_output_dir(context, test_case)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        launch_kwargs, actually_headed = self.network.resolve_browser_launch_kwargs(executable_path)
+        video_dir = output_dir / "video" if self.network.profile.record_video else None
+
+        # HAR 录制文件路径提前准备好，避免重复创建 context
+        har_file = None
+        if self.network.profile.record_har:
+            har_file = output_dir / f"trace_{datetime.now().strftime('%Y%m%d%H%M%S')}.har"
+
+        context_kwargs = self.network.resolve_browser_context_kwargs(video_dir)
+        if har_file:
+            context_kwargs["record_har_path"] = str(har_file)
 
         screenshots: List[str] = []
-        screenshot_dir = self._resolve_screenshot_dir(context, test_case)
+        console_logs: List[Dict] = []
+        har_path: str = ""
+        video_path: str = ""
 
         try:
             with sync_playwright() as p:
                 browser = p.chromium.launch(**launch_kwargs)
-                page = browser.new_page()
+                ctx = browser.new_context(**context_kwargs)
+
+                page = ctx.new_page()
+                if self.network.profile.capture_console:
+                    page.on("console", lambda msg: console_logs.append({"type": msg.type, "text": msg.text}))
+                if self.network.profile.capture_network:
+                    page.on("request", lambda req: console_logs.append({"type": "network", "text": f"{req.method} {req.url}"}))
+
                 page.goto(url, timeout=30000, wait_until="domcontentloaded")
 
                 if capture:
-                    screenshots.append(self._take_screenshot(page, screenshot_dir, "01_opened"))
+                    screenshots.append(self._take_screenshot(page, output_dir, "01_opened"))
 
                 results = []
                 for idx, step in enumerate(steps, start=2):
@@ -136,34 +167,56 @@ class UIExecutor(TestExecutor):
                     except Exception as step_err:
                         results.append({"op": op, "selector": selector, "status": "failed", "error": str(step_err)})
                         if capture:
-                            screenshots.append(self._take_screenshot(page, screenshot_dir, f"{idx:02d}_{step_name}_failed"))
+                            screenshots.append(self._take_screenshot(page, output_dir, f"{idx:02d}_{step_name}_failed"))
+                        ctx.close()
                         browser.close()
                         return self._make_result(
                             TestStatus.FAILED,
                             f"步骤 {step_name} 失败: {step_err}",
                             steps=results,
                             screenshots=screenshots,
+                            console_logs=console_logs,
                         )
 
-                    # 关键步骤完成后截图
                     if capture and step.get("capture_after", False):
-                        screenshots.append(self._take_screenshot(page, screenshot_dir, f"{idx:02d}_{step_name}"))
+                        screenshots.append(self._take_screenshot(page, output_dir, f"{idx:02d}_{step_name}"))
 
-                # 用例整体成功完成后截图
                 if capture:
-                    screenshots.append(self._take_screenshot(page, screenshot_dir, f"{len(steps)+2:02d}_success"))
+                    screenshots.append(self._take_screenshot(page, output_dir, f"{len(steps)+2:02d}_success"))
 
-                # 支持用例级别显式指定最终截图
                 explicit_screenshot = action.get("screenshot")
                 if explicit_screenshot:
-                    page.screenshot(path=str(screenshot_dir / explicit_screenshot))
+                    page.screenshot(path=str(output_dir / explicit_screenshot))
 
+                page.close()
+                ctx.close()
                 browser.close()
+
+                if har_file and har_file.exists():
+                    try:
+                        har_path = str(har_file.relative_to(getattr(self.config, "base_dir", Path.cwd())))
+                    except ValueError:
+                        har_path = str(har_file)
+
+                # 收集视频路径
+                if video_dir and video_dir.exists():
+                    videos = sorted(video_dir.glob("*.webm"))
+                    if videos:
+                        try:
+                            video_path = str(videos[0].relative_to(getattr(self.config, "base_dir", Path.cwd())))
+                        except ValueError:
+                            video_path = str(videos[0])
+
                 return self._make_result(
                     TestStatus.PASSED,
                     "UI 测试通过",
                     steps=results,
                     screenshots=screenshots,
+                    console_logs=console_logs,
+                    video_path=video_path,
+                    har_path=har_path,
+                    browser_mode="headed" if actually_headed else "headless",
+                    network_type=self.network.profile.network_type.value,
                 )
         except Exception as e:
             err_msg = str(e)
@@ -175,4 +228,6 @@ class UIExecutor(TestExecutor):
                 TestStatus.ERROR,
                 f"UI 测试失败: {err_msg}",
                 screenshots=screenshots,
+                console_logs=console_logs,
+                network_type=self.network.profile.network_type.value,
             )

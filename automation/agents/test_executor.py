@@ -67,6 +67,11 @@ class TestExecutor(BaseAgent):
             execution["response"] = result.get("response", result.get("rows", result.get("steps", {})))
             execution["error_message"] = result.get("message", "")
             execution["screenshots"] = result.get("screenshots", []) or execution.get("screenshots", [])
+            execution["console_logs"] = result.get("console_logs", [])
+            execution["video_path"] = result.get("video_path", "")
+            execution["har_path"] = result.get("har_path", "")
+            execution["browser_mode"] = result.get("browser_mode", "")
+            execution["network_type"] = result.get("network_type", "")
         except Exception as e:
             execution["status"] = TestStatus.ERROR.value
             execution["error_message"] = str(e)
