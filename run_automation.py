@@ -170,6 +170,9 @@ class AutomationTestPlatform:
             results = workflow.run(context)
             self._print_summary(results)
 
+            output_files = dict(context.metadata.get("output_files", {}))
+            self._collect_screenshots(context, output_files)
+
             output_info = {
                 "run_id": run_id,
                 "version": active_version,
@@ -178,15 +181,27 @@ class AutomationTestPlatform:
                 "defects": context.defects,
                 "execution_results": context.execution_results,
                 "report_path": context.metadata.get("report_path", self.config.output.report_file),
-                "output_files": context.metadata.get("output_files", {}),
+                "output_files": output_files,
                 "summary": results["summary"],
             }
 
             self._save_results(output_info)
             self._print_output_files(output_info)
             return output_info
+
         finally:
             self.config.output = original_output
+
+    def _collect_screenshots(self, context, output_files: Dict):
+        """把 UI 测试截图统一收集到 output_files，方便报告展示."""
+        seen = set(output_files.values())
+        counter = 1
+        for result in getattr(context, "execution_results", []) or []:
+            for shot in result.get("screenshots", []) or []:
+                if shot and shot not in seen:
+                    output_files[f"screenshot_{counter:03d}_{result.get('test_id', 'unknown')}"] = shot
+                    seen.add(shot)
+                    counter += 1
 
     def _print_start(self, project_info: Dict, run_id: str, version: Optional[str]):
         print(f"\n{'=' * 60}")
