@@ -212,6 +212,26 @@ class AutomationTestPlatform:
         print(f"⏱️  总耗时: {summary['total_duration']:.2f}秒")
         print(f"📝 测试用例数: {summary['test_cases_count']}")
         print(f"🐛 缺陷数: {summary['defects_count']}")
+
+        milestones = summary.get("milestones")
+        if milestones:
+            print(f"\n🎯 里程碑进度: {milestones['completed']}/{milestones['total_milestones']} 完成")
+            print(f"⚠️  未关闭风险: {milestones['open_risks']} 个")
+            if milestones.get("critical_risks"):
+                print("🔴 存在严重风险，建议立即处理")
+
+        risks = summary.get("risks", {}).get("risks", [])
+        open_risks = [r for r in risks if r.get("status") == "open"]
+        if open_risks:
+            print("\n📋 当前已知风险:")
+            for risk in open_risks[:5]:
+                icon = {"critical": "🔴", "high": "🟠", "medium": "🟡", "low": "🟢"}.get(
+                    risk.get("level"), "⚪"
+                )
+                print(f"   {icon} [{risk.get('level').upper()}] {risk.get('description')}")
+                if risk.get("mitigation"):
+                    print(f"      缓解措施: {risk.get('mitigation')}")
+
         print(f"{'=' * 60}\n")
 
     def _save_results(self, results: dict):

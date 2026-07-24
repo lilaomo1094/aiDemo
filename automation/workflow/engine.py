@@ -8,7 +8,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
 
-from automation.core.monitoring import ProgressReporter
+from automation.core.monitoring import MilestoneManager, NodeStatus, ProgressReporter
 
 
 class WorkflowStatus(Enum):
@@ -94,19 +94,44 @@ class WorkflowEngine:
         )
         self._context_lock = threading.Lock()
         self._progress = progress_reporter
+        self.milestone_manager: Optional[MilestoneManager] = None
+        self._task_to_milestone = {
+            "task_requirement": "requirement_analyzed",
+            "task_code_parse": "code_parsed",
+            "task_test_generate": "test_cases_generated",
+            "task_test_execute": "tests_executed",
+            "task_defect_detect": "defects_detected",
+            "task_report": "report_generated",
+        }
 
-    def _report_progress(self, current_task: str = "", message: str = ""):
+    def _report_progress(
+        self,
+        current_task: str = "",
+        message: str = "",
+        milestone_id: str = "",
+        milestone_progress: float = 0.0,
+    ):
         if not self._progress:
             return
         completed = sum(1 for t in self.tasks.values() if t.status == WorkflowStatus.COMPLETED)
         failed = sum(1 for t in self.tasks.values() if t.status == WorkflowStatus.FAILED)
         running = sum(1 for t in self.tasks.values() if t.status == WorkflowStatus.RUNNING)
+        risks = []
+        if self.milestone_manager and milestone_id:
+            milestone = self.milestone_manager.milestones.get(milestone_id)
+            if milestone:
+                risks = milestone.risks
+            if not risks:
+                risks = [r.to_dict() for r in self.milestone_manager.risk_manager.list_open()]
         self._progress.update(
             completed=completed,
             failed=failed,
             running=running,
             current_task=current_task,
             message=message,
+            milestone=milestone_id,
+            milestone_progress=milestone_progress,
+            risks=risks,
         )
 
     def register_listener(self, listener: Callable):
@@ -182,14 +207,48 @@ class WorkflowEngine:
     def run(self, context: WorkflowContext) -> Dict:
         self.context = context
         self.create_tasks()
+        self.milestone_manager = MilestoneManager(context.run_id)
+
+        # 配置校验里程碑
+        self.milestone_manager.start("config_validated", "校验项目配置与输入")
+        self.milestone_manager.evaluate_risks("config_validated", context, self.config)
+        cfg_status = NodeStatus.PASSED
+        if self.milestone_manager.risk_manager.has_critical():
+            cfg_status = NodeStatus.BLOCKED
+            results = {
+                "run_id": context.run_id,
+                "status": WorkflowStatus.FAILED.value,
+                "tasks": [],
+                "summary": self._generate_summary(),
+                "errors": ["配置校验存在严重风险，已阻断执行"],
+                "milestones": self.milestone_manager.to_dict(),
+            }
+            self.milestone_manager.finish("config_validated", cfg_status, "配置校验未通过")
+            self._report_progress(
+                current_task="配置校验",
+                message="存在严重风险，已阻断",
+                milestone_id="config_validated",
+                milestone_progress=100.0,
+            )
+            if self._progress:
+                self._progress.finish(status="失败", message="配置校验存在严重风险")
+            return results
+        self.milestone_manager.finish("config_validated", cfg_status, "配置校验通过")
+
         results = {
             "run_id": context.run_id,
             "status": WorkflowStatus.COMPLETED.value,
             "tasks": [],
             "summary": {},
             "errors": [],
+            "milestones": {},
         }
-        self._report_progress(current_task="启动调度", message="准备执行工作流")
+        self._report_progress(
+            current_task="启动调度",
+            message="准备执行工作流",
+            milestone_id="config_validated",
+            milestone_progress=100.0,
+        )
         max_iterations = len(self.tasks) * 2
         iteration = 0
         with ThreadPoolExecutor(max_workers=self.max_workers, thread_name_prefix="zhice-worker-") as executor:
@@ -232,15 +291,21 @@ class WorkflowEngine:
                         results["status"] = WorkflowStatus.FAILED.value
                         results["errors"].append(f"任务 {task.name} 失败: {task.error_message}")
 
+                    milestone_id = self._task_to_milestone.get(task.task_id, "")
+                    milestone = self.milestone_manager.milestones.get(milestone_id) if milestone_id else None
                     self._report_progress(
                         current_task=task.name,
                         message=f"{'完成' if task.status == WorkflowStatus.COMPLETED else '失败'}: {task.name}",
+                        milestone_id=milestone_id,
+                        milestone_progress=getattr(milestone, "progress_percentage", 100.0),
                     )
 
                 iteration += 1
                 if all(t.status in (WorkflowStatus.COMPLETED, WorkflowStatus.FAILED, WorkflowStatus.SKIPPED) for t in self.tasks.values()):
                     break
 
+        self.milestone_manager.finish("task_completed", NodeStatus.PASSED, "工作流执行结束")
+        results["milestones"] = self.milestone_manager.to_dict()
         if self._progress:
             final_status = "完成" if results["status"] == WorkflowStatus.COMPLETED.value else "失败"
             self._progress.finish(status=final_status, message=f"工作流{final_status}")
@@ -250,6 +315,9 @@ class WorkflowEngine:
     def _execute_task(self, task: WorkflowTask):
         task.status = WorkflowStatus.RUNNING
         task.start_time = datetime.now()
+        milestone_id = self._task_to_milestone.get(task.task_id)
+        if self.milestone_manager and milestone_id:
+            self.milestone_manager.start(milestone_id, f"执行 {task.name}")
         self.notify("task_started", {"task": task.name, "task_id": task.task_id})
         try:
             agent_output = self._run_agent(task)
@@ -257,11 +325,16 @@ class WorkflowEngine:
             task.status = WorkflowStatus.COMPLETED
             with self._context_lock:
                 self._update_context(task)
+            if self.milestone_manager and milestone_id:
+                self.milestone_manager.evaluate_risks(milestone_id, self.context, self.config)
+                self.milestone_manager.finish(milestone_id, NodeStatus.PASSED, f"{task.name} 完成")
             self.notify("task_completed", {"task": task.name, "task_id": task.task_id, "output": agent_output})
         except Exception as e:
             task.status = WorkflowStatus.FAILED
             task.error_message = str(e)
             task.end_time = datetime.now()
+            if self.milestone_manager and milestone_id:
+                self.milestone_manager.finish(milestone_id, NodeStatus.FAILED, error=str(e))
             self.notify("task_failed", {"task": task.name, "task_id": task.task_id, "error": str(e)})
 
     def _get_agent_factory(self):
@@ -313,7 +386,7 @@ class WorkflowEngine:
         completed = sum(1 for t in self.tasks.values() if t.status == WorkflowStatus.COMPLETED)
         failed = sum(1 for t in self.tasks.values() if t.status == WorkflowStatus.FAILED)
         total_duration = sum(t.duration() for t in self.tasks.values())
-        return {
+        summary = {
             "total_tasks": len(self.tasks),
             "completed": completed,
             "failed": failed,
@@ -321,6 +394,10 @@ class WorkflowEngine:
             "test_cases_count": len(self.context.test_cases) if self.context else 0,
             "defects_count": len(self.context.defects) if self.context else 0,
         }
+        if self.milestone_manager:
+            summary["milestones"] = self.milestone_manager.summary()
+            summary["risks"] = self.milestone_manager.risk_manager.to_dict()
+        return summary
 
 
 def create_workflow(
