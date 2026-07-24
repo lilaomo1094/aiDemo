@@ -13,6 +13,8 @@ class IMMessage:
     sender_name: str = ""
     content: str = ""
     channel: str = ""  # chat_id / group_id
+    message_type: str = "text"  # text / voice / image / file
+    audio_url: str = ""  # 语音消息下载地址
     raw: Any = None
 
     def is_command(self) -> bool:

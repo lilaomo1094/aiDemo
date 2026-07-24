@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from automation.core.scheduler import TaskScheduler
+from automation.core.voice import create_asr_provider
 
 from .base import IMMessage
 from .factory import create_im_provider
@@ -166,16 +167,28 @@ class IntentParser:
 class IMBotService:
     """IM 机器人服务，桥接 IM 消息与任务调度器."""
 
-    def __init__(self, scheduler: TaskScheduler, im_config: Dict[str, Any]):
+    def __init__(self, scheduler: TaskScheduler, im_config):
         self.scheduler = scheduler
-        self.im_config = im_config
-        self.provider_type = im_config.get("provider", "lark")
-        self.provider = create_im_provider(self.provider_type, im_config)
-        self.default_config_path = im_config.get("default_config_path", "config/project_config.py")
-        self.project_aliases = im_config.get("project_aliases", {})
-        self.admin_users = set(im_config.get("admin_users", []))
+        # 兼容 Pydantic 模型与字典配置
+        if hasattr(im_config, "model_dump"):
+            self.im_config = im_config.model_dump()
+        else:
+            self.im_config = dict(im_config)
+        self.provider_type = self.im_config.get("provider", "lark")
+        self.provider = create_im_provider(self.provider_type, self.im_config)
+        self.default_config_path = self.im_config.get("default_config_path", "config/project_config.py")
+        self.project_aliases = self.im_config.get("project_aliases", {})
+        self.admin_users = set(self.im_config.get("admin_users", []))
         self.intent_parser = IntentParser(self.project_aliases, self.default_config_path)
         self._lock = threading.Lock()
+
+        # 语音识别（可选）
+        voice_config = self.im_config.get("voice") or {}
+        self.asr = create_asr_provider(voice_config) if voice_config.get("enabled") else None
+
+        # Function Calling 智能编排（可选）
+        self.function_calling_enabled = self.im_config.get("function_calling", False)
+
         self._register_hooks()
 
     def _register_hooks(self):
@@ -235,7 +248,22 @@ class IMBotService:
         return "\n".join(lines)
 
     def handle_message(self, message: IMMessage) -> str:
-        """处理单条 IM 消息，返回回复文本."""
+        """处理单条 IM 消息，返回回复文本.
+
+        支持语音消息：先通过 ASR 转文本，再进行意图解析或 Function Calling 编排。
+        """
+        # 1. 语音消息转文本
+        if message.message_type == "voice" and message.audio_url and self.asr:
+            transcribed = self._transcribe_audio(message.audio_url)
+            if not transcribed:
+                return "语音消息识别失败，请重试或发送文字。"
+            message.content = transcribed
+
+        # 2. Function Calling 智能编排（处理自然语言复杂指令）
+        if self.function_calling_enabled and not message.content.strip().startswith("/"):
+            return self._cmd_orchestrate(message)
+
+        # 3. 原有意图解析流程
         intent, params = self.intent_parser.parse(message.content)
 
         if intent == "run":
@@ -254,6 +282,43 @@ class IMBotService:
             return "未识别为指令，发送 /help 查看可用命令。"
         else:
             return "未识别为指令，发送 /help 查看可用命令。"
+
+    def _transcribe_audio(self, audio_url: str) -> str:
+        """下载音频并通过 ASR 识别为文本."""
+        import tempfile
+
+        import requests
+
+        try:
+            resp = requests.get(audio_url, timeout=60)
+            resp.raise_for_status()
+            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
+                tmp.write(resp.content)
+                tmp_path = tmp.name
+            result = self.asr.transcribe(tmp_path)
+            Path(tmp_path).unlink(missing_ok=True)
+            return result.text
+        except Exception as e:
+            print(f"语音转文字失败: {e}")
+            return ""
+
+    def _cmd_orchestrate(self, message: IMMessage) -> str:
+        """使用 Function Calling 编排器处理自然语言指令."""
+        from automation.agents.orchestrator import FunctionCallingOrchestrator
+        from automation.core.config import load_config
+        from automation.workflow.engine import WorkflowTask
+
+        config = load_config(self.default_config_path)
+        orchestrator = FunctionCallingOrchestrator(config)
+        task = WorkflowTask(
+            task_id="fc-im",
+            agent_type=None,
+            name="智能编排",
+            description=message.content,
+            input_data={"instruction": message.content},
+        )
+        result = orchestrator.execute(task, None)
+        return result.get("final_answer") or f"已执行 {len(result.get('tool_results', []))} 个工具调用"
 
     def _resolve_config_path(self, target: Optional[str]) -> str:
         if not target:

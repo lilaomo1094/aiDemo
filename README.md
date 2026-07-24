@@ -19,14 +19,15 @@ aiAgent/
 │   └── requirement.md              # 需求文档模板
 │
 ├── automation/                      # 自动化测试核心引擎
-│   ├── agents/                      # 7个AI Agent实现
+│   ├── agents/                      # 8个AI Agent实现
 │   │   ├── base.py                  # Agent 抽象基类
 │   │   ├── requirement_analyzer.py  # 需求分析Agent
 │   │   ├── code_parser.py          # 代码解析Agent
 │   │   ├── test_generator.py       # 测试用例生成Agent
 │   │   ├── test_executor.py        # 测试执行Agent
 │   │   ├── defect_detector.py      # 缺陷发现Agent
-│   │   └── report_generator.py     # 报告生成Agent
+│   │   ├── report_generator.py     # 报告生成Agent
+│   │   └── orchestrator.py         # Function Calling 编排器Agent
 │   │
 │   ├── core/                        # 框架核心能力（可插拔）
 │   │   ├── config.py               # 统一配置管理（Pydantic 校验）
@@ -47,6 +48,10 @@ aiAgent/
 │   │   │   ├── db_executor.py      # 真实 SQL 执行
 │   │   │   ├── ui_executor.py      # Playwright UI 测试
 │   │   │   ├── integration_executor.py  # 多步骤编排
+│   │   │   └── factory.py
+│   │   ├── voice/                  # 语音识别（ASR）
+│   │   │   ├── base.py
+│   │   │   ├── openai_whisper.py
 │   │   │   └── factory.py
 │   │   └── output/                 # 统一输出格式化
 │   │       └── formatter.py        # CSV/JSON/HTML/Excel
@@ -81,6 +86,7 @@ aiAgent/
 │   └── results.json                # 完整结果JSON
 │
 ├── run_automation.py                # ⭐ 主入口脚本
+├── run_voice_task.py               # 语音任务入口（ASR + Function Calling）
 ├── conftest.py                     # Pytest配置
 ├── pytest.ini                      # Pytest设置
 ├── requirements.txt                 # 运行依赖
@@ -109,7 +115,7 @@ aiAgent/
 
 | 目录 | 说明 |
 |------|------|
-| `agents/` | 7个AI Agent实现，负责需求分析、代码解析、测试生成、执行、缺陷发现、报告生成 |
+| `agents/` | 8个AI Agent实现，包含需求分析、代码解析、测试生成、执行、缺陷发现、报告生成、Function Calling 编排 |
 | `core/` | 框架核心能力：统一配置、LLM Provider、代码/API/DB 解析器、可插拔执行器、输出格式化 |
 | `workflow/` | 工作流引擎，负责 DAG 任务调度和流程控制 |
 
@@ -272,6 +278,60 @@ python run_automation.py
 │  │ .csv        │  │              │  │                      │   │
 │  └──────────────┘  └──────────────┘  └──────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
+
+## 🎯 Function Calling 智能编排
+
+`automation/agents/orchestrator.py` 中的 `FunctionCallingOrchestrator` 支持大模型通过 Function Calling 自动调度 Agent：
+
+- 用户只需用自然语言描述任务，例如：
+  - "分析一下登录需求，生成 UI 用例并执行"
+  - "解析后端仓库，给所有 API 生成接口测试"
+- 大模型会按序调用 `analyze_requirement`、`generate_test_cases`、`execute_tests` 等工具
+- 工具执行结果返回给大模型，继续下一步决策
+- 最终输出执行摘要与报告路径
+
+启用方式：
+
+```python
+# config/project_config.py
+"function_calling": {"enabled": True, "max_iterations": 10},
+"llm": {"provider": "openai", "model": "gpt-4o", "api_key": "sk-..."},
+```
+
+```bash
+python run_voice_task.py --text "分析需求并生成测试用例"
+```
+
+## 🎤 语音下达测试任务
+
+平台集成 ASR（目前支持 OpenAI Whisper），可通过语音消息触发测试流程：
+
+1. **CLI 语音入口**
+   ```bash
+   python run_voice_task.py --audio task.mp3
+   ```
+
+2. **IM 机器人语音消息**
+   - 在 `im.voice` 中开启 ASR
+   - 向机器人发送语音消息
+   - 机器人自动识别 → Function Calling 编排 → 执行任务 → 推送结果
+
+配置示例：
+
+```python
+"voice": {
+    "enabled": True,
+    "provider": "openai_whisper",
+    "api_key": "sk-...",
+    "model": "whisper-1",
+    "language": "zh",
+},
+"im": {
+    "provider": "lark",
+    "enabled": True,
+    "voice": {"enabled": True, "api_key": "sk-..."},
+    "function_calling": True,
+}
 ```
 
 ## 📊 输出说明
@@ -389,6 +449,35 @@ PROJECT_CONFIG = {
         "results_file": "output/results.json",
         "test_cases_excel": "output/test_cases.xlsx",
         "defects_excel": "output/defects.xlsx",
+    },
+
+    # ========== 语音识别配置（可选） ==========
+    "voice": {
+        "enabled": False,
+        "provider": "openai_whisper",
+        "api_key": "",
+        "model": "whisper-1",
+        "language": "zh",
+        "timeout": 60,
+    },
+
+    # ========== Function Calling 智能编排（可选） ==========
+    "function_calling": {
+        "enabled": False,
+        "max_iterations": 10,
+    },
+
+    # ========== IM 机器人配置（可选） ==========
+    "im": {
+        "provider": "lark",
+        "enabled": False,
+        "app_id": "",
+        "app_secret": "",
+        "default_config_path": "config/project_config.py",
+        "project_aliases": {},
+        "admin_users": [],
+        "voice": {"enabled": False, "api_key": ""},
+        "function_calling": False,
     },
 
     # ========== 扩展配置 ==========

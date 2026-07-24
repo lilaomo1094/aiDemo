@@ -133,6 +133,49 @@ class LLMConfig(BaseModel):
         return v.lower()
 
 
+class VoiceConfig(BaseModel):
+    enabled: bool = False
+    provider: str = "openai_whisper"
+    api_key: str = ""
+    base_url: Optional[str] = None
+    model: str = "whisper-1"
+    language: str = "zh"
+    timeout: int = Field(default=60, ge=1)
+
+    @field_validator("provider")
+    @classmethod
+    def _validate_provider(cls, v: str) -> str:
+        allowed = {"openai_whisper"}
+        if v.lower() not in allowed:
+            raise ValueError(f"不支持的 ASR 提供者: {v}，支持: {allowed}")
+        return v.lower()
+
+
+class FunctionCallingConfig(BaseModel):
+    enabled: bool = False
+    max_iterations: int = Field(default=10, ge=1, le=50)
+
+
+class IMVoiceConfig(BaseModel):
+    enabled: bool = False
+    provider: str = "openai_whisper"
+    api_key: str = ""
+    model: str = "whisper-1"
+    language: str = "zh"
+
+
+class IMConfig(BaseModel):
+    provider: str = "lark"
+    enabled: bool = False
+    app_id: str = ""
+    app_secret: str = ""
+    default_config_path: str = "config/project_config.py"
+    project_aliases: Dict[str, str] = Field(default_factory=dict)
+    admin_users: List[str] = Field(default_factory=list)
+    voice: IMVoiceConfig = Field(default_factory=IMVoiceConfig)
+    function_calling: bool = False
+
+
 class PlatformConfig(BaseModel):
     project: ProjectInfo = Field(default_factory=ProjectInfo)
     requirement: RequirementConfig = Field(default_factory=RequirementConfig)
@@ -142,6 +185,9 @@ class PlatformConfig(BaseModel):
     test: TestConfig = Field(default_factory=TestConfig)
     output: OutputConfig = Field(default_factory=OutputConfig)
     llm: LLMConfig = Field(default_factory=LLMConfig)
+    voice: VoiceConfig = Field(default_factory=VoiceConfig)
+    function_calling: FunctionCallingConfig = Field(default_factory=FunctionCallingConfig)
+    im: IMConfig = Field(default_factory=IMConfig)
     extra: Dict[str, Any] = Field(default_factory=dict)
 
     model_config = {"populate_by_name": True, "validate_assignment": True}

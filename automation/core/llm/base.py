@@ -2,7 +2,7 @@
 """LLM Provider 抽象基类."""
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 
@@ -12,10 +12,35 @@ class LLMResponse:
     model: str = ""
     usage: Dict[str, int] = None
     raw: Any = None
+    tool_calls: List[Dict[str, Any]] = field(default_factory=list)
 
     def __post_init__(self):
         if self.usage is None:
             self.usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+
+
+class ToolDefinition:
+    """Function Calling 工具定义."""
+
+    def __init__(self, name: str, description: str, parameters: Dict[str, Any], required: List[str] = None):
+        self.name = name
+        self.description = description
+        self.parameters = parameters
+        self.required = required or []
+
+    def to_openai(self) -> Dict[str, Any]:
+        return {
+            "type": "function",
+            "function": {
+                "name": self.name,
+                "description": self.description,
+                "parameters": {
+                    "type": "object",
+                    "properties": self.parameters,
+                    "required": self.required,
+                },
+            },
+        }
 
 
 class LLMProvider(ABC):

@@ -118,11 +118,49 @@ PROJECT_CONFIG = {
         "timeout": 120,
     },
 
+    # ========== 语音识别配置（可选） ==========
+    # 启用后支持通过语音下达测试任务，IM 机器人与 run_voice_task.py 会调用 ASR
+    "voice": {
+        "enabled": False,
+        "provider": "openai_whisper",  # 目前仅支持 openai_whisper
+        "api_key": "",
+        "base_url": "https://api.openai.com/v1",
+        "model": "whisper-1",
+        "language": "zh",
+        "timeout": 60,
+    },
+
+    # ========== Function Calling 智能编排（可选） ==========
+    # 启用后 IM 机器人收到自然语言指令时，会通过大模型 Function Calling 自动编排 Agent
+    "function_calling": {
+        "enabled": False,
+        "max_iterations": 10,
+    },
+
+    # ========== IM 机器人配置（可选） ==========
+    "im": {
+        "provider": "lark",
+        "enabled": False,
+        "app_id": "",
+        "app_secret": "",
+        "default_config_path": "config/project_config.py",
+        "project_aliases": {},
+        "admin_users": [],
+        "voice": {
+            "enabled": False,
+            "provider": "openai_whisper",
+            "api_key": "",
+            "model": "whisper-1",
+            "language": "zh",
+        },
+        "function_calling": False,
+    },
+
     # ========== 扩展配置 ==========
     "extra": {
         # API 基础地址，用于真实 API 测试执行
         "api_base_url": "http://localhost:8000",
-        # UI 基础地址（本地 mock 登录页面）
+        # UI 基础地址（示例）
         "ui_base_url": "http://localhost:8080",
     },
 }
