@@ -18,7 +18,7 @@ from automation.workflow.engine import WorkflowTask
 
 
 def main():
-    parser = argparse.ArgumentParser(description="aiAgent 语音任务入口")
+    parser = argparse.ArgumentParser(description="智测 语音任务入口")
     parser.add_argument("--audio", help="本地音频文件路径")
     parser.add_argument("--audio-url", help="音频文件 URL")
     parser.add_argument("--config", default="config/project_config.py", help="项目配置文件路径")

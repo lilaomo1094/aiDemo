@@ -1,4 +1,4 @@
-# aiAgent 全链路自动化测试平台
+# 智测 全链路自动化测试平台
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" alt="Python">
@@ -8,12 +8,12 @@
 
 ## 📋 项目简介
 
-aiAgent 是一个基于AI Agent的全链路自动化测试平台，通过联动多个AI专家Agent，实现从需求文档到测试报告的全流程自动化。测试人员仅需修改配置文件即可开始测试工作。
+智测是一个基于AI Agent的全链路自动化测试平台，通过联动多个AI专家Agent，实现从需求文档到测试报告的全流程自动化。测试人员仅需修改配置文件即可开始测试工作。
 
 ## 🏗️ 项目架构
 
 ```
-aiAgent/
+智测/
 ├── config/                          # ⭐ 项目配置（测试人员仅需修改这里）
 │   ├── project_config.py            # 项目配置文件
 │   └── requirement.md              # 需求文档模板
@@ -77,13 +77,17 @@ aiAgent/
 │   ├── security/                   # 安全测试
 │   └── ai_specific/               # AI专项测试
 │
-├── output/                          # 测试输出目录
+├── output/                          # 测试输出目录（无版本模式）
 │   ├── test_cases.csv              # 测试用例清单
 │   ├── test_cases.xlsx             # 测试用例 Excel
 │   ├── defects.csv                 # 缺陷清单
 │   ├── defects.xlsx                # 缺陷 Excel
 │   ├── test_report.html            # HTML测试报告
 │   └── results.json                # 完整结果JSON
+│
+├── versions/                        # 版本迭代目录（启用版本模式后）
+│   ├── manifest.json               # 版本清单
+│   └── v1.0.0/                     # 单个版本输入输出空间
 │
 ├── run_automation.py                # ⭐ 主入口脚本
 ├── run_voice_task.py               # 语音任务入口（ASR + Function Calling）
@@ -334,6 +338,51 @@ python run_voice_task.py --text "分析需求并生成测试用例"
 }
 ```
 
+## 🗂️ 版本迭代管理
+
+智测支持按版本管理需求文档与测试输出，每个版本拥有独立的输入输出空间：
+
+```
+versions/
+├── manifest.json              # 版本清单与当前版本
+├── v1.0.0/
+│   ├── requirement.md         # 该版本需求文档
+│   └── output/                # 该版本测试输出
+│       ├── test_cases.csv
+│       ├── defects.csv
+│       ├── test_report.html
+│       └── results.json
+└── v1.1.0/
+    ├── requirement.md
+    └── output/
+```
+
+### 常用命令
+
+```bash
+# 创建新版本并复制需求文档
+python run_automation.py --create-version v1.0.0 --requirement config/requirement.md
+
+# 按指定版本执行测试
+python run_automation.py --version v1.0.0
+
+# 对比两个版本的输出统计
+python run_automation.py --compare v1.0.0 v1.1.0
+```
+
+### 配置示例
+
+```python
+"version": {
+    "enabled": False,
+    "base_dir": "versions",
+    "current_version": "v1.0.0",  # 默认当前版本
+    "auto_create": True,          # --version 指定不存在版本时自动创建
+}
+```
+
+启用后，不指定 `--version` 也会使用 `current_version`；指定版本后，输出自动隔离到对应目录，便于追溯每个版本的测试演进。
+
 ## 📊 输出说明
 
 ### test_cases.csv - 测试用例
@@ -467,6 +516,14 @@ PROJECT_CONFIG = {
         "max_iterations": 10,
     },
 
+    # ========== 版本迭代管理（可选） ==========
+    "version": {
+        "enabled": False,
+        "base_dir": "versions",
+        "current_version": "",
+        "auto_create": True,
+    },
+
     # ========== IM 机器人配置（可选） ==========
     "im": {
         "provider": "lark",
@@ -579,4 +636,4 @@ MIT License
 
 ---
 
-<p align="center">🚀 使用aiAgent，让测试工作更高效！</p>
+<p align="center">🚀 使用智测，让测试工作更高效！</p>

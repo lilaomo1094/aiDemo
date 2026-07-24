@@ -24,7 +24,7 @@ from .test_generator import TestGenerator
 class FunctionCallingOrchestrator(BaseAgent):
     """基于 Function Calling 的任务编排器."""
 
-    SYSTEM_PROMPT = """你是 aiAgent 全链路自动化测试平台的智能编排器。
+    SYSTEM_PROMPT = """你是 智测 全链路自动化测试平台的智能编排器。
 你可以调用以下工具帮助用户完成测试任务：
 - analyze_requirement: 分析需求文档
 - parse_code: 解析代码仓库或 OpenAPI

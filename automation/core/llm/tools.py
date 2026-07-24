@@ -7,7 +7,7 @@ from .base import ToolDefinition
 
 
 class AgentTools:
-    """aiAgent 可调用工具集合."""
+    """智测 可调用工具集合."""
 
     @classmethod
     def all_tools(cls) -> List[ToolDefinition]:

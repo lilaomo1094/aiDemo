@@ -145,7 +145,7 @@ class OutputFormatter:
         </table>
 
         <div class="footer">
-            <p>proDemoA 全链路自动化测试平台</p>
+            <p>智测 全链路自动化测试平台</p>
         </div>
     </div>
 </body>

@@ -156,6 +156,13 @@ class FunctionCallingConfig(BaseModel):
     max_iterations: int = Field(default=10, ge=1, le=50)
 
 
+class VersionConfig(BaseModel):
+    enabled: bool = False
+    base_dir: str = "versions"
+    current_version: str = ""
+    auto_create: bool = True  # 指定 --version 且不存在时自动创建
+
+
 class IMVoiceConfig(BaseModel):
     enabled: bool = False
     provider: str = "openai_whisper"
@@ -187,6 +194,7 @@ class PlatformConfig(BaseModel):
     llm: LLMConfig = Field(default_factory=LLMConfig)
     voice: VoiceConfig = Field(default_factory=VoiceConfig)
     function_calling: FunctionCallingConfig = Field(default_factory=FunctionCallingConfig)
+    version: VersionConfig = Field(default_factory=VersionConfig)
     im: IMConfig = Field(default_factory=IMConfig)
     extra: Dict[str, Any] = Field(default_factory=dict)
 

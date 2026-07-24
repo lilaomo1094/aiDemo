@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # ============================================================
-# aiAgent 全链路自动化测试平台 - 项目配置文件
+# 智测 全链路自动化测试平台 - 项目配置文件
 # ============================================================
 # 使用说明：
 # 1. 测试人员只需修改本文件中的项目信息
@@ -135,6 +135,18 @@ PROJECT_CONFIG = {
     "function_calling": {
         "enabled": False,
         "max_iterations": 10,
+    },
+
+    # ========== 版本迭代管理（可选） ==========
+    # 启用后，每个版本拥有独立的需求文档与输出目录
+    # 运行: python run_automation.py --version v1.0.0
+    # 创建: python run_automation.py --create-version v1.0.0 --requirement config/requirement.md
+    # 对比: python run_automation.py --compare v1.0.0 v1.1.0
+    "version": {
+        "enabled": False,
+        "base_dir": "versions",
+        "current_version": "",
+        "auto_create": True,  # 指定 --version 且版本不存在时自动创建
     },
 
     # ========== IM 机器人配置（可选） ==========
