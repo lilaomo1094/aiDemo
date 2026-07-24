@@ -110,14 +110,13 @@ class NetworkManager:
         """返回 (playwright launch kwargs, 是否实际使用 headed)."""
         headless = self.profile.browser_mode == BrowserMode.HEADLESS
         args = ["--disable-blink-features=AutomationControlled"]
+        actually_headed = not headless
 
-        # Linux 无图形环境时，headed 需要 xvfb 支持
-        if not headless and os.name == "posix" and not os.environ.get("DISPLAY"):
-            if shutil.which("xvfb-run"):
-                # 由上层通过 xvfb-run 启动整个进程，这里保持 headed
-                pass
-            else:
-                headless = True
+        # Linux 无图形环境时， headed 浏览器无法直接启动，自动回退到 headless
+        # 同时保留视频录制作为本地监控手段
+        if actually_headed and os.name == "posix" and not os.environ.get("DISPLAY"):
+            actually_headed = False
+            headless = True
 
         kwargs = {
             "headless": headless,
@@ -129,7 +128,7 @@ class NetworkManager:
         elif self.profile.local_browser_path:
             kwargs["executable_path"] = self.profile.local_browser_path
 
-        return kwargs, not headless
+        return kwargs, actually_headed
 
     def resolve_browser_context_kwargs(self, video_dir: Optional[Path] = None) -> Dict[str, Any]:
         """返回 playwright browser.new_context 参数."""
