@@ -24,6 +24,7 @@ from automation.core.config import (
     load_config,
     merge_with_framework_config,
 )
+from automation.core.monitoring import ProgressReporter
 from automation.core.output import OutputFormatter
 from automation.core.rag import AgentKnowledgeStore
 from automation.core.version import VersionManager
@@ -150,7 +151,13 @@ class AutomationTestPlatform:
         self._print_start(project_info, run_id, active_version)
 
         try:
-            workflow = create_workflow(self.config, knowledge_store=self.knowledge_store)
+            progress = ProgressReporter(total_steps=6, enable_terminal=True)
+            workflow = create_workflow(
+                self.config,
+                knowledge_store=self.knowledge_store,
+                max_workers=getattr(getattr(self.config, "workflow", None), "max_workers", 4),
+                progress_reporter=progress,
+            )
             context = WorkflowContext(
                 run_id=run_id,
                 project_info=project_info,

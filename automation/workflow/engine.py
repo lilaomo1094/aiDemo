@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 """工作流引擎：负责任务调度与上下文管理."""
 
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
+
+from automation.core.monitoring import ProgressReporter
 
 
 class WorkflowStatus(Enum):
@@ -70,7 +74,13 @@ class WorkflowContext:
 
 
 class WorkflowEngine:
-    def __init__(self, config: Any, knowledge_store=None):
+    def __init__(
+        self,
+        config: Any,
+        knowledge_store=None,
+        max_workers: Optional[int] = None,
+        progress_reporter: Optional[ProgressReporter] = None,
+    ):
         self.config = config
         self.knowledge_store = knowledge_store
         self.tasks: Dict[str, WorkflowTask] = {}
@@ -78,6 +88,26 @@ class WorkflowEngine:
         self.listeners: List[Callable] = []
         # 延迟初始化 agent 工厂，避免重复 import
         self._agent_factory_cache = None
+        # 并发控制
+        self.max_workers = max_workers or getattr(
+            getattr(config, "workflow", None), "max_workers", 4
+        )
+        self._context_lock = threading.Lock()
+        self._progress = progress_reporter
+
+    def _report_progress(self, current_task: str = "", message: str = ""):
+        if not self._progress:
+            return
+        completed = sum(1 for t in self.tasks.values() if t.status == WorkflowStatus.COMPLETED)
+        failed = sum(1 for t in self.tasks.values() if t.status == WorkflowStatus.FAILED)
+        running = sum(1 for t in self.tasks.values() if t.status == WorkflowStatus.RUNNING)
+        self._progress.update(
+            completed=completed,
+            failed=failed,
+            running=running,
+            current_task=current_task,
+            message=message,
+        )
 
     def register_listener(self, listener: Callable):
         self.listeners.append(listener)
@@ -159,34 +189,61 @@ class WorkflowEngine:
             "summary": {},
             "errors": [],
         }
+        self._report_progress(current_task="启动调度", message="准备执行工作流")
         max_iterations = len(self.tasks) * 2
         iteration = 0
-        while iteration < max_iterations:
-            executable = self.get_executable_tasks()
-            if not executable:
-                remaining = [t for t in self.tasks.values() if t.status == WorkflowStatus.PENDING]
-                if remaining:
-                    results["status"] = WorkflowStatus.FAILED.value
-                    results["errors"].append(f"无法执行任务: {remaining[0].task_id}")
-                    for task in remaining:
+        with ThreadPoolExecutor(max_workers=self.max_workers, thread_name_prefix="zhice-worker-") as executor:
+            while iteration < max_iterations:
+                executable = self.get_executable_tasks()
+                if not executable:
+                    remaining = [t for t in self.tasks.values() if t.status == WorkflowStatus.PENDING]
+                    if remaining:
+                        results["status"] = WorkflowStatus.FAILED.value
+                        results["errors"].append(f"无法执行任务: {remaining[0].task_id}")
+                        for task in remaining:
+                            task.status = WorkflowStatus.FAILED
+                            task.error_message = "依赖任务失败"
+                        self._report_progress(current_task="依赖失败", message="部分任务因依赖失败")
+                    break
+
+                self._report_progress(
+                    current_task=", ".join(t.name for t in executable),
+                    message=f"本轮并发 {len(executable)} 个任务",
+                )
+
+                futures = {executor.submit(self._execute_task, task): task for task in executable}
+                for future in as_completed(futures):
+                    task = futures[future]
+                    try:
+                        future.result()
+                    except Exception as e:
                         task.status = WorkflowStatus.FAILED
-                        task.error_message = "依赖任务失败"
-                break
-            for task in executable:
-                self._execute_task(task)
-                results["tasks"].append({
-                    "task_id": task.task_id,
-                    "name": task.name,
-                    "status": task.status.value,
-                    "duration": task.duration(),
-                    "error": task.error_message,
-                })
-                if task.status == WorkflowStatus.FAILED:
-                    results["status"] = WorkflowStatus.FAILED.value
-                    results["errors"].append(f"任务 {task.name} 失败: {task.error_message}")
-            iteration += 1
-            if all(t.status == WorkflowStatus.COMPLETED for t in self.tasks.values()):
-                break
+                        task.error_message = str(e)
+                        self.notify("task_failed", {"task": task.name, "task_id": task.task_id, "error": str(e)})
+
+                    results["tasks"].append({
+                        "task_id": task.task_id,
+                        "name": task.name,
+                        "status": task.status.value,
+                        "duration": task.duration(),
+                        "error": task.error_message,
+                    })
+                    if task.status == WorkflowStatus.FAILED:
+                        results["status"] = WorkflowStatus.FAILED.value
+                        results["errors"].append(f"任务 {task.name} 失败: {task.error_message}")
+
+                    self._report_progress(
+                        current_task=task.name,
+                        message=f"{'完成' if task.status == WorkflowStatus.COMPLETED else '失败'}: {task.name}",
+                    )
+
+                iteration += 1
+                if all(t.status in (WorkflowStatus.COMPLETED, WorkflowStatus.FAILED, WorkflowStatus.SKIPPED) for t in self.tasks.values()):
+                    break
+
+        if self._progress:
+            final_status = "完成" if results["status"] == WorkflowStatus.COMPLETED.value else "失败"
+            self._progress.finish(status=final_status, message=f"工作流{final_status}")
         results["summary"] = self._generate_summary()
         return results
 
@@ -198,7 +255,8 @@ class WorkflowEngine:
             agent_output = self._run_agent(task)
             task.output_data = agent_output
             task.status = WorkflowStatus.COMPLETED
-            self._update_context(task)
+            with self._context_lock:
+                self._update_context(task)
             self.notify("task_completed", {"task": task.name, "task_id": task.task_id, "output": agent_output})
         except Exception as e:
             task.status = WorkflowStatus.FAILED
@@ -265,5 +323,15 @@ class WorkflowEngine:
         }
 
 
-def create_workflow(config, knowledge_store=None) -> WorkflowEngine:
-    return WorkflowEngine(config, knowledge_store=knowledge_store)
+def create_workflow(
+    config,
+    knowledge_store=None,
+    max_workers: Optional[int] = None,
+    progress_reporter: Optional[ProgressReporter] = None,
+) -> WorkflowEngine:
+    return WorkflowEngine(
+        config,
+        knowledge_store=knowledge_store,
+        max_workers=max_workers,
+        progress_reporter=progress_reporter,
+    )
