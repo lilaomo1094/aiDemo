@@ -3,14 +3,16 @@
 """merchant-dev.nexuscube.cn 登录演示脚本.
 
 用法:
-    python demo_merchant_login.py
+    python demo_merchant_login.py [--browser {chromium,edge,chrome}]
 
 环境要求:
     - 安装 playwright: pip install playwright
-    - 安装浏览器: playwright install chromium
+    - 使用 Chromium: playwright install chromium
+    - 使用 Edge/Chrome: 确保系统已安装 Edge/Chrome 浏览器
     - 当前网络可访问 https://merchant-dev.nexuscube.cn
 """
 
+import argparse
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
@@ -22,11 +24,30 @@ PASSWORD = "888888"
 OUTPUT_DIR = Path("output")
 
 
+def launch_browser(p, browser_type: str = "chromium"):
+    """根据类型启动浏览器，优先使用本地已安装的 Edge/Chrome."""
+    launch_kwargs = {"headless": False}
+    if browser_type == "edge":
+        launch_kwargs["channel"] = "msedge"
+    elif browser_type == "chrome":
+        launch_kwargs["channel"] = "chrome"
+    return p.chromium.launch(**launch_kwargs)
+
+
 def main():
+    parser = argparse.ArgumentParser(description="商户端登录演示")
+    parser.add_argument(
+        "--browser",
+        choices=["chromium", "edge", "chrome"],
+        default="edge",
+        help="指定浏览器类型（默认 edge）",
+    )
+    args = parser.parse_args()
+
     OUTPUT_DIR.mkdir(exist_ok=True)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = launch_browser(p, args.browser)
         context = browser.new_context(
             viewport={"width": 1366, "height": 768},
             user_agent=(

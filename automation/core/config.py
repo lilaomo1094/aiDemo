@@ -204,6 +204,7 @@ class NetworkConfig(BaseModel):
 
     type: str = "public"  # public | private | vpn
     browser_mode: str = "headless"  # headed | headless
+    browser_type: str = "chromium"  # chromium | edge | chrome
     proxy: Optional[str] = None
     bypass_hosts: List[str] = Field(default_factory=list)
     record_video: bool = False
@@ -227,6 +228,14 @@ class NetworkConfig(BaseModel):
         allowed = {"headed", "headless"}
         if v.lower() not in allowed:
             raise ValueError(f"不支持的浏览器模式: {v}，支持: {allowed}")
+        return v.lower()
+
+    @field_validator("browser_type")
+    @classmethod
+    def _validate_browser_type(cls, v: str) -> str:
+        allowed = {"chromium", "edge", "chrome"}
+        if v.lower() not in allowed:
+            raise ValueError(f"不支持的浏览器类型: {v}，支持: {allowed}")
         return v.lower()
 
 

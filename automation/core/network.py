@@ -26,6 +26,7 @@ class NetworkProfile:
         self,
         network_type: NetworkType = NetworkType.PUBLIC,
         browser_mode: BrowserMode = BrowserMode.HEADLESS,
+        browser_type: str = "chromium",
         proxy: Optional[str] = None,
         bypass_hosts: Optional[List[str]] = None,
         record_video: bool = False,
@@ -37,6 +38,7 @@ class NetworkProfile:
     ):
         self.network_type = network_type
         self.browser_mode = browser_mode
+        self.browser_type = browser_type.lower()
         self.proxy = proxy
         self.bypass_hosts = bypass_hosts or []
         self.record_video = record_video
@@ -54,6 +56,7 @@ class NetworkProfile:
         return {
             "network_type": self.network_type.value,
             "browser_mode": self.browser_mode.value,
+            "browser_type": self.browser_type,
             "proxy": self.proxy,
             "bypass_hosts": self.bypass_hosts,
             "record_video": self.record_video,
@@ -80,6 +83,7 @@ class NetworkManager:
     def _build_profile(self) -> NetworkProfile:
         network_type = NetworkType(self.config.get("type", "public").lower())
         browser_mode = BrowserMode(self.config.get("browser_mode", "headless").lower())
+        browser_type = self.config.get("browser_type", "chromium").lower()
 
         # 内网场景默认开启本地监控能力
         is_private = network_type in {NetworkType.PRIVATE, NetworkType.VPN}
@@ -96,6 +100,7 @@ class NetworkManager:
         return NetworkProfile(
             network_type=network_type,
             browser_mode=browser_mode,
+            browser_type=browser_type,
             proxy=self.config.get("proxy") or None,
             bypass_hosts=self.config.get("bypass_hosts", []),
             record_video=record_video,
@@ -127,8 +132,20 @@ class NetworkManager:
             kwargs["executable_path"] = executable_path
         elif self.profile.local_browser_path:
             kwargs["executable_path"] = self.profile.local_browser_path
+        else:
+            channel = self._browser_channel(self.profile.browser_type)
+            if channel:
+                kwargs["channel"] = channel
 
         return kwargs, actually_headed
+
+    @staticmethod
+    def _browser_channel(browser_type: str) -> str:
+        """映射浏览器类型到 Playwright channel 名称."""
+        return {
+            "edge": "msedge",
+            "chrome": "chrome",
+        }.get(browser_type.lower(), "")
 
     def resolve_browser_context_kwargs(self, video_dir: Optional[Path] = None) -> Dict[str, Any]:
         """返回 playwright browser.new_context 参数."""

@@ -41,6 +41,11 @@ class UIExecutor(TestExecutor):
         except Exception:
             return False
 
+    def _use_local_browser(self) -> bool:
+        """判断是否使用本地已安装浏览器（Edge/Chrome）而非 Playwright 下载的 Chromium."""
+        browser_type = self.network.profile.browser_type
+        return browser_type in {"edge", "chrome"} and not self.network.profile.local_browser_path
+
     def _resolve_output_dir(self, context, test_case: Dict) -> Path:
         """确定本次用例的输出目录：优先版本化输出目录."""
         run_id = getattr(context, "run_id", "unknown")
@@ -96,11 +101,13 @@ class UIExecutor(TestExecutor):
             if not self.network.profile.capture_console:
                 self.network.profile.capture_console = True
 
-        # 若未找到浏览器，尝试自动安装一次
-        executable_path = self._find_chromium_executable()
-        if not executable_path:
-            self._install_browsers()
+        # 若使用 Playwright Chromium 且未找到浏览器，尝试自动安装一次
+        executable_path = ""
+        if not self._use_local_browser():
             executable_path = self._find_chromium_executable()
+            if not executable_path:
+                self._install_browsers()
+                executable_path = self._find_chromium_executable()
 
         output_dir = self._resolve_output_dir(context, test_case)
         output_dir.mkdir(parents=True, exist_ok=True)

@@ -202,9 +202,11 @@ PROJECT_CONFIG = {
     # ========== 网络环境配置 ==========
     # type: public(公网) | private(公司内网) | vpn(VPN接入内网)
     # browser_mode: headed(有界面，便于内网本地监控) | headless(无头，适用于CI/公网)
+    # browser_type: chromium(Playwright下载的Chromium) | edge(本地Edge) | chrome(本地Chrome)
     "network": {
         "type": "public",
         "browser_mode": "headless",
+        "browser_type": "edge",
         # 代理配置示例："http://proxy.company.com:8080"
         "proxy": None,
         "bypass_hosts": [],
@@ -215,7 +217,7 @@ PROJECT_CONFIG = {
         "capture_network": False,
         # 内网监控时放慢操作节奏（毫秒）
         "slow_mo": 0,
-        # 指定本地浏览器路径（如 Chrome/Edge 可执行文件）
+        # 指定本地浏览器路径（如 Chrome/Edge 可执行文件），优先级高于 browser_type
         "local_browser_path": None,
     },
 
