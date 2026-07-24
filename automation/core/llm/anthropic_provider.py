@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 """Anthropic Claude Provider."""
 
+import logging
 from typing import Dict, List
 
 import requests
 
-from .base import LLMProvider, LLMResponse
+from .base import LLMProvider, LLMResponse, with_llm_retry
+
+
+logger = logging.getLogger(__name__)
 
 
 class AnthropicProvider(LLMProvider):
@@ -18,7 +22,14 @@ class AnthropicProvider(LLMProvider):
         self.max_tokens = config.max_tokens
         self.timeout = config.timeout
 
+    @with_llm_retry(max_retries=3, backoff_seconds=1.0)
     def chat(self, messages: List[Dict[str, str]], **kwargs) -> LLMResponse:
+        try:
+            return self._chat(messages, **kwargs)
+        except (requests.RequestException, requests.HTTPError) as e:
+            return self._try_fallback_model(messages, kwargs, e)
+
+    def _chat(self, messages: List[Dict[str, str]], **kwargs) -> LLMResponse:
         system = ""
         conversation = []
         for m in messages:

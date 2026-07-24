@@ -7,6 +7,7 @@
 import importlib.util
 import json
 import os
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -106,6 +107,18 @@ class TestConfig(BaseModel):
     max_workers: int = Field(default=4, ge=1)
 
 
+class TestAccountConfig(BaseModel):
+    """测试账号配置，用于生成 UI/API 测试数据."""
+
+    name: str = Field(default="default", description="账号标识名")
+    username: str = ""
+    password: str = ""
+    phone: str = ""
+    email: str = ""
+    role: str = "user"
+    extra: Dict[str, Any] = Field(default_factory=dict)
+
+
 class OutputConfig(BaseModel):
     test_cases_file: str = "output/test_cases.csv"
     defects_file: str = "output/defects.csv"
@@ -118,11 +131,14 @@ class OutputConfig(BaseModel):
 class LLMConfig(BaseModel):
     provider: str = "openai"
     model: str = "gpt-4o"
+    fallback_model: Optional[str] = None
     api_key: str = ""
     base_url: Optional[str] = None
     temperature: float = Field(default=0.2, ge=0.0, le=2.0)
     max_tokens: int = Field(default=4000, ge=1)
     timeout: int = Field(default=120, ge=1)
+    retry_times: int = Field(default=3, ge=0, le=10)
+    retry_backoff: float = Field(default=1.0, ge=0.0)
 
     @field_validator("provider")
     @classmethod
@@ -190,6 +206,7 @@ class PlatformConfig(BaseModel):
     frontend_repo: CodeRepositoryConfig = Field(default_factory=CodeRepositoryConfig)
     backend_repo: CodeRepositoryConfig = Field(default_factory=CodeRepositoryConfig)
     test: TestConfig = Field(default_factory=TestConfig)
+    test_accounts: List[TestAccountConfig] = Field(default_factory=list)
     output: OutputConfig = Field(default_factory=OutputConfig)
     llm: LLMConfig = Field(default_factory=LLMConfig)
     voice: VoiceConfig = Field(default_factory=VoiceConfig)
@@ -262,14 +279,67 @@ def _normalize_legacy_config(raw: Dict[str, Any]) -> Dict[str, Any]:
     if req:
         normalized["requirement"] = req
 
-    # database / repos / test / output / llm
-    for section in ["database", "frontend_repo", "backend_repo", "test", "output", "llm"]:
+    # database / repos / test / test_accounts / output / llm
+    for section in ["database", "frontend_repo", "backend_repo", "test", "test_accounts", "output", "llm"]:
         if section in raw:
             normalized[section] = raw[section]
 
     # extra
     normalized["extra"] = raw.get("extra", {})
     return normalized
+
+
+_ENV_PLACEHOLDER = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
+
+
+def _resolve_env_placeholders(value: Any) -> Any:
+    """递归解析字符串中的 ${ENV_VAR} 占位符为环境变量值."""
+    if isinstance(value, str):
+        if _ENV_PLACEHOLDER.fullmatch(value):
+            var_name = _ENV_PLACEHOLDER.match(value).group(1)
+            resolved = os.environ.get(var_name, "")
+            return resolved
+        return _ENV_PLACEHOLDER.sub(lambda m: os.environ.get(m.group(1), ""), value)
+    if isinstance(value, dict):
+        return {k: _resolve_env_placeholders(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_resolve_env_placeholders(v) for v in value]
+    return value
+
+
+def _apply_secret_fallbacks(raw: Dict[str, Any]) -> Dict[str, Any]:
+    """当敏感字段为空时，自动尝试从标准环境变量读取."""
+    llm = raw.get("llm", {})
+    provider = (llm.get("provider") or "openai").lower()
+    if not llm.get("api_key"):
+        env_var = {
+            "openai": "OPENAI_API_KEY",
+            "anthropic": "ANTHROPIC_API_KEY",
+            "azure_openai": "AZURE_OPENAI_API_KEY",
+            "ollama": "OLLAMA_API_KEY",
+        }.get(provider, "LLM_API_KEY")
+        llm["api_key"] = os.environ.get(env_var, "")
+
+    db = raw.get("database", {})
+    if not db.get("password"):
+        db["password"] = os.environ.get("DATABASE_PASSWORD", "")
+
+    for acc in raw.get("test_accounts", []):
+        if isinstance(acc, dict) and not acc.get("password"):
+            acc["password"] = os.environ.get("TEST_PASSWORD", "")
+
+    voice = raw.get("voice", {})
+    if not voice.get("api_key"):
+        voice["api_key"] = os.environ.get("VOICE_API_KEY") or os.environ.get("OPENAI_API_KEY", "")
+
+    im = raw.get("im", {})
+    if not im.get("app_secret"):
+        im["app_secret"] = os.environ.get("IM_APP_SECRET", "")
+    im_voice = im.get("voice", {})
+    if not im_voice.get("api_key"):
+        im_voice["api_key"] = os.environ.get("VOICE_API_KEY") or os.environ.get("OPENAI_API_KEY", "")
+
+    return raw
 
 
 def load_config(path: Union[str, Path]) -> PlatformConfig:
@@ -284,6 +354,8 @@ def load_config(path: Union[str, Path]) -> PlatformConfig:
     else:
         raise ValueError(f"不支持的配置文件格式: {suffix}")
     normalized = _normalize_legacy_config(raw)
+    normalized = _resolve_env_placeholders(normalized)
+    normalized = _apply_secret_fallbacks(normalized)
     return PlatformConfig(**normalized)
 
 

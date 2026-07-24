@@ -32,7 +32,8 @@ PROJECT_CONFIG = {
         "port": 3306,
         "database": "ums_db",
         "username": "test_user",
-        "password": "test_password",
+        # 密码支持 ${DATABASE_PASSWORD} 占位符，或直接写死（不推荐）
+        "password": "${DATABASE_PASSWORD}",
         "tables": [
             {
                 "name": "users",
@@ -96,6 +97,27 @@ PROJECT_CONFIG = {
         "max_workers": 4,
     },
 
+    # ========== 测试账号（用于 UI/API 用例生成） ==========
+    # 密码支持 ${TEST_PASSWORD} 占位符或环境变量自动回退
+    "test_accounts": [
+        {
+            "name": "default",
+            "username": "testuser",
+            "password": "${TEST_PASSWORD}",
+            "phone": "13411985758",
+            "email": "test@example.com",
+            "role": "user",
+        },
+        {
+            "name": "admin",
+            "username": "admin",
+            "password": "${TEST_PASSWORD}",
+            "phone": "13411985759",
+            "email": "admin@example.com",
+            "role": "admin",
+        },
+    ],
+
     # ========== 输出配置 ==========
     "output": {
         "test_cases_file": "output/test_cases.csv",
@@ -111,11 +133,17 @@ PROJECT_CONFIG = {
     "llm": {
         "provider": "openai",
         "model": "gpt-4o",
+        # 主模型失败时自动切换的兜底模型，为空则关闭降级
+        "fallback_model": "gpt-4o-mini",
+        # 建议通过环境变量 OPENAI_API_KEY 注入，避免写死在配置文件
         "api_key": "",
         "base_url": "https://api.openai.com/v1",
         "temperature": 0.2,
         "max_tokens": 4000,
         "timeout": 120,
+        # LLM 调用重试策略
+        "retry_times": 3,
+        "retry_backoff": 1.0,
     },
 
     # ========== 语音识别配置（可选） ==========
@@ -123,7 +151,8 @@ PROJECT_CONFIG = {
     "voice": {
         "enabled": False,
         "provider": "openai_whisper",  # 目前仅支持 openai_whisper
-        "api_key": "",
+        # 支持 ${VOICE_API_KEY}，为空时自动回退到 OPENAI_API_KEY
+        "api_key": "${VOICE_API_KEY}",
         "base_url": "https://api.openai.com/v1",
         "model": "whisper-1",
         "language": "zh",
@@ -154,14 +183,16 @@ PROJECT_CONFIG = {
         "provider": "lark",
         "enabled": False,
         "app_id": "",
-        "app_secret": "",
+        # 支持 ${IM_APP_SECRET}
+        "app_secret": "${IM_APP_SECRET}",
         "default_config_path": "config/project_config.py",
         "project_aliases": {},
         "admin_users": [],
         "voice": {
             "enabled": False,
             "provider": "openai_whisper",
-            "api_key": "",
+            # 支持 ${VOICE_API_KEY}，为空时自动回退到 OPENAI_API_KEY
+            "api_key": "${VOICE_API_KEY}",
             "model": "whisper-1",
             "language": "zh",
         },

@@ -2,11 +2,15 @@
 """OpenAI / Azure OpenAI / 兼容 OpenAI API 的 Provider."""
 
 import json
+import logging
 from typing import Dict, List
 
 import requests
 
-from .base import LLMProvider, LLMResponse
+from .base import LLMProvider, LLMResponse, with_llm_retry
+
+
+logger = logging.getLogger(__name__)
 
 
 class OpenAIProvider(LLMProvider):
@@ -19,7 +23,14 @@ class OpenAIProvider(LLMProvider):
         self.max_tokens = config.max_tokens
         self.timeout = config.timeout
 
+    @with_llm_retry(max_retries=3, backoff_seconds=1.0)
     def chat(self, messages: List[Dict[str, str]], **kwargs) -> LLMResponse:
+        try:
+            return self._chat(messages, **kwargs)
+        except (requests.RequestException, requests.HTTPError) as e:
+            return self._try_fallback_model(messages, kwargs, e)
+
+    def _chat(self, messages: List[Dict[str, str]], **kwargs) -> LLMResponse:
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",

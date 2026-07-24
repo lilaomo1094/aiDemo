@@ -191,6 +191,20 @@ class TestGenerator(BaseAgent):
 
         return test_cases
 
+    def _get_test_account(self, name: str = "default", role: str = "") -> Dict[str, str]:
+        """从配置中读取测试账号，找不到时返回兜底账号."""
+        accounts = getattr(self.config, "test_accounts", [])
+        for acc in accounts:
+            acc_dict = acc.model_dump() if hasattr(acc, "model_dump") else dict(acc)
+            if name and acc_dict.get("name") == name:
+                return acc_dict
+            if role and acc_dict.get("role") == role:
+                return acc_dict
+        if accounts:
+            acc_dict = accounts[0].model_dump() if hasattr(accounts[0], "model_dump") else dict(accounts[0])
+            return acc_dict
+        return {"username": "testuser", "password": "Test123456", "phone": "13400000000", "email": "test@example.com"}
+
     def _generate_ui_tests(self, requirements: List[Dict], frontend_components: List[Dict]) -> List[Dict]:
         """基于需求关键字和前端组件生成 UI 测试用例."""
         has_login = any(
@@ -207,6 +221,10 @@ class TestGenerator(BaseAgent):
             ui_base_url = self.config.extra.get("ui_base_url", "")
         login_url = f"{ui_base_url.rstrip('/')}/#/login" if ui_base_url else "/#/login"
 
+        default_account = self._get_test_account("default")
+        valid_phone = default_account.get("phone") or "13400000000"
+        valid_password = default_account.get("password") or "Test123456"
+
         cases = [
             {
                 "id": "TC-UI-001",
@@ -219,14 +237,14 @@ class TestGenerator(BaseAgent):
                 "test_steps": ["打开登录页面", "输入手机号", "输入密码", "点击登录按钮"],
                 "expected_result": "页面显示登录成功并跳转",
                 "action": {
-                    "url": login_url,
-                    "steps": [
-                        {"op": "fill", "selector": "#phone", "value": "13411985758"},
-                        {"op": "fill", "selector": "#password", "value": "888888"},
-                        {"op": "click", "selector": "#login-btn"},
-                        {"op": "assert_text", "selector": "#message", "value": "登录成功"},
-                    ],
-                },
+                        "url": login_url,
+                        "steps": [
+                            {"op": "fill", "selector": "#phone", "value": valid_phone},
+                            {"op": "fill", "selector": "#password", "value": valid_password},
+                            {"op": "click", "selector": "#login-btn"},
+                            {"op": "assert_text", "selector": "#message", "value": "登录成功"},
+                        ],
+                    },
                 "tags": ["ui", "login", "positive"],
             },
             {
@@ -243,7 +261,7 @@ class TestGenerator(BaseAgent):
                     "url": login_url,
                     "steps": [
                         {"op": "fill", "selector": "#phone", "value": ""},
-                        {"op": "fill", "selector": "#password", "value": "888888"},
+                        {"op": "fill", "selector": "#password", "value": valid_password},
                         {"op": "click", "selector": "#login-btn"},
                         {"op": "assert_text", "selector": "#message", "value": "请输入手机号"},
                     ],
@@ -263,7 +281,7 @@ class TestGenerator(BaseAgent):
                 "action": {
                     "url": login_url,
                     "steps": [
-                        {"op": "fill", "selector": "#phone", "value": "13411985758"},
+                        {"op": "fill", "selector": "#phone", "value": valid_phone},
                         {"op": "fill", "selector": "#password", "value": ""},
                         {"op": "click", "selector": "#login-btn"},
                         {"op": "assert_text", "selector": "#message", "value": "请输入密码"},
@@ -285,7 +303,7 @@ class TestGenerator(BaseAgent):
                     "url": login_url,
                     "steps": [
                         {"op": "fill", "selector": "#phone", "value": "123"},
-                        {"op": "fill", "selector": "#password", "value": "888888"},
+                        {"op": "fill", "selector": "#password", "value": valid_password},
                         {"op": "click", "selector": "#login-btn"},
                         {"op": "assert_text", "selector": "#message", "value": "手机号格式不正确"},
                     ],
@@ -305,7 +323,7 @@ class TestGenerator(BaseAgent):
                 "action": {
                     "url": login_url,
                     "steps": [
-                        {"op": "fill", "selector": "#phone", "value": "13411985758"},
+                        {"op": "fill", "selector": "#phone", "value": valid_phone},
                         {"op": "fill", "selector": "#password", "value": "wrongpass"},
                         {"op": "click", "selector": "#login-btn"},
                         {"op": "assert_text", "selector": "#message", "value": "账号或密码错误"},
@@ -364,6 +382,9 @@ class TestGenerator(BaseAgent):
         return mapping.get(test_type, 200)
 
     def _api_data(self, method: str, path: str, test_type: str) -> Dict:
+        account = self._get_test_account("default")
+        username = account.get("username") or "testuser"
+        password = account.get("password") or "Test123456"
         if "为空" in test_type:
             return {}
         if "错误" in test_type:
@@ -373,9 +394,9 @@ class TestGenerator(BaseAgent):
         if "不存在" in test_type:
             return {"id": 999999}
         if "login" in path:
-            return {"username": "testuser", "password": "Test123456"}
+            return {"username": username, "password": password}
         if "register" in path:
-            return {"username": f"testuser{uuid.uuid4().hex[:8]}", "email": f"test{uuid.uuid4().hex[:8]}@example.com", "password": "Test123456"}
+            return {"username": f"testuser{uuid.uuid4().hex[:8]}", "email": f"test{uuid.uuid4().hex[:8]}@example.com", "password": password}
         if "users" in path:
             if method == "POST":
                 return {"username": "newuser", "email": f"new{uuid.uuid4().hex[:8]}@example.com"}

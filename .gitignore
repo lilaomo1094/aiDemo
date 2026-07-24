@@ -46,3 +46,8 @@ Thumbs.db
 output/
 reports/
 *.log
+
+# Environment secrets
+.env
+.env.local
+.env.*.local
