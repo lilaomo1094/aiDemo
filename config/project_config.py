@@ -168,13 +168,13 @@ PROJECT_CONFIG = {
 
     # ========== 版本迭代管理（可选） ==========
     # 启用后，每个版本拥有独立的需求文档与输出目录
-    # 运行: python run_automation.py --version v1.0.0
-    # 创建: python run_automation.py --create-version v1.0.0 --requirement config/requirement.md
-    # 对比: python run_automation.py --compare v1.0.0 v1.1.0
+    # 运行: python run_automation.py --version v0.7.30
+    # 创建: python run_automation.py --create-version v0.7.30 --requirement config/requirement.md
+    # 对比: python run_automation.py --compare v0.7.30 v0.8.0
     "version": {
-        "enabled": False,
+        "enabled": True,
         "base_dir": "versions",
-        "current_version": "",
+        "current_version": "v0.7.30",
         "auto_create": True,  # 指定 --version 且版本不存在时自动创建
     },
 
