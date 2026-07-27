@@ -24,6 +24,7 @@ from automation.core.config import (
     load_config,
     merge_with_framework_config,
 )
+from automation.core.management import TestAutomationManager
 from automation.core.monitoring import ProgressReporter
 from automation.core.output import OutputFormatter
 from automation.core.rag import AgentKnowledgeStore
@@ -285,6 +286,22 @@ def main():
     parser.add_argument("--requirement", default=None, help="创建版本时使用的外部需求文档路径")
     parser.add_argument("--compare", nargs=2, metavar=("FROM", "TO"), help="对比两个版本，例如 --compare v1.0.0 v1.1.0")
     parser.add_argument("--network", default=None, choices=["public", "private", "vpn"], help="覆盖网络环境类型")
+    parser.add_argument(
+        "--manage",
+        default=None,
+        choices=[
+            "list-versions",
+            "run-version",
+            "assets",
+            "promote",
+            "list-tasks",
+            "submit-task",
+            "task-summary",
+        ],
+        help="测试自动化管理框架操作",
+    )
+    parser.add_argument("--priority", type=int, default=5, help="任务优先级（数字越小越高）")
+    parser.add_argument("--status", default=None, help="版本目标状态，配合 --manage promote 使用")
     args = parser.parse_args()
 
     print("""
@@ -302,6 +319,59 @@ def main():
         if args.network:
             platform.config.network.type = args.network
             print(f"🌐 命令行指定网络环境: {args.network}")
+
+        # 测试自动化管理框架操作
+        if args.manage:
+            manager = TestAutomationManager(platform.config, platform.knowledge_store)
+            if args.network:
+                manager.config.network.type = args.network
+
+            if args.manage == "list-versions":
+                versions = manager.list_versions()
+                print(json.dumps(versions, ensure_ascii=False, indent=2))
+                return
+
+            if args.manage == "run-version":
+                progress = ProgressReporter(total_steps=5, enable_terminal=True)
+                result = manager.run_version(version=args.version, progress_reporter=progress)
+                print(json.dumps({k: v for k, v in result.items() if k not in ("agent_results",)}, ensure_ascii=False, indent=2))
+                return
+
+            if args.manage == "assets":
+                assets = manager.get_version_assets(args.version)
+                print(json.dumps(assets, ensure_ascii=False, indent=2))
+                return
+
+            if args.manage == "promote":
+                if not args.version or not args.status:
+                    print("❌ --manage promote 需要配合 --version 和 --status 使用")
+                    sys.exit(1)
+                ok = manager.promote_version(args.version, args.status, notes="")
+                print("✅ 状态已更新" if ok else "❌ 更新失败")
+                return
+
+            if args.manage == "submit-task":
+                task_id = manager.submit_task(
+                    config_path=args.config,
+                    version=args.version,
+                    priority=args.priority,
+                    environment_type=args.network,
+                )
+                print(f"✅ 任务已提交: {task_id}")
+                return
+
+            if args.manage == "list-tasks":
+                tasks = manager.list_tasks(status=None, version=args.version)
+                print(json.dumps(tasks, ensure_ascii=False, indent=2))
+                return
+
+            if args.manage == "task-summary":
+                summary = manager.get_task_summary()
+                print(json.dumps(summary, ensure_ascii=False, indent=2))
+                return
+
+            print(f"❌ 未知管理操作: {args.manage}")
+            sys.exit(1)
 
         if args.compare:
             vm = VersionManager(
