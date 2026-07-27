@@ -42,6 +42,27 @@
 - 告知 BOSS 提供方式：将文件直接粘贴到对话、上传附件或给出可下载链接。
 - 智测**不得**要求 BOSS 提供 VPN、内网访问权限或真实域名登录，应基于离线资产完成分析。
 
+### 5.1 版本初始化脚本用法
+
+- 建立版本时，智测可通过初始化脚本自动生成版本目录和所有配置模板，BOSS 只需手动修改参数。
+- 脚本入口：
+  ```bash
+  python scripts/init_version.py --version v0.8.0 --environment test
+  ```
+- CLI 入口：
+  ```bash
+  python run_automation.py --init-version v0.8.0 --environment test \
+      --swagger-file "versions/v0.8.0/swagger.yaml" \
+      --backend-url "https://github.com/example/backend" \
+      --api-base-url "http://test-api.company.com" \
+      --db-host "test-db.company.com" --db-database "ums_db_test"
+  ```
+- 初始化后自动生成：
+  - `versions/{version}/config.json`（含 Swagger、前后端仓库、数据库、网络、API/UI 地址）
+  - `versions/{version}/requirement.md`（占位，需替换为 Word 转译后的 Markdown）
+  - `versions/{version}/README.md`（填写说明）
+- 运行测试时，智测自动读取版本级 `config.json` 并应用其中的环境覆盖。
+
 ## 6. 规则维护
 
 - 本文件由智测根据 BOSS 的指令维护。

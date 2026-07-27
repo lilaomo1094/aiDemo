@@ -9,7 +9,27 @@
       "output_dir": "output",
       "parent_version": null,
       "status": "draft"
+    },
+    {
+      "version": "v0.8.0",
+      "description": "示例版本",
+      "created_at": "2026-07-27T09:22:05.684183",
+      "requirement_file": "requirement.md",
+      "config_file": null,
+      "output_dir": "output",
+      "parent_version": null,
+      "status": "draft"
+    },
+    {
+      "version": "v0.8.1",
+      "description": "演示版本初始化",
+      "created_at": "2026-07-27T09:23:00.286366",
+      "requirement_file": "requirement.md",
+      "config_file": null,
+      "output_dir": "output",
+      "parent_version": null,
+      "status": "draft"
     }
   ],
-  "current_version": "v0.7.30"
+  "current_version": "v0.8.1"
 }

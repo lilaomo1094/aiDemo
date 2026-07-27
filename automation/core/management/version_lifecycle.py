@@ -140,7 +140,7 @@ class VersionLifecycleManager(VersionManager):
         self._update_asset_config(version, self.CONFIG_FILE)
 
     def init_version_config(self, version: str, environment: str = "dev") -> Dict[str, Any]:
-        """初始化版本专属配置模板."""
+        """初始化版本专属配置模板，包含所有可手动填写的参数."""
         config = {
             "version": version,
             "description": "",
@@ -171,6 +171,35 @@ class VersionLifecycleManager(VersionManager):
                     "test_framework": "pytest",
                     "api_spec": "",
                     "local_path": "",
+                },
+            },
+            "environment_overrides": {
+                "database": {
+                    "enabled": False,
+                    "type": "mysql",
+                    "host": "",
+                    "port": 3306,
+                    "database": "",
+                    "username": "test_user",
+                    "password": "${DATABASE_PASSWORD}",
+                    "tables": [],
+                },
+                "network": {
+                    "type": "public",
+                    "browser_mode": "headless",
+                    "browser_type": "chromium",
+                    "proxy": None,
+                    "bypass_hosts": [],
+                    "record_video": False,
+                    "record_har": False,
+                    "capture_console": True,
+                    "capture_network": False,
+                    "slow_mo": 0,
+                    "local_browser_path": None,
+                },
+                "extra": {
+                    "api_base_url": "",
+                    "ui_base_url": "",
                 },
             },
             "created_at": datetime.now().isoformat(),

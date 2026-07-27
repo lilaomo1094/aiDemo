@@ -285,9 +285,21 @@ def main():
     parser.add_argument("--environment", default=None, choices=["dev", "test", "staging", "prod"], help="指定运行环境，覆盖配置文件中的 environment")
     parser.add_argument("--version", default=None, help="指定版本号，例如 v1.0.0")
     parser.add_argument("--create-version", default=None, help="仅创建新版本并写入需求文档（需配合 --requirement）")
+    parser.add_argument("--init-version", default=None, help="初始化版本目录并生成配置模板，例如 --init-version v0.8.0")
     parser.add_argument("--requirement", default=None, help="创建版本时使用的外部需求文档路径")
     parser.add_argument("--compare", nargs=2, metavar=("FROM", "TO"), help="对比两个版本，例如 --compare v1.0.0 v1.1.0")
     parser.add_argument("--network", default=None, choices=["public", "private", "vpn"], help="覆盖网络环境类型")
+    parser.add_argument("--swagger-file", default="", help="版本初始化: Swagger 文件路径")
+    parser.add_argument("--swagger-url", default="", help="版本初始化: Swagger URL")
+    parser.add_argument("--frontend-url", default="", help="版本初始化: 前端仓库 Git 地址")
+    parser.add_argument("--backend-url", default="", help="版本初始化: 后端仓库 Git 地址")
+    parser.add_argument("--frontend-local-path", default="", help="版本初始化: 前端仓库本地路径")
+    parser.add_argument("--backend-local-path", default="", help="版本初始化: 后端仓库本地路径")
+    parser.add_argument("--api-base-url", default="", help="版本初始化: API 基础地址")
+    parser.add_argument("--ui-base-url", default="", help="版本初始化: UI 基础地址")
+    parser.add_argument("--db-host", default="", help="版本初始化: 数据库主机")
+    parser.add_argument("--db-database", default="", help="版本初始化: 数据库名")
+    parser.add_argument("--description", default="", help="版本初始化: 版本描述")
     parser.add_argument(
         "--manage",
         default=None,
@@ -391,6 +403,27 @@ def main():
             )
             diff = vm.compare_versions(args.compare[0], args.compare[1])
             print(json.dumps(diff, ensure_ascii=False, indent=2))
+            return
+
+        if args.init_version:
+            from scripts.init_version import init_version
+            init_version(
+                version=args.init_version,
+                base_dir=str(platform.config.base_dir / platform.config.version.base_dir),
+                environment=args.environment or platform.config.environment,
+                config_path=args.config,
+                swagger_url=args.swagger_url,
+                swagger_file=args.swagger_file,
+                frontend_url=args.frontend_url,
+                frontend_local_path=args.frontend_local_path,
+                backend_url=args.backend_url,
+                backend_local_path=args.backend_local_path,
+                api_base_url=args.api_base_url,
+                ui_base_url=args.ui_base_url,
+                db_host=args.db_host,
+                db_database=args.db_database,
+                description=args.description,
+            )
             return
 
         if args.create_version:

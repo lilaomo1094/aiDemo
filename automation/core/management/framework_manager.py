@@ -74,7 +74,35 @@ class TestAutomationManager:
         # 应用版本级 Swagger / 代码仓库配置
         self._apply_version_sources(target)
 
+        # 应用版本级环境覆盖（数据库、网络、API/UI 地址）
+        self._apply_version_environment_overrides(target)
+
         return target
+
+    def _apply_version_environment_overrides(self, version: str):
+        """将版本级 environment_overrides 合并到当前 config."""
+        cfg = self.version_manager.ensure_version_config(version, environment=self.config.environment)
+        overrides = cfg.get("environment_overrides", {})
+        if not overrides:
+            return
+
+        db_overrides = overrides.get("database", {})
+        if db_overrides.get("enabled"):
+            print(f"🗄️  版本级数据库: {db_overrides.get('host')}:{db_overrides.get('port')}/{db_overrides.get('database')}")
+            current = self.config.database.model_dump(by_alias=True)
+            current.update({k: v for k, v in db_overrides.items() if v not in (None, "")})
+            self.config.database = self.config.database.__class__(**current)
+
+        net_overrides = overrides.get("network", {})
+        if net_overrides:
+            current = self.config.network.model_dump(by_alias=True)
+            current.update({k: v for k, v in net_overrides.items() if v not in (None, "")})
+            self.config.network = self.config.network.__class__(**current)
+
+        extra_overrides = overrides.get("extra", {})
+        if extra_overrides:
+            print(f"🔗 版本级地址: API={extra_overrides.get('api_base_url')} UI={extra_overrides.get('ui_base_url')}")
+            self.config.extra.update(extra_overrides)
 
     def _apply_version_sources(self, version: str):
         """将版本级 sources 配置合并到当前 config，供 Agent 使用."""
@@ -91,11 +119,13 @@ class TestAutomationManager:
                 if not self.config.backend_repo.enabled:
                     self.config.backend_repo = CodeRepositoryConfig(
                         enabled=True,
-                        type="openapi",
+                        type="local",
+                        local_path=spec_source,
                         api_spec=spec_source,
                     )
                 else:
                     self.config.backend_repo.api_spec = spec_source or self.config.backend_repo.api_spec
+                    self.config.backend_repo.local_path = spec_source or self.config.backend_repo.local_path
 
         # 版本级前后端仓库覆盖项目级配置
         for key in ["frontend_repo", "backend_repo"]:
