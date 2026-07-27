@@ -239,6 +239,19 @@ class NetworkConfig(BaseModel):
         return v.lower()
 
 
+class EnvironmentConfig(BaseModel):
+    """环境级配置：可被不同项目复用，按 dev/test/staging/prod 隔离."""
+
+    name: str = Field(default="dev", description="环境名称")
+    description: str = ""
+    database: DatabaseConfig = Field(default_factory=DatabaseConfig)
+    test_accounts: List[TestAccountConfig] = Field(default_factory=list)
+    network: NetworkConfig = Field(default_factory=NetworkConfig)
+    extra: Dict[str, Any] = Field(default_factory=dict)
+
+    model_config = {"populate_by_name": True}
+
+
 class PlatformConfig(BaseModel):
     project: ProjectInfo = Field(default_factory=ProjectInfo)
     requirement: RequirementConfig = Field(default_factory=RequirementConfig)
@@ -255,6 +268,9 @@ class PlatformConfig(BaseModel):
     im: IMConfig = Field(default_factory=IMConfig)
     network: NetworkConfig = Field(default_factory=NetworkConfig)
     extra: Dict[str, Any] = Field(default_factory=dict)
+    # 环境配置：可引用 environments/ 目录下的公共环境配置
+    environment: str = Field(default="dev", description="当前使用的环境配置名")
+    environments_dir: str = Field(default="config/environments", description="环境配置库目录")
 
     model_config = {"populate_by_name": True, "validate_assignment": True}
 
@@ -398,6 +414,91 @@ def load_config(path: Union[str, Path]) -> PlatformConfig:
     normalized = _resolve_env_placeholders(normalized)
     normalized = _apply_secret_fallbacks(normalized)
     return PlatformConfig(**normalized)
+
+
+def load_environment_config(
+    env_name: str,
+    environments_dir: Union[str, Path] = "config/environments",
+    base_dir: Optional[Union[str, Path]] = None,
+) -> EnvironmentConfig:
+    """加载指定环境的公共配置."""
+    if base_dir:
+        env_dir = Path(base_dir) / environments_dir
+    else:
+        env_dir = Path(environments_dir)
+    env_path = env_dir / f"{env_name}.json"
+    if not env_path.exists():
+        raise FileNotFoundError(f"环境配置不存在: {env_path}")
+    raw = load_json_config(env_path)
+    return EnvironmentConfig(**raw)
+
+
+def merge_environment_config(
+    project_config: PlatformConfig,
+    env_name: Optional[str] = None,
+) -> PlatformConfig:
+    """将公共环境配置合并到项目配置，项目配置优先级更高.
+
+    合并规则：对 database/network/extra/test_accounts 进行深合并，
+    项目配置中为空/默认值的字段由环境配置填充。
+    """
+    env_name = env_name or project_config.environment
+    if not env_name:
+        return project_config
+    try:
+        env_config = load_environment_config(env_name, project_config.environments_dir, project_config.base_dir)
+    except FileNotFoundError:
+        return project_config
+
+    project_dump = project_config.model_dump(by_alias=True)
+    env_dump = env_config.model_dump(by_alias=True)
+
+    for section in ["database", "network", "extra"]:
+        project_section = project_dump.get(section) or {}
+        env_section = env_dump.get(section) or {}
+        project_dump[section] = _deep_merge(project_section, env_section)
+
+    project_accounts = project_dump.get("test_accounts") or []
+    env_accounts = env_dump.get("test_accounts") or []
+    if not project_accounts:
+        project_dump["test_accounts"] = env_accounts
+
+    # 同步当前环境名
+    project_dump["environment"] = env_name
+    return PlatformConfig(**project_dump)
+
+
+def _deep_merge(project_value: Any, env_value: Any) -> Any:
+    """深合并：项目值为空时采用环境值；字典递归合并；列表非空时保留项目值."""
+    if isinstance(project_value, dict) and isinstance(env_value, dict):
+        merged = dict(env_value)
+        for key, value in project_value.items():
+            merged[key] = _deep_merge(value, env_value.get(key))
+        return merged
+    if isinstance(project_value, list):
+        return project_value if project_value else env_value
+    if project_value is None:
+        return env_value
+    if isinstance(project_value, str):
+        return project_value if project_value.strip() != "" else env_value
+    if isinstance(project_value, bool):
+        return project_value
+    return project_value
+
+
+def _has_user_value(value: Any) -> bool:
+    """判断配置项是否包含用户自定义值."""
+    if value is None:
+        return False
+    if isinstance(value, dict):
+        return any(_has_user_value(v) for v in value.values())
+    if isinstance(value, list):
+        return len(value) > 0
+    if isinstance(value, str):
+        return value.strip() != ""
+    if isinstance(value, bool):
+        return value
+    return True
 
 
 def merge_with_framework_config(

@@ -1,0 +1,41 @@
+{
+  "name": "prod",
+  "description": "生产环境：仅建议执行只读或冒烟测试，谨慎启用",
+  "database": {
+    "enabled": false,
+    "type": "mysql",
+    "host": "prod-db.company.com",
+    "port": 3306,
+    "database": "ums_db_prod",
+    "username": "readonly_user",
+    "password": "${DATABASE_PASSWORD}",
+    "tables": []
+  },
+  "test_accounts": [
+    {
+      "name": "readonly",
+      "username": "readonly",
+      "password": "${TEST_PASSWORD}",
+      "phone": "13411985758",
+      "email": "readonly@example.com",
+      "role": "user"
+    }
+  ],
+  "network": {
+    "type": "public",
+    "browser_mode": "headless",
+    "browser_type": "chromium",
+    "proxy": null,
+    "bypass_hosts": [],
+    "record_video": true,
+    "record_har": true,
+    "capture_console": true,
+    "capture_network": true,
+    "slow_mo": 0,
+    "local_browser_path": null
+  },
+  "extra": {
+    "api_base_url": "https://api.company.com",
+    "ui_base_url": "https://www.company.com"
+  }
+}

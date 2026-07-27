@@ -22,6 +22,7 @@ from automation.core.config import (
     OutputConfig,
     PlatformConfig,
     load_config,
+    merge_environment_config,
     merge_with_framework_config,
 )
 from automation.core.management import TestAutomationManager
@@ -281,6 +282,7 @@ class AutomationTestPlatform:
 def main():
     parser = argparse.ArgumentParser(description="智测 全链路自动化测试平台")
     parser.add_argument("--config", default="config/project_config.py", help="配置文件路径")
+    parser.add_argument("--environment", default=None, choices=["dev", "test", "staging", "prod"], help="指定运行环境，覆盖配置文件中的 environment")
     parser.add_argument("--version", default=None, help="指定版本号，例如 v1.0.0")
     parser.add_argument("--create-version", default=None, help="仅创建新版本并写入需求文档（需配合 --requirement）")
     parser.add_argument("--requirement", default=None, help="创建版本时使用的外部需求文档路径")
@@ -315,6 +317,15 @@ def main():
 
     try:
         platform = AutomationTestPlatform(config_path=args.config)
+
+        # 合并公共环境配置
+        if args.environment:
+            platform.config.environment = args.environment
+        platform.config = merge_environment_config(platform.config, args.environment)
+        print(f"🌍 当前环境: {platform.config.environment}")
+        print(f"   数据库: {platform.config.database.host}:{platform.config.database.port}/{platform.config.database.database}")
+        print(f"   API: {platform.config.extra.get('api_base_url', '')}")
+        print(f"   UI: {platform.config.extra.get('ui_base_url', '')}")
 
         if args.network:
             platform.config.network.type = args.network

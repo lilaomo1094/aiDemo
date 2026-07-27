@@ -1,0 +1,49 @@
+{
+  "name": "dev",
+  "description": "开发环境：本地或联调环境，建议 headed 模式便于调试",
+  "database": {
+    "enabled": false,
+    "type": "mysql",
+    "host": "localhost",
+    "port": 3306,
+    "database": "ums_db_dev",
+    "username": "test_user",
+    "password": "${DATABASE_PASSWORD}",
+    "tables": []
+  },
+  "test_accounts": [
+    {
+      "name": "default",
+      "username": "testuser",
+      "password": "${TEST_PASSWORD}",
+      "phone": "13411985758",
+      "email": "test@example.com",
+      "role": "user"
+    },
+    {
+      "name": "admin",
+      "username": "admin",
+      "password": "${TEST_PASSWORD}",
+      "phone": "13411985759",
+      "email": "admin@example.com",
+      "role": "admin"
+    }
+  ],
+  "network": {
+    "type": "public",
+    "browser_mode": "headed",
+    "browser_type": "edge",
+    "proxy": null,
+    "bypass_hosts": [],
+    "record_video": false,
+    "record_har": false,
+    "capture_console": true,
+    "capture_network": false,
+    "slow_mo": 0,
+    "local_browser_path": null
+  },
+  "extra": {
+    "api_base_url": "http://localhost:8000",
+    "ui_base_url": "http://localhost:8080"
+  }
+}
