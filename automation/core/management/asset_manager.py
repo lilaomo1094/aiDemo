@@ -29,6 +29,9 @@ class AssetManager:
             "version": version,
             "requirement_file": str(self.version_manager.requirement_path(version).relative_to(vdir.parent)),
             "config_file": None,
+            "swagger": self._collect_files(vdir, ["*.json", "*.yaml", "*.yml"], filter_name="swagger"),
+            "frontend_repo": self._collect_files(vdir, ["*"], filter_name="frontend_repo"),
+            "backend_repo": self._collect_files(vdir, ["*"], filter_name="backend_repo"),
             "test_cases": self._collect_files(output_dir, ["*test_cases*"]),
             "reports": self._collect_files(output_dir, ["*report*"]),
             "screenshots": self._collect_files(output_dir, ["*.png", "*.jpg", "*.jpeg", "*.webp"]),
@@ -41,7 +44,24 @@ class AssetManager:
 
         config_path = self.version_manager.version_config_path(version)
         if config_path.exists():
-            assets["config_file"] = str(config_path.relative_to(vdir))
+            config_rel = str(config_path.relative_to(vdir))
+            assets["config_file"] = config_rel
+            self.version_manager._update_asset_config(version, config_rel)
+            try:
+                cfg = json.loads(config_path.read_text(encoding="utf-8"))
+                sources = cfg.get("sources", {})
+                for key in ["swagger", "frontend_repo", "backend_repo"]:
+                    src = sources.get(key, {})
+                    if src.get("enabled"):
+                        assets[key] = {
+                            "enabled": True,
+                            "url": src.get("url", ""),
+                            "file_path": src.get("file_path", ""),
+                            "local_path": src.get("local_path", ""),
+                            "branch": src.get("branch", ""),
+                        }
+            except Exception:
+                pass
 
         self._sync_to_lifecycle(version, assets)
         return assets
@@ -65,34 +85,46 @@ class AssetManager:
     def generate_asset_report(self, version: Optional[str] = None) -> Dict[str, Any]:
         """生成资产统计报告."""
         version = version or self.version_manager.current_version
-        assets = self.version_manager.get_assets(version)
+        assets = self.index_version_assets(version)
         return {
             "version": version,
             "status": self.version_manager.get_version_info(version).status if self.version_manager.get_version_info(version) else "unknown",
             "asset_summary": {
-                "test_cases": len(assets.test_cases),
-                "reports": len(assets.reports),
-                "screenshots": len(assets.screenshots),
-                "videos": len(assets.videos),
-                "har_files": len(assets.har_files),
-                "defects": len(assets.defects),
-                "results": len(assets.results),
+                "test_cases": len(assets.get("test_cases", [])),
+                "reports": len(assets.get("reports", [])),
+                "screenshots": len(assets.get("screenshots", [])),
+                "videos": len(assets.get("videos", [])),
+                "har_files": len(assets.get("har_files", [])),
+                "defects": len(assets.get("defects", [])),
+                "results": len(assets.get("results", [])),
             },
             "requirement_hash": self.get_requirement_hash(version),
             "baseline": self.version_manager.get_baseline(version).to_dict() if self.version_manager.get_baseline(version) else None,
-            "assets": assets.to_dict(),
+            "assets": assets,
         }
 
-    def _collect_files(self, directory: Path, patterns: List[str]) -> List[str]:
+    def _collect_files(self, directory: Path, patterns: List[str], filter_name: str = "") -> List[str]:
         results = []
         if not directory.exists():
             return results
         seen = set()
         for pattern in patterns:
             for path in directory.glob(pattern):
+                if path.is_dir():
+                    continue
                 rel = str(path.relative_to(directory.parent))
-                if rel not in seen:
-                    seen.add(rel)
+                if rel in seen:
+                    continue
+                seen.add(rel)
+                if filter_name == "swagger":
+                    lower = path.name.lower()
+                    if "swagger" in lower or "openapi" in lower or path.suffix in {".yaml", ".yml"}:
+                        results.append(rel)
+                elif filter_name in {"frontend_repo", "backend_repo"}:
+                    # 代码仓库资产通常放在版本目录下的 repos/ 子目录
+                    if f"repos/{filter_name}" in rel or rel.startswith(f"{directory.name}/repos/{filter_name}"):
+                        results.append(rel)
+                else:
                     results.append(rel)
         return sorted(results)
 

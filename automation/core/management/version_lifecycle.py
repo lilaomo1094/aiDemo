@@ -90,8 +90,9 @@ class VersionLifecycleManager(VersionManager):
             )
         )
         self._write_assets(
-            VersionAssetIndex(version=info.version, requirement_file=requirement_file, config_file=config_file)
+            VersionAssetIndex(version=info.version, requirement_file=requirement_file, config_file=self.CONFIG_FILE)
         )
+        self.init_version_config(info.version, environment=environment_profile)
         return info
 
     def set_status(self, version: str, status: str) -> bool:
@@ -137,6 +138,68 @@ class VersionLifecycleManager(VersionManager):
         path = self.version_config_path(version)
         path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
         self._update_asset_config(version, self.CONFIG_FILE)
+
+    def init_version_config(self, version: str, environment: str = "dev") -> Dict[str, Any]:
+        """初始化版本专属配置模板."""
+        config = {
+            "version": version,
+            "description": "",
+            "environment": environment,
+            "sources": {
+                "swagger": {
+                    "enabled": False,
+                    "url": "",
+                    "file_path": "",
+                    "format": "openapi",
+                },
+                "frontend_repo": {
+                    "enabled": False,
+                    "type": "github",
+                    "url": "",
+                    "branch": "main",
+                    "language": "react",
+                    "test_framework": "jest",
+                    "api_spec": "",
+                    "local_path": "",
+                },
+                "backend_repo": {
+                    "enabled": False,
+                    "type": "github",
+                    "url": "",
+                    "branch": "main",
+                    "language": "python",
+                    "test_framework": "pytest",
+                    "api_spec": "",
+                    "local_path": "",
+                },
+            },
+            "created_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat(),
+        }
+        self.save_version_config(version, config)
+        return config
+
+    def get_version_sources(self, version: Optional[str] = None) -> Dict[str, Any]:
+        """获取版本的输入源配置（Swagger、前后端仓库）."""
+        cfg = self.load_version_config(version)
+        if cfg:
+            return cfg.get("sources", {})
+        return {}
+
+    def update_version_sources(self, version: str, sources: Dict[str, Any]):
+        """更新版本的输入源配置."""
+        cfg = self.load_version_config(version) or self.init_version_config(version)
+        cfg["sources"] = sources
+        cfg["updated_at"] = datetime.now().isoformat()
+        self.save_version_config(version, cfg)
+
+    def ensure_version_config(self, version: Optional[str] = None, environment: str = "dev") -> Dict[str, Any]:
+        """确保版本配置文件存在，不存在则初始化."""
+        version = version or self.current_version
+        cfg = self.load_version_config(version)
+        if cfg is None:
+            cfg = self.init_version_config(version, environment)
+        return cfg
 
     def update_assets(self, version: str, asset_type: str, file_path: Union[str, Path]):
         """更新版本资产索引."""

@@ -1,23 +1,13 @@
 {
   "version": "v0.7.30",
   "requirement_file": "requirement.md",
-  "config_file": null,
-  "test_cases": [
-    "output/test_cases.csv",
-    "output/test_cases.xlsx"
-  ],
-  "reports": [
-    "output/test_report.html"
-  ],
+  "config_file": "config.json",
+  "test_cases": [],
+  "reports": [],
   "screenshots": [],
   "videos": [],
   "har_files": [],
-  "defects": [
-    "output/defects.csv",
-    "output/defects.xlsx"
-  ],
-  "results": [
-    "output/results.json"
-  ],
-  "updated_at": "2026-07-27T08:17:13.386946"
+  "defects": [],
+  "results": [],
+  "updated_at": "2026-07-27T09:04:30.642633"
 }

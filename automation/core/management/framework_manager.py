@@ -11,7 +11,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict, List, Optional
 
-from automation.core.config import PlatformConfig
+from automation.core.config import CodeRepositoryConfig, PlatformConfig
 from automation.core.management.agent_coordination import AgentCoordinator
 from automation.core.management.asset_manager import AssetManager
 from automation.core.management.environment_profile import EnvironmentProfileManager
@@ -71,7 +71,48 @@ class TestAutomationManager:
         profile = self.env_manager.build_profile(override_type=environment_type)
         self.env_manager.apply_to_config(profile)
 
+        # 应用版本级 Swagger / 代码仓库配置
+        self._apply_version_sources(target)
+
         return target
+
+    def _apply_version_sources(self, version: str):
+        """将版本级 sources 配置合并到当前 config，供 Agent 使用."""
+        cfg = self.version_manager.ensure_version_config(version, environment=self.config.environment)
+        sources = cfg.get("sources", {})
+
+        # Swagger -> 代码解析的 API Spec
+        swagger = sources.get("swagger", {})
+        if swagger.get("enabled"):
+            spec_source = swagger.get("file_path") or swagger.get("url") or ""
+            if spec_source:
+                print(f"📘 版本级 Swagger: {spec_source}")
+                # 如果 backend_repo 未启用，则构造一个启用的 backend_repo 用于解析
+                if not self.config.backend_repo.enabled:
+                    self.config.backend_repo = CodeRepositoryConfig(
+                        enabled=True,
+                        type="openapi",
+                        api_spec=spec_source,
+                    )
+                else:
+                    self.config.backend_repo.api_spec = spec_source or self.config.backend_repo.api_spec
+
+        # 版本级前后端仓库覆盖项目级配置
+        for key in ["frontend_repo", "backend_repo"]:
+            repo = sources.get(key, {})
+            if repo.get("enabled"):
+                print(f"📦 版本级 {key}: {repo.get('url') or repo.get('local_path')}")
+                model = CodeRepositoryConfig(
+                    enabled=True,
+                    type=repo.get("type", "github"),
+                    url=repo.get("url", ""),
+                    branch=repo.get("branch", "main"),
+                    language=repo.get("language", ""),
+                    test_framework=repo.get("test_framework", ""),
+                    api_spec=repo.get("api_spec", ""),
+                    local_path=repo.get("local_path", ""),
+                )
+                setattr(self.config, key, model)
 
     def run_version(
         self,
