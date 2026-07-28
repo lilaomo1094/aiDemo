@@ -38,6 +38,9 @@ class TaskLifecycleManager:
         priority: int = 5,
         network_type: Optional[str] = None,
         callback_info: Optional[Dict[str, Any]] = None,
+        depends_on: Optional[List[str]] = None,
+        resources: Optional[Dict[str, int]] = None,
+        preemptible: bool = True,
     ) -> str:
         """提交一个测试任务."""
         callback = callback_info or {}
@@ -46,7 +49,14 @@ class TaskLifecycleManager:
         if network_type:
             callback["network_type"] = network_type
 
-        task_id = self.scheduler.submit(config_path=config_path, priority=priority, callback_info=callback)
+        task_id = self.scheduler.submit(
+            config_path=config_path,
+            priority=priority,
+            callback_info=callback,
+            depends_on=depends_on,
+            resources=resources,
+            preemptible=preemptible,
+        )
         self._emit("task_submitted", {"task_id": task_id, "version": version, "priority": priority})
         return task_id
 
@@ -114,6 +124,14 @@ class TaskLifecycleManager:
 
     def wait_for_completion(self, task_id: str, timeout: Optional[float] = None) -> Optional[TaskState]:
         return self.scheduler.wait_for_completion(task_id, timeout=timeout)
+
+    def get_global_risk_summary(self) -> Dict[str, Any]:
+        """返回调度器内所有任务的风险聚合摘要."""
+        return self.scheduler.get_global_risk_summary()
+
+    def get_global_milestone_summary(self) -> Dict[str, Any]:
+        """返回所有任务的里程碑聚合摘要."""
+        return self.scheduler.get_global_milestone_summary()
 
     def save_run_record(self, task_id: str, record: Dict[str, Any]):
         """保存任务运行记录到生命周期目录."""

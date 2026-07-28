@@ -46,6 +46,15 @@ class UIExecutor(TestExecutor):
         browser_type = self.network.profile.browser_type
         return browser_type in {"edge", "chrome"} and not self.network.profile.local_browser_path
 
+    def _launch_browser(self, playwright, launch_kwargs: Dict):
+        """根据 browser_type 启动对应浏览器（chromium/firefox/webkit）."""
+        browser_type = self.network.profile.browser_type
+        if browser_type in {"firefox", "mozilla", "gecko"}:
+            return playwright.firefox.launch(**launch_kwargs)
+        if browser_type in {"safari", "webkit", "apple"}:
+            return playwright.webkit.launch(**launch_kwargs)
+        return playwright.chromium.launch(**launch_kwargs)
+
     def _resolve_output_dir(self, context, test_case: Dict) -> Path:
         """确定本次用例的输出目录：优先版本化输出目录."""
         run_id = getattr(context, "run_id", "unknown")
@@ -131,7 +140,7 @@ class UIExecutor(TestExecutor):
 
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(**launch_kwargs)
+                browser = self._launch_browser(p, launch_kwargs)
                 ctx = browser.new_context(**context_kwargs)
 
                 page = ctx.new_page()

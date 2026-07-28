@@ -4,7 +4,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 
 class TaskStatus(Enum):
@@ -31,6 +31,9 @@ class TaskState:
     error_message: str = ""
     tracker_data: Dict[str, Any] = field(default_factory=dict)
     callback_info: Dict[str, Any] = field(default_factory=dict)
+    depends_on: List[str] = field(default_factory=list)
+    resources: Dict[str, int] = field(default_factory=dict)
+    preemptible: bool = True
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -46,4 +49,7 @@ class TaskState:
             "error_message": self.error_message,
             "tracker_data": self.tracker_data,
             "callback_info": self.callback_info,
+            "depends_on": self.depends_on,
+            "resources": self.resources,
+            "preemptible": self.preemptible,
         }

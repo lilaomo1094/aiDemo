@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
-"""多任务并发调度器."""
+"""多任务并发调度器.
+
+支持能力：
+- 优先级队列
+- 任务依赖链（depends_on）
+- 资源槽位限制（resources / resource_limits）
+- 优先级抢占（preemptible）
+"""
 
 import json
 import threading
+import time
 import uuid
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 from queue import PriorityQueue
@@ -21,7 +29,12 @@ from .task_state import TaskState, TaskStatus
 class TaskScheduler:
     """支持多线程并发执行多个测试任务的调度器."""
 
-    def __init__(self, max_workers: int = 4, state_dir: str = "output/scheduler"):
+    def __init__(
+        self,
+        max_workers: int = 4,
+        state_dir: str = "output/scheduler",
+        resource_limits: Optional[Dict[str, int]] = None,
+    ):
         self.max_workers = max_workers
         self.state_dir = Path(state_dir)
         self.state_dir.mkdir(parents=True, exist_ok=True)
@@ -32,7 +45,24 @@ class TaskScheduler:
         self.hook_manager = HookManager()
         self._shutdown = False
 
-    def submit(self, config_path: str, priority: int = 5, callback_info: Dict = None) -> str:
+        # 资源槽位管理
+        self.resource_limits: Dict[str, int] = resource_limits or {}
+        self._running_resources: Dict[str, int] = {}
+        self._resource_lock = threading.Lock()
+
+        # 里程碑与风险聚合
+        self.milestone_summaries: Dict[str, Dict[str, Any]] = {}
+        self.risk_summaries: Dict[str, Dict[str, Any]] = {}
+
+    def submit(
+        self,
+        config_path: str,
+        priority: int = 5,
+        callback_info: Optional[Dict] = None,
+        depends_on: Optional[List[str]] = None,
+        resources: Optional[Dict[str, int]] = None,
+        preemptible: bool = True,
+    ) -> str:
         """提交一个测试任务到队列."""
         task_id = f"TASK-{uuid.uuid4().hex[:8]}"
         run_id = f"RUN-{datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}"
@@ -43,6 +73,9 @@ class TaskScheduler:
             status=TaskStatus.QUEUED,
             priority=priority,
             callback_info=callback_info or {},
+            depends_on=depends_on or [],
+            resources=resources or {},
+            preemptible=preemptible,
         )
         with self.lock:
             self.tasks[task_id] = task
@@ -70,15 +103,130 @@ class TaskScheduler:
                 priority, _, task_id = self.task_queue.get(timeout=1)
             except Exception:
                 continue
-            with self.lock:
-                task = self.tasks.get(task_id)
-                if not task or task.status != TaskStatus.QUEUED:
-                    continue
-                task.status = TaskStatus.RUNNING
-                task.started_at = datetime.now().isoformat()
+
+            action, task = self._evaluate_task(task_id, priority)
+            if action == "sleep":
+                time.sleep(0.1)
+                continue
+            if action == "continue":
+                continue
+            if action == "skip":
+                continue
+
+            # action == "run"
             self._save_state(task)
             self.hook_manager.emit("task_started", task.to_dict())
             self.executor.submit(self._run_task, task_id)
+
+    def _evaluate_task(self, task_id: str, priority: int):
+        with self.lock:
+            task = self.tasks.get(task_id)
+            if not task or task.status not in {TaskStatus.QUEUED, TaskStatus.PENDING}:
+                return "skip", None
+
+            # 依赖检查
+            dep_status = self._check_dependencies(task)
+            if dep_status == "waiting":
+                self.task_queue.put((priority, datetime.now().isoformat(), task_id))
+                return "sleep", task
+            if dep_status == "failed":
+                task.status = TaskStatus.BLOCKED
+                task.error_message = "依赖任务失败"
+                self._save_state(task)
+                self.hook_manager.emit("task_blocked", task.to_dict())
+                return "continue", task
+
+            # 资源检查与抢占
+            if not self._acquire_resources(task):
+                self.task_queue.put((priority, datetime.now().isoformat(), task_id))
+                return "sleep", task
+
+            task.status = TaskStatus.RUNNING
+            task.started_at = datetime.now().isoformat()
+            return "run", task
+
+    def _check_dependencies(self, task: TaskState) -> str:
+        """返回 'satisfied' | 'waiting' | 'failed'."""
+        if not task.depends_on:
+            return "satisfied"
+        for dep_id in task.depends_on:
+            dep = self.tasks.get(dep_id)
+            if not dep:
+                return "failed"
+            if dep.status == TaskStatus.FAILED or dep.status == TaskStatus.BLOCKED or dep.status == TaskStatus.CANCELLED:
+                return "failed"
+            if dep.status != TaskStatus.COMPLETED:
+                return "waiting"
+        return "satisfied"
+
+    def _acquire_resources(self, task: TaskState) -> bool:
+        """尝试为任务获取资源，不足时尝试抢占低优先级任务."""
+        if not task.resources:
+            return True
+        with self._resource_lock:
+            # 检查是否直接满足
+            if self._can_fit_resources(task.resources):
+                self._allocate_resources(task.resources)
+                return True
+
+            # 尝试抢占可抢占的低优先级运行中任务
+            if self._preempt_resources_for(task):
+                return True
+        return False
+
+    def _can_fit_resources(self, resources: Dict[str, int]) -> bool:
+        for name, amount in resources.items():
+            limit = self.resource_limits.get(name)
+            if limit is None:
+                # 未配置限制的资源默认不限制
+                continue
+            if self._running_resources.get(name, 0) + amount > limit:
+                return False
+        return True
+
+    def _allocate_resources(self, resources: Dict[str, int]):
+        for name, amount in resources.items():
+            self._running_resources[name] = self._running_resources.get(name, 0) + amount
+
+    def _release_resources(self, resources: Dict[str, int]):
+        with self._resource_lock:
+            for name, amount in resources.items():
+                current = self._running_resources.get(name, 0) - amount
+                self._running_resources[name] = max(0, current)
+
+    def _preempt_resources_for(self, task: TaskState) -> bool:
+        """为当前任务抢占低优先级可抢占任务的资源.
+
+        注意：本方法必须在 ``_resource_lock`` 内调用，因此直接操作
+        ``_running_resources``，不再重复加锁。
+        """
+        candidates = [
+            t for t in self.tasks.values()
+            if t.status == TaskStatus.RUNNING
+            and t.preemptible
+            and t.priority > task.priority
+            and t.task_id != task.task_id
+        ]
+        # 按优先级从低到高排序
+        candidates.sort(key=lambda t: (-t.priority, t.started_at or ""))
+
+        for victim in candidates:
+            # 释放被抢占任务的资源
+            for name, amount in victim.resources.items():
+                current = self._running_resources.get(name, 0) - amount
+                self._running_resources[name] = max(0, current)
+
+            # 标记被抢占任务重新入队
+            victim.status = TaskStatus.QUEUED
+            victim.started_at = None
+            self.task_queue.put((victim.priority, datetime.now().isoformat(), victim.task_id))
+            self.hook_manager.emit("task_preempted", victim.to_dict())
+
+            if self._can_fit_resources(task.resources):
+                self._allocate_resources(task.resources)
+                return True
+
+        return False
 
     def _run_task(self, task_id: str):
         task = self.tasks.get(task_id)
@@ -187,6 +335,16 @@ class TaskScheduler:
 
     def _finish_task(self, task: TaskState, result: Dict):
         task.completed_at = datetime.now().isoformat()
+        self._release_resources(task.resources)
+
+        # 聚合里程碑与风险到调度器全局视图
+        milestones = result.get("milestones") if isinstance(result, dict) else None
+        if milestones:
+            self.milestone_summaries[task.run_id] = milestones
+            risks = milestones.get("risks")
+            if risks:
+                self.risk_summaries[task.run_id] = risks
+
         self._save_state(task)
         self.hook_manager.emit("task_completed" if task.status == TaskStatus.COMPLETED else "task_failed", task.to_dict())
 
@@ -215,6 +373,40 @@ class TaskScheduler:
                 self._save_state(task)
                 return True
         return False
+
+    def get_global_risk_summary(self) -> Dict[str, Any]:
+        """返回调度器内所有任务的风险聚合摘要."""
+        total_open = 0
+        total_critical = 0
+        for summary in self.risk_summaries.values():
+            total_open += summary.get("open_count", 0)
+            total_critical += summary.get("critical_count", 0)
+        return {
+            "tasks_with_risks": len(self.risk_summaries),
+            "total_open_risks": total_open,
+            "total_critical_risks": total_critical,
+            "risk_details": self.risk_summaries,
+        }
+
+    def get_global_milestone_summary(self) -> Dict[str, Any]:
+        """返回所有任务的里程碑聚合摘要."""
+        completed = 0
+        failed = 0
+        running = 0
+        total = 0
+        for ms in self.milestone_summaries.values():
+            summary = ms.get("summary", {})
+            completed += summary.get("completed", 0)
+            failed += summary.get("failed", 0)
+            running += summary.get("running", 0)
+            total += summary.get("total_milestones", 0)
+        return {
+            "tasks": len(self.milestone_summaries),
+            "total_milestones": total,
+            "completed": completed,
+            "failed": failed,
+            "running": running,
+        }
 
     def wait_for_completion(self, task_id: str, timeout: Optional[float] = None) -> Optional[TaskState]:
         import time

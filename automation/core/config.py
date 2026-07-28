@@ -233,7 +233,7 @@ class NetworkConfig(BaseModel):
     @field_validator("browser_type")
     @classmethod
     def _validate_browser_type(cls, v: str) -> str:
-        allowed = {"chromium", "edge", "chrome"}
+        allowed = {"chromium", "edge", "chrome", "firefox", "safari", "webkit"}
         if v.lower() not in allowed:
             raise ValueError(f"不支持的浏览器类型: {v}，支持: {allowed}")
         return v.lower()
