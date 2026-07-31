@@ -55,25 +55,35 @@ class OpenAPIParser(RepositoryParser):
     # $ref 解析
     # ------------------------------------------------------------------ #
     def _resolve_ref(self, ref: str) -> Any:
-        if not ref.startswith("#/"):
-            return {}
-        parts = ref.split("/")[1:]
+        """解析文档内 ``$ref`` 引用，无效引用返回空对象并记录."""
+        if not isinstance(ref, str) or not ref.startswith("#/"):
+            return {"type": "object", "description": f"无效引用: {ref}"}
+        parts = [p for p in ref.split("/")[1:] if p]
         node = self._spec
         for part in parts:
             if not isinstance(node, dict) or part not in node:
-                return {}
+                return {"type": "object", "description": f"未找到引用: {ref}"}
             node = node[part]
         return node
 
-    def _resolve_schema(self, schema: Any, depth: int = 0) -> Dict[str, Any]:
+    def _resolve_schema(self, schema: Any, depth: int = 0, _seen_refs: Optional[set] = None) -> Dict[str, Any]:
         """递归展开 schema，返回标准化描述."""
         if depth > 20:
             return {"type": "object", "description": "嵌套过深"}
         if not isinstance(schema, dict):
             return {"type": "object"}
 
+        _seen_refs = _seen_refs or set()
+
         if "$ref" in schema:
-            schema = {**self._resolve_ref(schema["$ref"]), **{k: v for k, v in schema.items() if k != "$ref"}}
+            ref = schema["$ref"]
+            if ref in _seen_refs:
+                return {"type": "object", "description": f"循环引用: {ref}"}
+            _seen_refs = _seen_refs | {ref}
+            resolved = self._resolve_ref(ref)
+            if not isinstance(resolved, dict):
+                resolved = {"type": "object", "description": f"引用非对象: {ref}"}
+            schema = {**resolved, **{k: v for k, v in schema.items() if k != "$ref"}}
 
         schema_type = schema.get("type", "object")
         result: Dict[str, Any] = {
@@ -83,20 +93,22 @@ class OpenAPIParser(RepositoryParser):
         }
 
         if schema_type == "array" and "items" in schema:
-            result["items"] = self._resolve_schema(schema["items"], depth + 1)
+            result["items"] = self._resolve_schema(schema["items"], depth + 1, _seen_refs)
 
         if "properties" in schema:
             props = {}
             required = set(schema.get("required", []))
             for name, prop in schema["properties"].items():
-                props[name] = self._resolve_schema(prop, depth + 1)
+                if not isinstance(name, str):
+                    continue
+                props[name] = self._resolve_schema(prop, depth + 1, _seen_refs)
                 props[name]["required"] = name in required
             result["properties"] = props
 
-        if "allOf" in schema:
-            merged = {"type": "object", "properties": {}, "required": []}
+        if "allOf" in schema and isinstance(schema["allOf"], list):
+            merged = {"type": "object", "properties": {}}
             for sub in schema["allOf"]:
-                resolved = self._resolve_schema(sub, depth + 1)
+                resolved = self._resolve_schema(sub, depth + 1, _seen_refs)
                 merged["properties"].update(resolved.get("properties", {}))
             result.update(merged)
 
@@ -136,9 +148,11 @@ class OpenAPIParser(RepositoryParser):
 
         # requestBody -> body 参数
         request_body = details.get("requestBody") or {}
-        if request_body:
+        if request_body and isinstance(request_body, dict):
             content = request_body.get("content", {})
-            for content_type, schema_ref in content.items():
+            for content_type, schema_ref in (content.items() if isinstance(content, dict) else []):
+                if not isinstance(schema_ref, dict):
+                    continue
                 schema = self._resolve_schema(schema_ref.get("schema", {}))
                 for name, prop in schema.get("properties", {}).items():
                     parameters.append({

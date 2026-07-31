@@ -138,102 +138,96 @@ class UIExecutor(TestExecutor):
         har_path: str = ""
         video_path: str = ""
 
+        browser = None
+        ctx = None
+        page = None
         try:
             with sync_playwright() as p:
                 browser = self._launch_browser(p, launch_kwargs)
                 ctx = browser.new_context(**context_kwargs)
-
                 page = ctx.new_page()
-                if self.network.profile.capture_console:
-                    page.on("console", lambda msg: console_logs.append({"type": msg.type, "text": msg.text}))
-                if self.network.profile.capture_network:
-                    page.on("request", lambda req: console_logs.append({"type": "network", "text": f"{req.method} {req.url}"}))
 
-                page.goto(url, timeout=30000, wait_until="domcontentloaded")
+                try:
+                    if self.network.profile.capture_console:
+                        page.on("console", lambda msg: console_logs.append({"type": msg.type, "text": msg.text}))
+                    if self.network.profile.capture_network:
+                        page.on("request", lambda req: console_logs.append({"type": "network", "text": f"{req.method} {req.url}"}))
 
-                if capture:
-                    screenshots.append(self._take_screenshot(page, output_dir, "01_opened"))
+                    page.goto(url, timeout=30000, wait_until="domcontentloaded")
 
-                results = []
-                for idx, step in enumerate(steps, start=2):
-                    op = step.get("op")
-                    selector = step.get("selector", "")
-                    value = step.get("value", "")
-                    timeout = step.get("timeout", 10000)
-                    step_name = step.get("name", f"step_{idx}_{op}")
-                    try:
-                        if op == "fill":
-                            page.fill(selector, value)
-                        elif op == "click":
-                            page.click(selector)
-                        elif op == "select":
-                            page.select_option(selector, value)
-                        elif op == "wait":
-                            page.wait_for_selector(selector, timeout=timeout)
-                        elif op == "assert_text":
-                            page.wait_for_selector(selector, timeout=timeout)
-                            text = page.inner_text(selector)
-                            assert value in text, f"未找到期望文本: {value}"
-                        elif op == "assert_visible":
-                            page.wait_for_selector(selector, state="visible", timeout=timeout)
-                        else:
-                            results.append({"op": op, "selector": selector, "status": "unknown"})
-                            continue
-                        results.append({"op": op, "selector": selector, "status": "ok"})
-                    except Exception as step_err:
-                        results.append({"op": op, "selector": selector, "status": "failed", "error": str(step_err)})
-                        if capture:
-                            screenshots.append(self._take_screenshot(page, output_dir, f"{idx:02d}_{step_name}_failed"))
-                        ctx.close()
-                        browser.close()
-                        return self._make_result(
-                            TestStatus.FAILED,
-                            f"步骤 {step_name} 失败: {step_err}",
-                            steps=results,
-                            screenshots=screenshots,
-                            console_logs=console_logs,
-                        )
+                    if capture:
+                        screenshots.append(self._take_screenshot(page, output_dir, "01_opened"))
 
-                    if capture and step.get("capture_after", False):
-                        screenshots.append(self._take_screenshot(page, output_dir, f"{idx:02d}_{step_name}"))
-
-                if capture:
-                    screenshots.append(self._take_screenshot(page, output_dir, f"{len(steps)+2:02d}_success"))
-
-                explicit_screenshot = action.get("screenshot")
-                if explicit_screenshot:
-                    page.screenshot(path=str(output_dir / explicit_screenshot))
-
-                page.close()
-                ctx.close()
-                browser.close()
-
-                if har_file and har_file.exists():
-                    try:
-                        har_path = str(har_file.relative_to(getattr(self.config, "base_dir", Path.cwd())))
-                    except ValueError:
-                        har_path = str(har_file)
-
-                # 收集视频路径
-                if video_dir and video_dir.exists():
-                    videos = sorted(video_dir.glob("*.webm"))
-                    if videos:
+                    results = []
+                    for idx, step in enumerate(steps, start=2):
+                        op = step.get("op")
+                        selector = step.get("selector", "")
+                        value = step.get("value", "")
+                        timeout = step.get("timeout", 10000)
+                        step_name = step.get("name", f"step_{idx}_{op}")
                         try:
-                            video_path = str(videos[0].relative_to(getattr(self.config, "base_dir", Path.cwd())))
-                        except ValueError:
-                            video_path = str(videos[0])
+                            if op == "fill":
+                                page.fill(selector, value)
+                            elif op == "click":
+                                page.click(selector)
+                            elif op == "select":
+                                page.select_option(selector, value)
+                            elif op == "wait":
+                                page.wait_for_selector(selector, timeout=timeout)
+                            elif op == "assert_text":
+                                page.wait_for_selector(selector, timeout=timeout)
+                                text = page.inner_text(selector)
+                                assert value in text, f"未找到期望文本: {value}"
+                            elif op == "assert_visible":
+                                page.wait_for_selector(selector, state="visible", timeout=timeout)
+                            else:
+                                results.append({"op": op, "selector": selector, "status": "unknown"})
+                                continue
+                            results.append({"op": op, "selector": selector, "status": "ok"})
+                        except Exception as step_err:
+                            results.append({"op": op, "selector": selector, "status": "failed", "error": str(step_err)})
+                            if capture:
+                                screenshots.append(self._take_screenshot(page, output_dir, f"{idx:02d}_{step_name}_failed"))
+                            raise RuntimeError(f"步骤 {step_name} 失败: {step_err}")
 
-                return self._make_result(
-                    TestStatus.PASSED,
-                    "UI 测试通过",
-                    steps=results,
-                    screenshots=screenshots,
-                    console_logs=console_logs,
-                    video_path=video_path,
-                    har_path=har_path,
-                    browser_mode="headed" if actually_headed else "headless",
-                    network_type=self.network.profile.network_type.value,
-                )
+                        if capture and step.get("capture_after", False):
+                            screenshots.append(self._take_screenshot(page, output_dir, f"{idx:02d}_{step_name}"))
+
+                    if capture:
+                        screenshots.append(self._take_screenshot(page, output_dir, f"{len(steps)+2:02d}_success"))
+
+                    explicit_screenshot = action.get("screenshot")
+                    if explicit_screenshot:
+                        page.screenshot(path=str(output_dir / explicit_screenshot))
+
+                    if har_file and har_file.exists():
+                        try:
+                            har_path = str(har_file.relative_to(getattr(self.config, "base_dir", Path.cwd())))
+                        except ValueError:
+                            har_path = str(har_file)
+
+                    # 收集视频路径
+                    if video_dir and video_dir.exists():
+                        videos = sorted(video_dir.glob("*.webm"))
+                        if videos:
+                            try:
+                                video_path = str(videos[0].relative_to(getattr(self.config, "base_dir", Path.cwd())))
+                            except ValueError:
+                                video_path = str(videos[0])
+
+                    return self._make_result(
+                        TestStatus.PASSED,
+                        "UI 测试通过",
+                        steps=results,
+                        screenshots=screenshots,
+                        console_logs=console_logs,
+                        video_path=video_path,
+                        har_path=har_path,
+                        browser_mode="headed" if actually_headed else "headless",
+                        network_type=self.network.profile.network_type.value,
+                    )
+                finally:
+                    self._safe_close(page, ctx, browser)
         except Exception as e:
             err_msg = str(e)
             if "ERR_CONNECTION_CLOSED" in err_msg or "ERR_CONNECTION_REFUSED" in err_msg:
@@ -247,3 +241,13 @@ class UIExecutor(TestExecutor):
                 console_logs=console_logs,
                 network_type=self.network.profile.network_type.value,
             )
+
+    def _safe_close(self, page=None, ctx=None, browser=None):
+        """安全关闭 Playwright 浏览器资源，避免关闭异常掩盖原始错误."""
+        for obj in (page, ctx, browser):
+            if obj is None:
+                continue
+            try:
+                obj.close()
+            except Exception:
+                pass

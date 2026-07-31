@@ -81,7 +81,12 @@ class TestAutomationManager:
 
     def _apply_version_environment_overrides(self, version: str):
         """将版本级 environment_overrides 合并到当前 config."""
-        cfg = self.version_manager.ensure_version_config(version, environment=self.config.environment)
+        try:
+            cfg = self.version_manager.ensure_version_config(version, environment=self.config.environment)
+        except Exception as e:
+            print(f"⚠️  加载版本 {version} 配置失败: {e}，跳过环境覆盖")
+            return
+
         overrides = cfg.get("environment_overrides", {})
         if not overrides:
             return
@@ -89,15 +94,21 @@ class TestAutomationManager:
         db_overrides = overrides.get("database", {})
         if db_overrides.get("enabled"):
             print(f"🗄️  版本级数据库: {db_overrides.get('host')}:{db_overrides.get('port')}/{db_overrides.get('database')}")
-            current = self.config.database.model_dump(by_alias=True)
-            current.update({k: v for k, v in db_overrides.items() if v not in (None, "")})
-            self.config.database = self.config.database.__class__(**current)
+            try:
+                current = self.config.database.model_dump(by_alias=True)
+                current.update({k: v for k, v in db_overrides.items() if v not in (None, "")})
+                self.config.database = self.config.database.__class__(**current)
+            except Exception as e:
+                print(f"⚠️  应用版本级数据库配置失败: {e}")
 
         net_overrides = overrides.get("network", {})
         if net_overrides:
-            current = self.config.network.model_dump(by_alias=True)
-            current.update({k: v for k, v in net_overrides.items() if v not in (None, "")})
-            self.config.network = self.config.network.__class__(**current)
+            try:
+                current = self.config.network.model_dump(by_alias=True)
+                current.update({k: v for k, v in net_overrides.items() if v not in (None, "")})
+                self.config.network = self.config.network.__class__(**current)
+            except Exception as e:
+                print(f"⚠️  应用版本级网络配置失败: {e}")
 
         extra_overrides = overrides.get("extra", {})
         if extra_overrides:
@@ -106,7 +117,11 @@ class TestAutomationManager:
 
     def _apply_version_sources(self, version: str):
         """将版本级 sources 配置合并到当前 config，供 Agent 使用."""
-        cfg = self.version_manager.ensure_version_config(version, environment=self.config.environment)
+        try:
+            cfg = self.version_manager.ensure_version_config(version, environment=self.config.environment)
+        except Exception as e:
+            print(f"⚠️  加载版本 {version} sources 失败: {e}，跳过")
+            return
         sources = cfg.get("sources", {})
 
         # Swagger -> 代码解析的 API Spec
@@ -115,34 +130,40 @@ class TestAutomationManager:
             spec_source = swagger.get("file_path") or swagger.get("url") or ""
             if spec_source:
                 print(f"📘 版本级 Swagger: {spec_source}")
-                # 如果 backend_repo 未启用，则构造一个启用的 backend_repo 用于解析
-                if not self.config.backend_repo.enabled:
-                    self.config.backend_repo = CodeRepositoryConfig(
-                        enabled=True,
-                        type="local",
-                        local_path=spec_source,
-                        api_spec=spec_source,
-                    )
-                else:
-                    self.config.backend_repo.api_spec = spec_source or self.config.backend_repo.api_spec
-                    self.config.backend_repo.local_path = spec_source or self.config.backend_repo.local_path
+                try:
+                    # 如果 backend_repo 未启用，则构造一个启用的 backend_repo 用于解析
+                    if not self.config.backend_repo.enabled:
+                        self.config.backend_repo = CodeRepositoryConfig(
+                            enabled=True,
+                            type="local",
+                            local_path=spec_source,
+                            api_spec=spec_source,
+                        )
+                    else:
+                        self.config.backend_repo.api_spec = spec_source or self.config.backend_repo.api_spec
+                        self.config.backend_repo.local_path = spec_source or self.config.backend_repo.local_path
+                except Exception as e:
+                    print(f"⚠️  应用版本级 Swagger 配置失败: {e}")
 
         # 版本级前后端仓库覆盖项目级配置
         for key in ["frontend_repo", "backend_repo"]:
             repo = sources.get(key, {})
             if repo.get("enabled"):
                 print(f"📦 版本级 {key}: {repo.get('url') or repo.get('local_path')}")
-                model = CodeRepositoryConfig(
-                    enabled=True,
-                    type=repo.get("type", "github"),
-                    url=repo.get("url", ""),
-                    branch=repo.get("branch", "main"),
-                    language=repo.get("language", ""),
-                    test_framework=repo.get("test_framework", ""),
-                    api_spec=repo.get("api_spec", ""),
-                    local_path=repo.get("local_path", ""),
-                )
-                setattr(self.config, key, model)
+                try:
+                    model = CodeRepositoryConfig(
+                        enabled=True,
+                        type=repo.get("type", "github"),
+                        url=repo.get("url", ""),
+                        branch=repo.get("branch", "main"),
+                        language=repo.get("language", ""),
+                        test_framework=repo.get("test_framework", ""),
+                        api_spec=repo.get("api_spec", ""),
+                        local_path=repo.get("local_path", ""),
+                    )
+                    setattr(self.config, key, model)
+                except Exception as e:
+                    print(f"⚠️  应用版本级 {key} 失败: {e}")
 
     def run_version(
         self,

@@ -206,3 +206,65 @@ def test_openapi_parser_allof_and_enum(tmp_path: Path):
     assert names == {"name", "status"}
     status_param = next(p for p in ep["parameters"] if p["name"] == "status")
     assert status_param["type"] == "string"
+
+
+def test_openapi_parser_invalid_and_circular_refs(tmp_path: Path):
+    spec = {
+        "openapi": "3.0.0",
+        "paths": {
+            "/bad": {
+                "get": {
+                    "operationId": "badRefs",
+                    "responses": {
+                        "200": {
+                            "description": "OK",
+                            "content": {
+                                "application/json": {
+                                    "schema": {"$ref": "#/components/schemas/Missing"}
+                                }
+                            },
+                        }
+                    },
+                }
+            },
+            "/loop": {
+                "get": {
+                    "operationId": "loopRefs",
+                    "responses": {
+                        "200": {
+                            "description": "OK",
+                            "content": {
+                                "application/json": {
+                                    "schema": {"$ref": "#/components/schemas/A"}
+                                }
+                            },
+                        }
+                    },
+                }
+            },
+        },
+        "components": {
+            "schemas": {
+                "A": {
+                    "type": "object",
+                    "properties": {"b": {"$ref": "#/components/schemas/B"}},
+                },
+                "B": {
+                    "type": "object",
+                    "properties": {"a": {"$ref": "#/components/schemas/A"}},
+                },
+            }
+        },
+    }
+    spec_path = tmp_path / "bad_refs.json"
+    spec_path.write_text(json.dumps(spec), encoding="utf-8")
+
+    parser = OpenAPIParser()
+    result = parser.parse(type("C", (), {"api_spec": str(spec_path)}))
+
+    assert len(result.api_endpoints) == 2
+    bad_schema = result.api_endpoints[0]["responses"]["200"]["schema"]
+    assert "未找到引用" in bad_schema.get("description", "")
+
+    loop_schema = result.api_endpoints[1]["responses"]["200"]["schema"]
+    assert loop_schema["type"] == "object"

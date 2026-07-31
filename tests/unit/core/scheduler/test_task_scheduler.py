@@ -164,7 +164,7 @@ class TestTaskResources:
         # 手动构造一个正在运行且占用资源的低优先级任务
         t_low = s.submit(str(config_path), priority=9, resources={"ui": 1}, preemptible=True)
         s.tasks[t_low].status = TaskStatus.RUNNING
-        s._allocate_resources({"ui": 1})
+        s._allocate_resources(s.tasks[t_low])
 
         # 高优先级任务需要相同资源
         t_high = s.submit(str(config_path), priority=1, resources={"ui": 1}, preemptible=True)
@@ -174,3 +174,4 @@ class TestTaskResources:
         assert acquired is True, "高优先级任务应成功抢占资源"
         assert s.get_task(t_low).status == TaskStatus.QUEUED, "低优先级任务应被重新入队"
         assert s._running_resources.get("ui", 0) == 1, "资源应被高优先级任务占用"
+        assert s.tasks[t_low].resources_acquired is False, "被抢占任务应标记资源已释放"

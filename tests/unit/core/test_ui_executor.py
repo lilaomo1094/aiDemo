@@ -51,3 +51,12 @@ def test_ui_executor_missing_url_returns_blocked(ui_config):
     executor = UIExecutor(ui_config)
     result = executor.execute({"name": "test"}, None)
     assert result["status"] == "blocked"
+
+
+def test_ui_executor_safe_close_ignores_exceptions():
+    failing = MagicMock()
+    failing.close.side_effect = RuntimeError("close failed")
+    executor = UIExecutor(PlatformConfig())
+    # 不应抛出异常
+    executor._safe_close(failing, failing, failing)
+    assert failing.close.call_count == 3

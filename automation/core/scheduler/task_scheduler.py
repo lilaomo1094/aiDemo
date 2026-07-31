@@ -166,7 +166,7 @@ class TaskScheduler:
         with self._resource_lock:
             # 检查是否直接满足
             if self._can_fit_resources(task.resources):
-                self._allocate_resources(task.resources)
+                self._allocate_resources(task)
                 return True
 
             # 尝试抢占可抢占的低优先级运行中任务
@@ -184,15 +184,21 @@ class TaskScheduler:
                 return False
         return True
 
-    def _allocate_resources(self, resources: Dict[str, int]):
-        for name, amount in resources.items():
+    def _allocate_resources(self, task: TaskState):
+        """为任务分配资源并标记已获取."""
+        for name, amount in task.resources.items():
             self._running_resources[name] = self._running_resources.get(name, 0) + amount
+        task.resources_acquired = True
 
-    def _release_resources(self, resources: Dict[str, int]):
+    def _release_resources(self, task: TaskState):
+        """释放任务占用的资源，幂等且线程安全."""
+        if not task.resources_acquired:
+            return
         with self._resource_lock:
-            for name, amount in resources.items():
+            for name, amount in task.resources.items():
                 current = self._running_resources.get(name, 0) - amount
                 self._running_resources[name] = max(0, current)
+            task.resources_acquired = False
 
     def _preempt_resources_for(self, task: TaskState) -> bool:
         """为当前任务抢占低优先级可抢占任务的资源.
@@ -211,10 +217,11 @@ class TaskScheduler:
         candidates.sort(key=lambda t: (-t.priority, t.started_at or ""))
 
         for victim in candidates:
-            # 释放被抢占任务的资源
+            # 释放被抢占任务的资源（ bookkeeping 层面）
             for name, amount in victim.resources.items():
                 current = self._running_resources.get(name, 0) - amount
                 self._running_resources[name] = max(0, current)
+            victim.resources_acquired = False
 
             # 标记被抢占任务重新入队
             victim.status = TaskStatus.QUEUED
@@ -223,7 +230,7 @@ class TaskScheduler:
             self.hook_manager.emit("task_preempted", victim.to_dict())
 
             if self._can_fit_resources(task.resources):
-                self._allocate_resources(task.resources)
+                self._allocate_resources(task)
                 return True
 
         return False
@@ -335,7 +342,7 @@ class TaskScheduler:
 
     def _finish_task(self, task: TaskState, result: Dict):
         task.completed_at = datetime.now().isoformat()
-        self._release_resources(task.resources)
+        self._release_resources(task)
 
         # 聚合里程碑与风险到调度器全局视图
         milestones = result.get("milestones") if isinstance(result, dict) else None
@@ -370,6 +377,7 @@ class TaskScheduler:
             task = self.tasks.get(task_id)
             if task and task.status in {TaskStatus.PENDING, TaskStatus.QUEUED}:
                 task.status = TaskStatus.CANCELLED
+                self._release_resources(task)
                 self._save_state(task)
                 return True
         return False

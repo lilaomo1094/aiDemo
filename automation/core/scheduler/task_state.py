@@ -34,6 +34,7 @@ class TaskState:
     depends_on: List[str] = field(default_factory=list)
     resources: Dict[str, int] = field(default_factory=dict)
     preemptible: bool = True
+    resources_acquired: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -52,4 +53,5 @@ class TaskState:
             "depends_on": self.depends_on,
             "resources": self.resources,
             "preemptible": self.preemptible,
+            "resources_acquired": self.resources_acquired,
         }
