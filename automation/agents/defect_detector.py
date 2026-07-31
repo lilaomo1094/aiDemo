@@ -39,7 +39,7 @@ class DefectDetector(BaseAgent):
                 d.setdefault("test_name", "多个失败用例聚合")
                 d.setdefault("status", "new")
                 d.setdefault("created_at", datetime.now().isoformat())
-                defects.extend(llm_defects)
+            defects.extend(llm_defects)
 
         # 兜底规则生成
         if not defects:

@@ -25,10 +25,12 @@ class DashboardGenerator:
         state_dir: str = "output/scheduler",
         version_manifest: str = "versions/manifest.json",
         output_dir: str = "output/dashboard",
+        quality_dir: str = "output/quality",
     ):
         self.state_dir = Path(state_dir)
         self.version_manifest = Path(version_manifest)
         self.output_dir = Path(output_dir)
+        self.quality_dir = Path(quality_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def generate(self) -> Path:
@@ -36,10 +38,33 @@ class DashboardGenerator:
         tasks = self._load_tasks()
         versions = self._load_versions()
         summary = self._build_summary(tasks)
-        html = self._render_html(tasks, versions, summary)
+        quality = self._load_quality_reports()
+        html = self._render_html(tasks, versions, summary, quality)
         index_path = self.output_dir / "index.html"
         index_path.write_text(html, encoding="utf-8")
         return index_path
+
+    def _load_quality_reports(self) -> Dict[str, Any]:
+        """加载最新的 Agent 调用质量报告."""
+        if not self.quality_dir.exists():
+            return {"summary": {}, "agent_stats": {}, "reports": []}
+        reports: List[Dict[str, Any]] = []
+        for path in sorted(self.quality_dir.glob("quality_*.json"), reverse=True):
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+                data["source_file"] = path.name
+                reports.append(data)
+            except Exception:
+                continue
+        if not reports:
+            return {"summary": {}, "agent_stats": {}, "reports": []}
+        latest = reports[0]
+        return {
+            "summary": latest.get("summary", {}),
+            "agent_stats": latest.get("agent_stats", {}),
+            "reports": reports,
+            "generated_at": latest.get("generated_at", ""),
+        }
 
     def _load_tasks(self) -> List[Dict[str, Any]]:
         tasks = []
@@ -77,10 +102,12 @@ class DashboardGenerator:
         }
 
     def _render_html(
-        self, tasks: List[Dict[str, Any]], versions: List[Dict[str, Any]], summary: Dict[str, Any]
+        self, tasks: List[Dict[str, Any]], versions: List[Dict[str, Any]], summary: Dict[str, Any],
+        quality: Dict[str, Any] = None,
     ) -> str:
         title = "智测自动化测试仪表板"
         generated_at = datetime.now().isoformat()
+        quality = quality or {"summary": {}, "agent_stats": {}, "reports": []}
 
         rows = []
         for t in tasks[:50]:
@@ -113,6 +140,70 @@ class DashboardGenerator:
                 "</tr>"
             )
 
+        # Agent 调用质量可视化
+        q_summary = quality.get("summary", {})
+        q_stats = quality.get("agent_stats", {})
+        q_total = q_summary.get("total_calls", 0)
+        q_passed = q_summary.get("passed", 0)
+        q_failed = q_summary.get("failed", 0)
+        q_avg = q_summary.get("avg_score", 0.0)
+        q_ctx_bytes = q_summary.get("total_context_bytes", 0)
+        q_out_bytes = q_summary.get("total_output_bytes", 0)
+
+        def _fmt_bytes(n: int) -> str:
+            n = int(n or 0)
+            if n < 1024:
+                return f"{n} B"
+            if n < 1024 * 1024:
+                return f"{n / 1024:.1f} KB"
+            return f"{n / 1024 / 1024:.2f} MB"
+
+        # 每个 Agent 的质量统计行 + 评分进度条
+        agent_rows = []
+        for name, s in q_stats.items():
+            score_pct = round(float(s.get("avg_score", 0)) * 100)
+            score_color = "var(--success)" if score_pct >= 70 else ("var(--warning)" if score_pct >= 40 else "var(--danger)")
+            pass_rate = round(float(s.get("pass_rate", 0)) * 100)
+            agent_rows.append(
+                "<tr>"
+                f"<td><strong>{name}</strong></td>"
+                f"<td>{s.get('total', 0)}</td>"
+                f"<td>{s.get('passed', 0)}</td>"
+                f"<td>{s.get('failed', 0)}</td>"
+                f"<td>{pass_rate}%</td>"
+                f"<td>"
+                f"<div class='bar-wrap'><div class='bar' style='width:{score_pct}%;background:{score_color}'></div></div>"
+                f"<span class='bar-label'>{score_pct}%</span></td>"
+                f"<td>{s.get('avg_duration_seconds', 0)}s</td>"
+                f"<td>{_fmt_bytes(s.get('avg_context_bytes', 0))}</td>"
+                f"<td>{_fmt_bytes(s.get('avg_output_bytes', 0))}</td>"
+                "</tr>"
+            )
+
+        # 最近的调用报告明细
+        recent_reports = (q_summary.get("reports", []) or [])[-12:]
+        report_rows = []
+        for r in recent_reports:
+            stage = r.get("stage", "output")
+            passed = r.get("passed", False)
+            badge_cls = "q-pass" if passed else "q-fail"
+            badge_text = "通过" if passed else "失败"
+            issues = r.get("input_issues", []) + r.get("output_issues", [])
+            issue_text = "; ".join(issues[:2]) if issues else "-"
+            report_rows.append(
+                "<tr>"
+                f"<td>{r.get('timestamp', '')[:19]}</td>"
+                f"<td>{r.get('agent_name', '')}</td>"
+                f"<td><span class='q-badge {badge_cls}'>{badge_text}</span></td>"
+                f"<td>{stage}</td>"
+                f"<td>{r.get('score', 0)}</td>"
+                f"<td>{r.get('attempt', 1)}</td>"
+                f"<td title='{issue_text}'>{issue_text[:60]}</td>"
+                "</tr>"
+            )
+
+        q_generated = quality.get("generated_at", "")[:19] or "-"
+
         return f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -132,6 +223,7 @@ h1 {{ margin: 0; font-size: 1.5rem; }}
 .card .value {{ font-size: 1.75rem; font-weight: 700; margin-top: 0.25rem; }}
 .section {{ background: var(--card); border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }}
 .section h2 {{ margin-top: 0; font-size: 1.125rem; }}
+.section .sub {{ color: var(--muted); font-size: 0.8rem; margin-left: 0.5rem; }}
 table {{ width: 100%; border-collapse: collapse; font-size: 0.875rem; }}
 th, td {{ text-align: left; padding: 0.625rem; border-bottom: 1px solid #f3f4f6; }}
 th {{ color: var(--muted); font-weight: 600; }}
@@ -144,6 +236,13 @@ tr:hover {{ background: #f9fafb; }}
 .status.queued, .status.pending {{ background: #f3f4f6; color: var(--muted); }}
 .status.cancelled {{ background: #e5e7eb; color: #374151; }}
 .empty {{ color: var(--muted); padding: 2rem; text-align: center; }}
+.bar-wrap {{ display: inline-block; width: 100px; height: 10px; background: #e5e7eb; border-radius: 5px; vertical-align: middle; overflow: hidden; }}
+.bar {{ height: 100%; border-radius: 5px; }}
+.bar-label {{ font-size: 0.75rem; color: var(--muted); margin-left: 0.4rem; }}
+.q-badge {{ display: inline-block; padding: 0.1rem 0.5rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }}
+.q-pass {{ background: #dcfce7; color: var(--success); }}
+.q-fail {{ background: #fee2e2; color: var(--danger); }}
+.q-highlight {{ border-left: 4px solid var(--primary); }}
 </style>
 </head>
 <body>
@@ -159,6 +258,36 @@ tr:hover {{ background: #f9fafb; }}
     <div class="card"><div class="label">阻塞</div><div class="value" style="color:var(--warning)">{summary['blocked']}</div></div>
     <div class="card"><div class="label">运行中</div><div class="value" style="color:var(--primary)">{summary['running']}</div></div>
     <div class="card"><div class="label">队列中</div><div class="value">{summary['queued']}</div></div>
+  </div>
+
+  <div class="section q-highlight">
+    <h2>Agent 调用质量管理<span class="sub">报告时间: {q_generated} · 上下文体积 {_fmt_bytes(q_ctx_bytes)} · 输出体积 {_fmt_bytes(q_out_bytes)}</span></h2>
+    <div class="cards" style="margin-bottom:1rem">
+      <div class="card"><div class="label">Agent 调用总数</div><div class="value">{q_total}</div></div>
+      <div class="card"><div class="label">质量通过</div><div class="value" style="color:var(--success)">{q_passed}</div></div>
+      <div class="card"><div class="label">质量失败</div><div class="value" style="color:var(--danger)">{q_failed}</div></div>
+      <div class="card"><div class="label">平均评分</div><div class="value" style="color:var(--primary)">{round(q_avg, 2)}</div></div>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Agent</th><th>调用数</th><th>通过</th><th>失败</th><th>通过率</th><th>平均评分</th><th>平均耗时</th><th>平均上下文</th><th>平均输出</th></tr>
+      </thead>
+      <tbody>
+        {''.join(agent_rows) if agent_rows else '<tr><td colspan="9" class="empty">暂无 Agent 调用质量数据（运行工作流后将自动生成）</td></tr>'}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>最近 Agent 调用明细</h2>
+    <table>
+      <thead>
+        <tr><th>时间</th><th>Agent</th><th>结果</th><th>阶段</th><th>评分</th><th>尝试</th><th>问题</th></tr>
+      </thead>
+      <tbody>
+        {''.join(report_rows) if report_rows else '<tr><td colspan="7" class="empty">暂无调用明细</td></tr>'}
+      </tbody>
+    </table>
   </div>
 
   <div class="section">

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """工作流引擎：负责任务调度与上下文管理."""
 
+import os
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
@@ -8,7 +9,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
 
-from automation.core.monitoring import MilestoneManager, NodeStatus, ProgressReporter
+from automation.core.monitoring import AgentCallQualityManager, MilestoneManager, NodeStatus, ProgressReporter
 
 
 class WorkflowStatus(Enum):
@@ -72,6 +73,64 @@ class WorkflowContext:
             "metadata": self.metadata,
         }
 
+    def snapshot(self) -> Dict[str, Any]:
+        """创建上下文快照，用于失败时回滚."""
+        return {
+            "requirement_doc": self.requirement_doc,
+            "database_schema": dict(self.database_schema),
+            "code_info": dict(self.code_info),
+            "test_cases": list(self.test_cases),
+            "execution_results": list(self.execution_results),
+            "defects": list(self.defects),
+            "metadata": dict(self.metadata),
+        }
+
+    def restore(self, snapshot: Dict[str, Any]):
+        """从快照恢复上下文."""
+        self.requirement_doc = snapshot.get("requirement_doc", "")
+        self.database_schema = snapshot.get("database_schema", {})
+        self.code_info = snapshot.get("code_info", {})
+        self.test_cases = list(snapshot.get("test_cases", []))
+        self.execution_results = list(snapshot.get("execution_results", []))
+        self.defects = list(snapshot.get("defects", []))
+        self.metadata = dict(snapshot.get("metadata", {}))
+
+    def get_relevant_context(self, agent_type: AgentType) -> Dict[str, Any]:
+        """根据 Agent 类型返回所需的上下文子集，避免传递冗余数据."""
+        if agent_type == AgentType.REQUIREMENT_ANALYZER:
+            return {
+                "requirement_doc": self.requirement_doc,
+                "project_info": self.project_info,
+            }
+        if agent_type == AgentType.CODE_PARSER:
+            return {
+                "metadata": self.metadata,
+                "project_info": self.project_info,
+            }
+        if agent_type == AgentType.TEST_GENERATOR:
+            return {
+                "metadata": self.metadata,
+                "code_info": self.code_info,
+                "database_schema": self.database_schema,
+            }
+        if agent_type == AgentType.TEST_EXECUTOR:
+            return {
+                "test_cases": self.test_cases,
+            }
+        if agent_type == AgentType.DEFECT_DETECTOR:
+            return {
+                "execution_results": self.execution_results,
+                "test_cases": self.test_cases,
+            }
+        if agent_type == AgentType.REPORT_GENERATOR:
+            return {
+                "test_cases": self.test_cases,
+                "execution_results": self.execution_results,
+                "defects": self.defects,
+                "metadata": self.metadata,
+            }
+        return self.to_dict()
+
 
 class WorkflowEngine:
     def __init__(
@@ -80,6 +139,7 @@ class WorkflowEngine:
         knowledge_store=None,
         max_workers: Optional[int] = None,
         progress_reporter: Optional[ProgressReporter] = None,
+        quality_manager: Optional[AgentCallQualityManager] = None,
     ):
         self.config = config
         self.knowledge_store = knowledge_store
@@ -94,6 +154,7 @@ class WorkflowEngine:
         )
         self._context_lock = threading.Lock()
         self._progress = progress_reporter
+        self.quality_manager = quality_manager or AgentCallQualityManager()
         self.milestone_manager: Optional[MilestoneManager] = None
         self._task_to_milestone = {
             "task_requirement": "requirement_analyzed",
@@ -310,7 +371,19 @@ class WorkflowEngine:
             final_status = "完成" if results["status"] == WorkflowStatus.COMPLETED.value else "失败"
             self._progress.finish(status=final_status, message=f"工作流{final_status}")
         results["summary"] = self._generate_summary()
+        # 持久化质量报告，供仪表板可视化
+        self._persist_quality_reports()
         return results
+
+    def _persist_quality_reports(self):
+        """将 Agent 调用质量报告落盘到 output 目录."""
+        try:
+            base_dir = getattr(self.config, "base_dir", ".")
+            quality_dir = os.path.join(base_dir, "output", "quality")
+            path = os.path.join(quality_dir, f"quality_{self.context.run_id}.json")
+            self.quality_manager.save_reports(path)
+        except Exception as e:
+            print(f"质量报告持久化失败: {e}")
 
     def _execute_task(self, task: WorkflowTask):
         task.status = WorkflowStatus.RUNNING
@@ -319,8 +392,42 @@ class WorkflowEngine:
         if self.milestone_manager and milestone_id:
             self.milestone_manager.start(milestone_id, f"执行 {task.name}")
         self.notify("task_started", {"task": task.name, "task_id": task.task_id})
+
+        # 上下文快照，用于失败时回滚
+        context_snapshot = self.context.snapshot() if self.context else None
+
+        agent_name = self._get_agent_class_name(task.agent_type)
+        # 重置该 Agent 的重试计数
+        self.quality_manager.reset_agent_attempts(agent_name)
+
         try:
-            agent_output = self._run_agent(task)
+            # 质量门禁：执行前校验输入（含上下文体积追踪）
+            input_report = self.quality_manager.validate_input(agent_name, self.context)
+            if not input_report.passed and self.quality_manager.should_block_downstream(input_report):
+                raise ValueError(f"输入质量校验未通过: {input_report.input_issues}")
+            # 上下文体积告警通知
+            if input_report.warnings:
+                self.notify("quality_warning", {
+                    "task": task.name, "task_id": task.task_id,
+                    "stage": "input", "warnings": input_report.warnings,
+                    "context_bytes": input_report.context_bytes,
+                })
+
+            # 带质量重试的 Agent 执行
+            agent_output, output_report = self._run_agent_with_quality_retry(task, agent_name)
+
+            if not output_report.passed:
+                if self.quality_manager.should_block_downstream(output_report):
+                    raise ValueError(f"输出质量校验未通过: {output_report.output_issues}")
+                # 非阻断：记录警告但继续
+                self.notify("quality_warning", {
+                    "task": task.name,
+                    "task_id": task.task_id,
+                    "warnings": output_report.warnings,
+                    "issues": output_report.output_issues,
+                    "score": output_report.score,
+                })
+
             task.output_data = agent_output
             task.status = WorkflowStatus.COMPLETED
             with self._context_lock:
@@ -333,9 +440,51 @@ class WorkflowEngine:
             task.status = WorkflowStatus.FAILED
             task.error_message = str(e)
             task.end_time = datetime.now()
+            # 回滚上下文到执行前状态
+            if context_snapshot and self.context:
+                self.context.restore(context_snapshot)
             if self.milestone_manager and milestone_id:
                 self.milestone_manager.finish(milestone_id, NodeStatus.FAILED, error=str(e))
             self.notify("task_failed", {"task": task.name, "task_id": task.task_id, "error": str(e)})
+
+    def _run_agent_with_quality_retry(self, task: WorkflowTask, agent_name: str):
+        """执行 Agent 并在质量可恢复时重试，返回 (output, quality_report)."""
+        attempt = 0
+        while True:
+            attempt += 1
+            self.quality_manager.record_attempt(agent_name)
+            start = datetime.now()
+            agent_output = self._run_agent(task)
+            duration = (datetime.now() - start).total_seconds()
+
+            output_report = self.quality_manager.validate_output(
+                agent_name, agent_output, duration_seconds=duration, attempt=attempt
+            )
+
+            if output_report.passed:
+                return agent_output, output_report
+            # 判断是否值得重试
+            if self.quality_manager.should_retry(output_report):
+                self.notify("quality_retry", {
+                    "task": task.name, "task_id": task.task_id,
+                    "attempt": attempt, "score": output_report.score,
+                    "issues": output_report.output_issues,
+                })
+                # 回滚上下文后重试（避免脏数据累积）
+                continue
+            return agent_output, output_report
+
+    def _get_agent_class_name(self, agent_type: AgentType) -> str:
+        """将 AgentType 映射为质量管理器中的 Agent 名称."""
+        mapping = {
+            AgentType.REQUIREMENT_ANALYZER: "RequirementAnalyzer",
+            AgentType.CODE_PARSER: "CodeParser",
+            AgentType.TEST_GENERATOR: "TestGenerator",
+            AgentType.TEST_EXECUTOR: "TestExecutor",
+            AgentType.DEFECT_DETECTOR: "DefectDetector",
+            AgentType.REPORT_GENERATOR: "ReportGenerator",
+        }
+        return mapping.get(agent_type, "")
 
     def _get_agent_factory(self):
         if self._agent_factory_cache is None:
@@ -393,6 +542,8 @@ class WorkflowEngine:
             "total_duration": total_duration,
             "test_cases_count": len(self.context.test_cases) if self.context else 0,
             "defects_count": len(self.context.defects) if self.context else 0,
+            "quality": self.quality_manager.get_summary(),
+            "agent_call_stats": self.quality_manager.get_agent_call_stats(),
         }
         if self.milestone_manager:
             summary["milestones"] = self.milestone_manager.summary()
