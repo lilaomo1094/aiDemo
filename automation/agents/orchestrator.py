@@ -19,6 +19,7 @@ from .report_generator import ReportGenerator
 from .requirement_analyzer import RequirementAnalyzer
 from .test_executor import TestExecutor
 from .test_generator import TestGenerator
+from .ui_explorer import UIExplorerAgent
 
 
 class FunctionCallingOrchestrator(BaseAgent):
@@ -30,13 +31,15 @@ class FunctionCallingOrchestrator(BaseAgent):
 - parse_code: 解析代码仓库或 OpenAPI
 - generate_test_cases: 生成测试用例
 - execute_tests: 执行测试用例
+- explore_ui: AI 驱动的探索式 UI 测试（用自然语言描述目标，自动分析页面并执行交互）
 - detect_defects: 分析并发现缺陷
 - generate_report: 生成测试报告
 - submit_test_task: 提交异步测试任务（适合 IM/邮件场景）
 - query_task_status: 查询任务状态
 
 请根据用户指令，按顺序调用合适的工具。每次可以调用一个或多个工具。
-如果某一步依赖上一步结果，请等待上一步结果返回后再继续。"""
+如果某一步依赖上一步结果，请等待上一步结果返回后再继续。
+对于 UI 探索式测试请求（如"测试XX页面"），优先使用 explore_ui 工具。"""
 
     MAX_ITERATIONS = 10
 
@@ -132,6 +135,7 @@ class FunctionCallingOrchestrator(BaseAgent):
             "parse_code": self._tool_parse_code,
             "generate_test_cases": self._tool_generate_test_cases,
             "execute_tests": self._tool_execute_tests,
+            "explore_ui": self._tool_explore_ui,
             "detect_defects": self._tool_detect_defects,
             "generate_report": self._tool_generate_report,
             "submit_test_task": self._tool_submit_test_task,
@@ -210,6 +214,19 @@ class FunctionCallingOrchestrator(BaseAgent):
         if isinstance(result, dict) and "execution_results" in result:
             self.context.execution_results = result["execution_results"]
         return {"tool": "execute_tests", "status": "ok", "summary": result.get("summary", {})}
+
+    def _tool_explore_ui(self, args: Dict[str, Any]) -> Dict[str, Any]:
+        agent = UIExplorerAgent(self.config, self.knowledge_store)
+        from automation.workflow.engine import WorkflowTask
+        task = WorkflowTask(
+            task_id="fc_explore",
+            agent_type=None,
+            name="UI 探索测试",
+            description=args.get("goal", ""),
+            input_data=args,
+        )
+        result = agent.execute(task, self.context)
+        return {"tool": "explore_ui", "status": result.get("status", "ok"), "result": result}
 
     def _tool_detect_defects(self, args: Dict[str, Any]) -> Dict[str, Any]:
         agent = DefectDetector(self.config, self.knowledge_store)

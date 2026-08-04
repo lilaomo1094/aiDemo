@@ -1,7 +1,7 @@
 """可插拔测试执行器."""
 from .api_executor import APIExecutor
-from .base import TestExecutor, TestStatus
-from .factory import create_executor
+from .base import TestExecutor, TestResult, TestStatus
+from .factory import create_executor, register_executor
 from .integration_executor import IntegrationExecutor
 
 try:
@@ -17,12 +17,36 @@ try:
 except ImportError:
     UIExecutor = None  # type: ignore
 
+try:
+    from .exploratory_ui_executor import ExploratoryUIExecutor
+except ImportError:
+    ExploratoryUIExecutor = None  # type: ignore
+
+try:
+    from .page_analyzer import PageAnalyzer, PageState
+except ImportError:
+    PageAnalyzer = None  # type: ignore
+    PageState = None  # type: ignore
+
+try:
+    from .selector_healer import SelectorHealer, HealedSelector
+except ImportError:
+    SelectorHealer = None  # type: ignore
+    HealedSelector = None  # type: ignore
+
 __all__ = [
     "TestExecutor",
+    "TestResult",
     "TestStatus",
     "APIExecutor",
     "DBExecutor",
     "IntegrationExecutor",
     "UIExecutor",
+    "ExploratoryUIExecutor",
+    "PageAnalyzer",
+    "PageState",
+    "SelectorHealer",
+    "HealedSelector",
     "create_executor",
+    "register_executor",
 ]

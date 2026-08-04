@@ -16,6 +16,7 @@ class AgentTools:
             cls.parse_code(),
             cls.generate_test_cases(),
             cls.execute_tests(),
+            cls.explore_ui(),
             cls.detect_defects(),
             cls.generate_report(),
             cls.submit_test_task(),
@@ -146,6 +147,39 @@ class AgentTools:
                 },
             },
             required=["config_path"],
+        )
+
+    @classmethod
+    def explore_ui(cls) -> ToolDefinition:
+        return ToolDefinition(
+            name="explore_ui",
+            description=(
+                "对 Web UI 页面进行 AI 驱动的探索式测试。"
+                "只需用自然语言描述测试目标（如'测试登录功能是否正常'），"
+                "Agent 会自动打开页面、分析 DOM 结构、通过 LLM(Vision) 观察页面截图决策下一步操作，"
+                "执行交互并报告结果。支持：功能验证、回归测试、冒烟测试、UI 可用性检查。"
+                "当用户请求动态 UI 测试、自然语言 UI 测试时优先使用此工具。"
+            ),
+            parameters={
+                "goal": {
+                    "type": "string",
+                    "description": "测试目标，用自然语言描述。"
+                    "如：'使用 admin/admin123 登录，验证能否进入管理后台首页'",
+                },
+                "start_url": {
+                    "type": "string",
+                    "description": "起始页面 URL，如 https://example.com/login",
+                },
+                "max_steps": {
+                    "type": "integer",
+                    "description": "最大探索步数，默认 20",
+                },
+                "expected_outcome": {
+                    "type": "string",
+                    "description": "期望的测试结果描述，如：'跳转到首页，显示欢迎信息'",
+                },
+            },
+            required=["goal"],
         )
 
     @classmethod

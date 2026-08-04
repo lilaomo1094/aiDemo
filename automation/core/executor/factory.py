@@ -14,6 +14,11 @@ try:
 except ImportError:
     UIExecutor = None
 
+try:
+    from .exploratory_ui_executor import ExploratoryUIExecutor
+except ImportError:
+    ExploratoryUIExecutor = None
+
 _REGISTRY = {
     "api": APIExecutor,
     "database": DBExecutor,
@@ -21,6 +26,9 @@ _REGISTRY = {
     "integration": IntegrationExecutor,
     "e2e": IntegrationExecutor,
     "ui": UIExecutor,
+    "exploratory_ui": ExploratoryUIExecutor,
+    "explore_ui": ExploratoryUIExecutor,
+    "exploratory": ExploratoryUIExecutor,
 }
 
 
