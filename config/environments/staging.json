@@ -1,0 +1,49 @@
+{
+  "name": "staging",
+  "description": "预发布环境：更接近生产，建议录制视频与 HAR 便于回溯",
+  "database": {
+    "enabled": false,
+    "type": "mysql",
+    "host": "staging-db.company.com",
+    "port": 3306,
+    "database": "ums_db_staging",
+    "username": "test_user",
+    "password": "${DATABASE_PASSWORD}",
+    "tables": []
+  },
+  "test_accounts": [
+    {
+      "name": "default",
+      "username": "testuser",
+      "password": "${TEST_PASSWORD}",
+      "phone": "13411985758",
+      "email": "test@example.com",
+      "role": "user"
+    },
+    {
+      "name": "admin",
+      "username": "admin",
+      "password": "${TEST_PASSWORD}",
+      "phone": "13411985759",
+      "email": "admin@example.com",
+      "role": "admin"
+    }
+  ],
+  "network": {
+    "type": "public",
+    "browser_mode": "headless",
+    "browser_type": "chromium",
+    "proxy": null,
+    "bypass_hosts": [],
+    "record_video": true,
+    "record_har": true,
+    "capture_console": true,
+    "capture_network": true,
+    "slow_mo": 0,
+    "local_browser_path": null
+  },
+  "extra": {
+    "api_base_url": "https://staging-api.company.com",
+    "ui_base_url": "https://staging-ui.company.com"
+  }
+}

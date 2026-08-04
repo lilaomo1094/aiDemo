@@ -1,0 +1,72 @@
+{
+  "project": {
+    "project_name": "aiAgent 全链路自动化测试平台",
+    "project_code": "AIAGENT",
+    "test_type": "功能测试",
+    "test_environment": "test"
+  },
+  "requirement": {
+    "requirement_doc_path": "",
+    "requirement_doc": ""
+  },
+  "database": {
+    "enabled": false,
+    "type": "mysql",
+    "host": "localhost",
+    "port": 3306,
+    "database": "",
+    "username": "",
+    "password": "",
+    "tables": []
+  },
+  "frontend_repo": {
+    "enabled": false,
+    "type": "github",
+    "url": "",
+    "branch": "main",
+    "language": "react",
+    "test_framework": "jest",
+    "api_spec": "",
+    "local_path": ""
+  },
+  "backend_repo": {
+    "enabled": false,
+    "type": "github",
+    "url": "",
+    "branch": "main",
+    "language": "python",
+    "test_framework": "pytest",
+    "api_spec": "",
+    "local_path": ""
+  },
+  "test": {
+    "coverage_target": 80,
+    "test_types": ["unit", "integration", "api", "ui", "e2e"],
+    "retry_failed": true,
+    "retry_times": 2,
+    "timeout": 30,
+    "parallel": false,
+    "max_workers": 4
+  },
+  "output": {
+    "test_cases_file": "output/test_cases.csv",
+    "defects_file": "output/defects.csv",
+    "report_file": "output/test_report.html",
+    "results_file": "output/results.json",
+    "test_cases_excel": "output/test_cases.xlsx",
+    "defects_excel": "output/defects.xlsx"
+  },
+  "llm": {
+    "provider": "openai",
+    "model": "gpt-4o",
+    "api_key": "",
+    "base_url": "https://api.openai.com/v1",
+    "temperature": 0.2,
+    "max_tokens": 4000,
+    "timeout": 120
+  },
+  "extra": {
+    "api_base_url": "",
+    "ui_base_url": ""
+  }
+}

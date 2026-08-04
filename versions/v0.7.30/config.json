@@ -1,0 +1,35 @@
+{
+  "version": "v0.7.30",
+  "description": "",
+  "environment": "dev",
+  "sources": {
+    "swagger": {
+      "enabled": false,
+      "url": "",
+      "file_path": "",
+      "format": "openapi"
+    },
+    "frontend_repo": {
+      "enabled": false,
+      "type": "github",
+      "url": "",
+      "branch": "main",
+      "language": "react",
+      "test_framework": "jest",
+      "api_spec": "",
+      "local_path": ""
+    },
+    "backend_repo": {
+      "enabled": false,
+      "type": "github",
+      "url": "",
+      "branch": "main",
+      "language": "python",
+      "test_framework": "pytest",
+      "api_spec": "",
+      "local_path": ""
+    }
+  },
+  "created_at": "2026-07-27T09:01:30.843738",
+  "updated_at": "2026-07-27T09:01:30.843748"
+}

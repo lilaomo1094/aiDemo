@@ -1,0 +1,15 @@
+{
+  "versions": [
+    {
+      "version": "v0.7.30",
+      "description": "",
+      "created_at": "2026-07-24T09:22:59.894548",
+      "requirement_file": "requirement.md",
+      "config_file": null,
+      "output_dir": "output",
+      "parent_version": null,
+      "status": "draft"
+    }
+  ],
+  "current_version": "v0.7.30"
+}

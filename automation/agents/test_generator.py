@@ -1,0 +1,404 @@
+# -*- coding: utf-8 -*-
+"""测试用例生成 Agent：基于需求、代码、数据库生成结构化用例."""
+
+import json
+import uuid
+from typing import Dict, List
+
+from automation.core.utils import compact_json, count_by, extract_module_from_path, truncate_list
+
+from .base import BaseAgent
+
+
+class TestGenerator(BaseAgent):
+    SYSTEM_PROMPT = """你是一名资深测试用例设计专家。请根据输入的需求、API 规范和数据库结构生成测试用例，并以 JSON 数组输出。
+每个用例字段：
+{
+  "id": "TC-API-001",
+  "type": "API|Database|UI|Integration",
+  "module": "模块名",
+  "name": "用例名称",
+  "description": "用例描述",
+  "priority": "high|medium|low",
+  "preconditions": ["前置条件"],
+  "test_steps": ["步骤1", "步骤2"],
+  "expected_result": "预期结果",
+  "expected_status": 200,
+  "action": {"method": "POST", "path": "/api/xxx", "data": {}, "headers": {}, "expected_status": 200, "sql": "", "steps": [], "url": ""},
+  "tags": ["api", "auth"]
+}
+注意：
+1. 为每个 API 生成正例和反例（参数为空、参数错误、权限不足、资源不存在）。
+2. 为数据库表生成约束完整性用例。
+3. 如果前端组件信息存在，补充 UI 用例。
+4. 只输出 JSON 数组，不要额外解释。"""
+
+    def execute(self, task, context) -> Dict:
+        requirements = context.metadata.get("requirements", [])
+        code_info = getattr(context, "code_info", {}) or {}
+        backend = code_info.get("backend", {})
+        database = code_info.get("database", {})
+        frontend = code_info.get("frontend", {})
+
+        api_endpoints = backend.get("api_endpoints", [])
+        data_models = backend.get("data_models", []) or database.get("tables", [])
+        frontend_components = frontend.get("components", [])
+
+        # 如果存在 LLM，优先使用 LLM 生成
+        if self.llm:
+            test_cases = self._generate_with_llm(
+                requirements, api_endpoints, data_models, frontend_components
+            )
+        else:
+            test_cases = []
+
+        # 兜底规则生成
+        if not test_cases:
+            test_cases = self._generate_rule_based(
+                requirements, api_endpoints, data_models, frontend_components
+            )
+
+        return {
+            "test_cases": test_cases,
+            "summary": {
+                "total_cases": len(test_cases),
+                "by_type": count_by(test_cases, "type"),
+            },
+        }
+
+    def _generate_with_llm(
+        self,
+        requirements: List[Dict],
+        api_endpoints: List[Dict],
+        data_models: List[Dict],
+        frontend_components: List[Dict],
+    ) -> List[Dict]:
+        prompt = self._build_prompt(requirements, api_endpoints, data_models, frontend_components)
+        query = " ".join(r.get("title", "") for r in requirements[:3])
+        system = self._build_system_prompt(self.SYSTEM_PROMPT, query=query)
+        result = self._call_llm_json(prompt, system=system, fallback=[])
+        if not isinstance(result, list):
+            return []
+        for idx, tc in enumerate(result):
+            if "id" not in tc:
+                tc["id"] = f"TC-{tc.get('type', 'GEN')}-{idx + 1:03d}"
+        return result
+
+    def _build_prompt(
+        self,
+        requirements: List[Dict],
+        api_endpoints: List[Dict],
+        data_models: List[Dict],
+        frontend_components: List[Dict],
+    ) -> str:
+        # 压缩上下文：限制 token 预算，避免 LLM prompt 过长
+        max_tokens_per_section = 1200
+        req_json = compact_json(truncate_list(requirements, max_tokens_per_section, ["id", "title", "priority", "test_type"]), max_tokens_per_section)
+        api_json = compact_json(truncate_list(api_endpoints, max_tokens_per_section, ["method", "path", "summary", "parameters"]), max_tokens_per_section)
+        model_json = compact_json(truncate_list(data_models, max_tokens_per_section, ["name", "columns"]), max_tokens_per_section)
+        frontend_json = compact_json(truncate_list(frontend_components, max_tokens_per_section, ["name", "type"]), max_tokens_per_section)
+
+        return f"""请根据以下信息生成测试用例：
+
+## 需求列表
+{req_json}
+
+## API 接口
+{api_json}
+
+## 数据模型
+{model_json}
+
+## 前端组件
+{frontend_json}
+"""
+
+    def _generate_rule_based(
+        self,
+        requirements: List[Dict],
+        api_endpoints: List[Dict],
+        data_models: List[Dict],
+        frontend_components: List[Dict],
+    ) -> List[Dict]:
+        test_cases = []
+        endpoints = api_endpoints or [
+            {"method": "POST", "path": "/api/auth/login"},
+            {"method": "POST", "path": "/api/auth/register"},
+            {"method": "GET", "path": "/api/users"},
+            {"method": "POST", "path": "/api/users"},
+            {"method": "GET", "path": "/api/users/{{id}}"},
+            {"method": "PUT", "path": "/api/users/{{id}}"},
+            {"method": "DELETE", "path": "/api/users/{{id}}"},
+        ]
+
+        test_type_map = {
+            "POST": ["正常", "参数为空", "参数错误", "权限验证"],
+            "GET": ["正常", "无数据", "权限验证", "分页"],
+            "PUT": ["正常", "不存在", "参数错误", "权限验证"],
+            "DELETE": ["正常", "不存在", "权限验证"],
+        }
+
+        for endpoint in endpoints:
+            method = endpoint.get("method", "GET")
+            path = endpoint.get("path", "")
+            for test_type in test_type_map.get(method, ["正常"]):
+                tc_id = f"TC-API-{len(test_cases) + 1:03d}"
+                priority = "high" if "权限" in test_type or "正常" in test_type else "medium"
+                expected_status = self._expected_status(method, test_type)
+                test_cases.append({
+                    "id": tc_id,
+                    "type": "API",
+                    "module": extract_module_from_path(path),
+                    "name": f"{method} {path} - {test_type}",
+                    "description": f"API 接口 {method} {path} 的{test_type}测试",
+                    "priority": priority,
+                    "preconditions": self._api_preconditions(method, path),
+                    "test_steps": self._api_steps(method, path, test_type),
+                    "expected_result": self._api_expected_result(method, test_type),
+                    "expected_status": expected_status,
+                    "action": {
+                        "method": method,
+                        "path": path,
+                        "data": self._api_data(method, path, test_type),
+                        "headers": {},
+                        "expected_status": expected_status,
+                    },
+                    "tags": [method, extract_module_from_path(path), test_type],
+                })
+
+        # 根据需求/前端组件生成 UI 测试
+        test_cases.extend(self._generate_ui_tests(requirements, frontend_components))
+
+        for model in data_models:
+            table = model.get("name", "")
+            test_cases.append({
+                "id": f"TC-DB-{len(test_cases) + 1:03d}",
+                "type": "Database",
+                "module": table,
+                "name": f"{table} 表数据完整性测试",
+                "description": f"验证 {table} 表的数据完整性、约束和关系",
+                "priority": "high",
+                "preconditions": ["数据库连接正常"],
+                "test_steps": [
+                    f"验证 {table} 表主键约束",
+                    f"验证 {table} 表外键约束",
+                    f"验证 {table} 表非空约束",
+                ],
+                "expected_result": "所有约束条件正常工作",
+                "action": {"sql": f"SELECT * FROM {table} LIMIT 1"},
+                "tags": ["database", table, "constraint"],
+            })
+
+        return test_cases
+
+    def _get_test_account(self, name: str = "default", role: str = "") -> Dict[str, str]:
+        """从配置中读取测试账号，找不到时返回兜底账号."""
+        accounts = getattr(self.config, "test_accounts", [])
+        for acc in accounts:
+            acc_dict = acc.model_dump() if hasattr(acc, "model_dump") else dict(acc)
+            if name and acc_dict.get("name") == name:
+                return acc_dict
+            if role and acc_dict.get("role") == role:
+                return acc_dict
+        if accounts:
+            acc_dict = accounts[0].model_dump() if hasattr(accounts[0], "model_dump") else dict(accounts[0])
+            return acc_dict
+        return {"username": "testuser", "password": "Test123456", "phone": "13400000000", "email": "test@example.com"}
+
+    def _generate_ui_tests(self, requirements: List[Dict], frontend_components: List[Dict]) -> List[Dict]:
+        """基于需求关键字和前端组件生成 UI 测试用例."""
+        has_login = any(
+            "登录" in r.get("title", "") or "login" in r.get("title", "").lower() or
+            "登录" in r.get("description", "") or "login" in r.get("description", "").lower()
+            for r in requirements
+        )
+        has_components = bool(frontend_components)
+        if not has_login and not has_components:
+            return []
+
+        ui_base_url = ""
+        if hasattr(self.config, "extra") and self.config.extra:
+            ui_base_url = self.config.extra.get("ui_base_url", "")
+        login_url = f"{ui_base_url.rstrip('/')}/#/login" if ui_base_url else "/#/login"
+
+        default_account = self._get_test_account("default")
+        valid_phone = default_account.get("phone") or "13400000000"
+        valid_password = default_account.get("password") or "Test123456"
+
+        cases = [
+            {
+                "id": "TC-UI-001",
+                "type": "UI",
+                "module": "login",
+                "name": "登录页面-正常登录",
+                "description": "输入正确手机号和密码，验证登录成功",
+                "priority": "high",
+                "preconditions": ["登录页面可访问"],
+                "test_steps": ["打开登录页面", "输入手机号", "输入密码", "点击登录按钮"],
+                "expected_result": "页面显示登录成功并跳转",
+                "action": {
+                        "url": login_url,
+                        "steps": [
+                            {"op": "fill", "selector": "#phone", "value": valid_phone},
+                            {"op": "fill", "selector": "#password", "value": valid_password},
+                            {"op": "click", "selector": "#login-btn"},
+                            {"op": "assert_text", "selector": "#message", "value": "登录成功"},
+                        ],
+                    },
+                "tags": ["ui", "login", "positive"],
+            },
+            {
+                "id": "TC-UI-002",
+                "type": "UI",
+                "module": "login",
+                "name": "登录页面-手机号为空",
+                "description": "手机号为空时点击登录，验证给出错误提示",
+                "priority": "high",
+                "preconditions": ["登录页面可访问"],
+                "test_steps": ["打开登录页面", "清空手机号", "输入密码", "点击登录按钮"],
+                "expected_result": "页面提示请输入手机号",
+                "action": {
+                    "url": login_url,
+                    "steps": [
+                        {"op": "fill", "selector": "#phone", "value": ""},
+                        {"op": "fill", "selector": "#password", "value": valid_password},
+                        {"op": "click", "selector": "#login-btn"},
+                        {"op": "assert_text", "selector": "#message", "value": "请输入手机号"},
+                    ],
+                },
+                "tags": ["ui", "login", "validation"],
+            },
+            {
+                "id": "TC-UI-003",
+                "type": "UI",
+                "module": "login",
+                "name": "登录页面-密码为空",
+                "description": "密码为空时点击登录，验证给出错误提示",
+                "priority": "high",
+                "preconditions": ["登录页面可访问"],
+                "test_steps": ["打开登录页面", "输入手机号", "清空密码", "点击登录按钮"],
+                "expected_result": "页面提示请输入密码",
+                "action": {
+                    "url": login_url,
+                    "steps": [
+                        {"op": "fill", "selector": "#phone", "value": valid_phone},
+                        {"op": "fill", "selector": "#password", "value": ""},
+                        {"op": "click", "selector": "#login-btn"},
+                        {"op": "assert_text", "selector": "#message", "value": "请输入密码"},
+                    ],
+                },
+                "tags": ["ui", "login", "validation"],
+            },
+            {
+                "id": "TC-UI-004",
+                "type": "UI",
+                "module": "login",
+                "name": "登录页面-手机号格式错误",
+                "description": "输入非法手机号，验证给出格式错误提示",
+                "priority": "medium",
+                "preconditions": ["登录页面可访问"],
+                "test_steps": ["打开登录页面", "输入错误格式手机号", "输入密码", "点击登录按钮"],
+                "expected_result": "页面提示手机号格式不正确",
+                "action": {
+                    "url": login_url,
+                    "steps": [
+                        {"op": "fill", "selector": "#phone", "value": "123"},
+                        {"op": "fill", "selector": "#password", "value": valid_password},
+                        {"op": "click", "selector": "#login-btn"},
+                        {"op": "assert_text", "selector": "#message", "value": "手机号格式不正确"},
+                    ],
+                },
+                "tags": ["ui", "login", "validation"],
+            },
+            {
+                "id": "TC-UI-005",
+                "type": "UI",
+                "module": "login",
+                "name": "登录页面-密码错误",
+                "description": "输入错误密码，验证给出账号或密码错误提示",
+                "priority": "high",
+                "preconditions": ["登录页面可访问"],
+                "test_steps": ["打开登录页面", "输入正确手机号", "输入错误密码", "点击登录按钮"],
+                "expected_result": "页面提示账号或密码错误",
+                "action": {
+                    "url": login_url,
+                    "steps": [
+                        {"op": "fill", "selector": "#phone", "value": valid_phone},
+                        {"op": "fill", "selector": "#password", "value": "wrongpass"},
+                        {"op": "click", "selector": "#login-btn"},
+                        {"op": "assert_text", "selector": "#message", "value": "账号或密码错误"},
+                    ],
+                },
+                "tags": ["ui", "login", "negative"],
+            },
+        ]
+        return cases
+
+    def _api_preconditions(self, method: str, path: str) -> List[str]:
+        pre = ["API 服务正常运行"]
+        if method in {"PUT", "DELETE"}:
+            pre.append("测试数据已创建")
+        if "/auth" not in path:
+            pre.append("用户已登录")
+        return pre
+
+    def _api_steps(self, method: str, path: str, test_type: str) -> List[str]:
+        steps = ["准备测试数据"]
+        if "正常" in test_type:
+            steps.append(f"发送 {method} 请求到 {path}")
+        elif "为空" in test_type:
+            steps.append(f"发送 {method} 请求到 {path}，参数为空")
+        elif "错误" in test_type:
+            steps.append(f"发送 {method} 请求到 {path}，使用错误参数")
+        elif "权限" in test_type:
+            steps.append(f"发送 {method} 请求到 {path}，无认证信息")
+        elif "不存在" in test_type:
+            steps.append(f"发送 {method} 请求到 {path}，使用不存在的 ID")
+        elif "分页" in test_type:
+            steps.append(f"发送 GET 请求到 {path}?page=1&page_size=10")
+        steps.extend(["验证响应状态码", "验证响应数据格式", "验证业务逻辑"])
+        return steps
+
+    def _api_expected_result(self, method: str, test_type: str) -> str:
+        mapping = {
+            "正常": "返回 200/201，数据正确",
+            "为空": "返回 400，提示参数错误",
+            "错误": "返回 400，提示参数错误",
+            "权限": "返回 401，未授权",
+            "不存在": "返回 404，资源不存在",
+            "分页": "返回 200，分页数据正确",
+        }
+        return mapping.get(test_type, "按预期返回")
+
+    def _expected_status(self, method: str, test_type: str) -> int:
+        mapping = {
+            "正常": 200 if method != "POST" else 201,
+            "为空": 400,
+            "错误": 400,
+            "权限": 401,
+            "不存在": 404,
+            "分页": 200,
+        }
+        return mapping.get(test_type, 200)
+
+    def _api_data(self, method: str, path: str, test_type: str) -> Dict:
+        account = self._get_test_account("default")
+        username = account.get("username") or "testuser"
+        password = account.get("password") or "Test123456"
+        if "为空" in test_type:
+            return {}
+        if "错误" in test_type:
+            return {"invalid": "value"}
+        if "权限" in test_type:
+            return {}
+        if "不存在" in test_type:
+            return {"id": 999999}
+        if "login" in path:
+            return {"username": username, "password": password}
+        if "register" in path:
+            return {"username": f"testuser{uuid.uuid4().hex[:8]}", "email": f"test{uuid.uuid4().hex[:8]}@example.com", "password": password}
+        if "users" in path:
+            if method == "POST":
+                return {"username": "newuser", "email": f"new{uuid.uuid4().hex[:8]}@example.com"}
+            return {"page": 1, "page_size": 10}
+        return {}
