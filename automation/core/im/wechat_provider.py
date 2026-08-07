@@ -20,6 +20,9 @@ class WeChatProvider(IMProvider):
         self.corp_id = config.get("corp_id", "")
         self.corp_secret = config.get("corp_secret", "")
         self.agent_id = config.get("agent_id", "")
+        # 企业微信回调 Token，用于校验 msg_signature。
+        # 配置后才会启用签名校验；未配置时保持明文模式兼容。
+        self.token = config.get("token", "")
         self.mock = config.get("mock", False)
 
     def send_text(self, receiver: str, content: str, **kwargs) -> bool:
@@ -91,6 +94,45 @@ class WeChatProvider(IMProvider):
             raw=payload,
         )
 
-    def verify_webhook(self, payload: Dict[str, Any], signature: str = None) -> bool:
-        # 企业微信需校验 msg_signature，简化默认通过
-        return True
+    def verify_webhook(self, body: bytes, headers: Dict[str, str]) -> bool:
+        """校验企业微信事件回调签名 (msg_signature).
+
+        企业微信把 msg_signature / timestamp / nonce 放在 URL query 中。
+        WebhookServer 会把 query 参数合并进 headers（前缀 ``qs:``）以便这里读取。
+        未配置 token 时放行（兼容明文模式）；配置 token 后必须校验。
+        """
+        if not self.token:
+            return True
+
+        import hashlib
+        import hmac
+
+        msg_signature = headers.get("qs:msg_signature") or ""
+        timestamp = headers.get("qs:timestamp") or ""
+        nonce = headers.get("qs:nonce") or ""
+        if not msg_signature:
+            return False
+        # 企业微信签名算法：sha1(sort([token, timestamp, nonce, body]))
+        expected = hashlib.sha1(
+            "".join(sorted([self.token, timestamp, nonce, body.decode("utf-8", errors="replace")])).encode("utf-8")
+        ).hexdigest()
+        return hmac.compare_digest(expected, msg_signature)
+
+    def verify_echostr(self, msg_signature: str, timestamp: str, nonce: str, echostr: str) -> bool:
+        """校验企业微信 URL 验证请求的 msg_signature.
+
+        企业微信注册回调时会以 GET 形式发送 msg_signature/timestamp/nonce/echostr，
+        服务端必须用 sha1(sort([token, timestamp, nonce, echostr])) 校验通过后才能回显。
+        未配置 token 时放行（兼容明文模式）。
+        """
+        if not self.token:
+            return True
+        if not msg_signature:
+            return False
+        import hashlib
+        import hmac
+
+        expected = hashlib.sha1(
+            "".join(sorted([self.token, timestamp, nonce, echostr])).encode("utf-8")
+        ).hexdigest()
+        return hmac.compare_digest(expected, msg_signature)

@@ -40,7 +40,11 @@ class TaskScheduler:
         self.state_dir.mkdir(parents=True, exist_ok=True)
         self.tasks: Dict[str, TaskState] = {}
         self.task_queue: PriorityQueue = PriorityQueue()
-        self.lock = threading.Lock()
+        # 使用可重入锁：_evaluate_task / _preempt_resources_for 会在持有锁时
+        # 调用 hook_manager.emit，而已注册的 hook 处理函数可能反向调用
+        # submit()/cancel_task() 等同样需要获取 self.lock 的方法。
+        # 不可重入的 Lock 会在这种回调场景下死锁，导致 consume 线程永久挂起。
+        self.lock = threading.RLock()
         self.executor: Optional[ThreadPoolExecutor] = None
         self.hook_manager = HookManager()
         self._shutdown = False
@@ -48,7 +52,7 @@ class TaskScheduler:
         # 资源槽位管理
         self.resource_limits: Dict[str, int] = resource_limits or {}
         self._running_resources: Dict[str, int] = {}
-        self._resource_lock = threading.Lock()
+        self._resource_lock = threading.RLock()
 
         # 里程碑与风险聚合
         self.milestone_summaries: Dict[str, Dict[str, Any]] = {}
@@ -104,19 +108,33 @@ class TaskScheduler:
             except Exception:
                 continue
 
-            action, task = self._evaluate_task(task_id, priority)
-            if action == "sleep":
-                time.sleep(0.1)
-                continue
-            if action == "continue":
-                continue
-            if action == "skip":
-                continue
+            # 整个循环体必须在异常隔离的保护下执行：_evaluate_task / _save_state /
+            # executor.submit 任意一处抛异常（如磁盘满、executor 已 shutdown），
+            # 都会让唯一的消费线程静默退出，调度器永久停止处理任务，且已被标记为
+            # RUNNING 并占用资源的任务再也得不到释放。这里捕获并记录后继续，
+            # 把出错的 task_id 重新入队以便下一轮重试。
+            try:
+                action, task = self._evaluate_task(task_id, priority)
+                if action == "sleep":
+                    # _evaluate_task 在返回 sleep 前已把任务重新入队，这里只需让出 CPU
+                    time.sleep(0.1)
+                    continue
+                if action == "continue":
+                    continue
+                if action == "skip":
+                    continue
 
-            # action == "run"
-            self._save_state(task)
-            self.hook_manager.emit("task_started", task.to_dict())
-            self.executor.submit(self._run_task, task_id)
+                # action == "run"
+                self._save_state(task)
+                self.hook_manager.emit("task_started", task.to_dict())
+                if self._shutdown:
+                    # stop() 在此处与 emit 之间被调用：不要再提交到已关闭的 executor
+                    break
+                self.executor.submit(self._run_task, task_id)
+            except Exception as e:
+                print(f"[TaskScheduler] consume_loop 处理任务 {task_id} 时异常，已跳过: {e}")
+                # 让出 CPU，避免在持续异常的 task 上空转
+                time.sleep(0.1)
 
     def _evaluate_task(self, task_id: str, priority: int):
         with self.lock:
@@ -344,13 +362,17 @@ class TaskScheduler:
         task.completed_at = datetime.now().isoformat()
         self._release_resources(task)
 
-        # 聚合里程碑与风险到调度器全局视图
+        # 聚合里程碑与风险到调度器全局视图。
+        # milestone_summaries / risk_summaries 会被 get_global_*_summary 在其它线程
+        # 迭代，必须在 self.lock 下写入，否则读侧会抛
+        # "RuntimeError: dictionary changed size during iteration"。
         milestones = result.get("milestones") if isinstance(result, dict) else None
         if milestones:
-            self.milestone_summaries[task.run_id] = milestones
-            risks = milestones.get("risks")
-            if risks:
-                self.risk_summaries[task.run_id] = risks
+            with self.lock:
+                self.milestone_summaries[task.run_id] = milestones
+                risks = milestones.get("risks")
+                if risks:
+                    self.risk_summaries[task.run_id] = risks
 
         self._save_state(task)
         self.hook_manager.emit("task_completed" if task.status == TaskStatus.COMPLETED else "task_failed", task.to_dict())
@@ -370,7 +392,11 @@ class TaskScheduler:
         return self.tasks.get(task_id)
 
     def list_tasks(self) -> List[TaskState]:
-        return list(self.tasks.values())
+        # tasks 字典会被 submit (持锁写入) 与 worker 线程并发访问；
+        # 直接 list(self.tasks.values()) 在并发写入时会抛
+        # "RuntimeError: dictionary changed size during iteration"。在锁内做快照。
+        with self.lock:
+            return list(self.tasks.values())
 
     def cancel_task(self, task_id: str) -> bool:
         with self.lock:
@@ -384,16 +410,19 @@ class TaskScheduler:
 
     def get_global_risk_summary(self) -> Dict[str, Any]:
         """返回调度器内所有任务的风险聚合摘要."""
+        # 在锁内对 risk_summaries 做快照再迭代，避免与 _finish_task 的写入并发
         total_open = 0
         total_critical = 0
-        for summary in self.risk_summaries.values():
+        with self.lock:
+            snapshot = dict(self.risk_summaries)
+        for summary in snapshot.values():
             total_open += summary.get("open_count", 0)
             total_critical += summary.get("critical_count", 0)
         return {
-            "tasks_with_risks": len(self.risk_summaries),
+            "tasks_with_risks": len(snapshot),
             "total_open_risks": total_open,
             "total_critical_risks": total_critical,
-            "risk_details": self.risk_summaries,
+            "risk_details": snapshot,
         }
 
     def get_global_milestone_summary(self) -> Dict[str, Any]:
@@ -402,14 +431,16 @@ class TaskScheduler:
         failed = 0
         running = 0
         total = 0
-        for ms in self.milestone_summaries.values():
+        with self.lock:
+            snapshot = dict(self.milestone_summaries)
+        for ms in snapshot.values():
             summary = ms.get("summary", {})
             completed += summary.get("completed", 0)
             failed += summary.get("failed", 0)
             running += summary.get("running", 0)
             total += summary.get("total_milestones", 0)
         return {
-            "tasks": len(self.milestone_summaries),
+            "tasks": len(snapshot),
             "total_milestones": total,
             "completed": completed,
             "failed": failed,

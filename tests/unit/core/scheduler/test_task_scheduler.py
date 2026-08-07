@@ -4,7 +4,8 @@ import time
 
 import pytest
 
-from automation.core.scheduler import TaskScheduler, TaskStatus
+from automation.core.monitoring import EventHook
+from automation.core.scheduler import TaskScheduler, TaskState, TaskStatus
 
 
 @pytest.fixture
@@ -175,3 +176,167 @@ class TestTaskResources:
         assert s.get_task(t_low).status == TaskStatus.QUEUED, "低优先级任务应被重新入队"
         assert s._running_resources.get("ui", 0) == 1, "资源应被高优先级任务占用"
         assert s.tasks[t_low].resources_acquired is False, "被抢占任务应标记资源已释放"
+
+
+class TestSchedulerConcurrencyFixes:
+    """回归测试：调度器并发缺陷修复."""
+
+    def test_hook_callback_into_submit_does_not_deadlock(self, tmp_path):
+        """回归测试：hook 处理函数在持有锁时反向调用 submit() 不应死锁.
+
+        旧实现使用不可重入的 threading.Lock()，_evaluate_task 在持有 self.lock 时
+        调用 hook_manager.emit('task_blocked', ...)，若 hook 处理函数再调用
+        scheduler.submit() (同样需要 self.lock)，consume 线程会永久死锁。
+        修复后使用 RLock，同线程可重入。
+        """
+        config_path = tmp_path / "project_config.py"
+        config_path.write_text("PROJECT_CONFIG = {}", encoding="utf-8")
+        s = TaskScheduler(max_workers=2, state_dir=str(tmp_path / "scheduler"))
+
+        callback_triggered = threading.Event()
+
+        def reentrant_handler(event, data):
+            # 在 hook 内反向调用 submit，模拟 "task_blocked 时自动重新提交一个降级任务"
+            if event == "task_blocked":
+                try:
+                    s.submit(str(config_path), priority=9)
+                finally:
+                    callback_triggered.set()
+
+        s.hook_manager.register(EventHook(
+            name="reentrant",
+            event_filter=["task_blocked"],
+            handler=reentrant_handler,
+        ))
+
+        # 构造一个依赖不存在的任务 -> 依赖失败 -> 触发 task_blocked 事件
+        s.submit(str(config_path), priority=5, depends_on=["TASK-NONEXISTENT"])
+
+        # 直接调用 _evaluate_task 触发 task_blocked 路径（在锁内 emit）
+        # 旧实现会在这里死锁；若 1.5s 内回调被触发说明没有死锁。
+        s._evaluate_task(list(s.tasks.keys())[0], priority=5)
+        assert callback_triggered.wait(timeout=1.5), "hook 回调未触发，疑似死锁"
+
+    def test_consume_loop_survives_exception_in_evaluate(self, tmp_path):
+        """回归测试：_consume_loop 体异常不应杀死消费线程.
+
+        旧实现只对 task_queue.get 做了 try/except，循环体其余部分
+        (_evaluate_task / _save_state / executor.submit) 任意一处抛异常都会
+        让唯一的 consume 线程静默退出，调度器永久停止处理任务。
+        本测试让第一个任务的 _evaluate_task 抛异常，验证第二个任务仍能被消费。
+        """
+        config_path = tmp_path / "project_config.py"
+        config_path.write_text("PROJECT_CONFIG = {}", encoding="utf-8")
+        s = TaskScheduler(max_workers=2, state_dir=str(tmp_path / "scheduler"))
+
+        original_evaluate = s._evaluate_task
+        call_count = {"n": 0}
+
+        def flaky_evaluate(task_id, priority):
+            call_count["n"] += 1
+            if call_count["n"] == 1:
+                raise RuntimeError("模拟 _evaluate_task 抛异常（如磁盘满导致 _save_state 失败）")
+            return original_evaluate(task_id, priority)
+
+        s._evaluate_task = flaky_evaluate
+        s._run_task = lambda task_id: None  # 不真正执行 workflow
+        s.start()
+        try:
+            t1 = s.submit(str(config_path), priority=5)
+            # 第一个任务会让 consume 线程抛异常；若 consume 线程已死，第二个任务永远不会被消费
+            time.sleep(0.3)
+            t2 = s.submit(str(config_path), priority=5)
+            deadline = time.time() + 3
+            while time.time() < deadline:
+                if s.get_task(t2).status == TaskStatus.RUNNING:
+                    break
+                time.sleep(0.1)
+            assert s.get_task(t2).status == TaskStatus.RUNNING, (
+                "consume 线程未恢复，第二个任务未被消费 — 疑似 consume_loop 已死"
+            )
+        finally:
+            s.stop()
+
+    def test_list_tasks_does_not_raise_under_concurrent_writes(self, tmp_path):
+        """回归测试：并发 submit 时调用 list_tasks 不应抛 RuntimeError.
+
+        旧实现 list_tasks 直接 list(self.tasks.values())，与 submit 的写入并发
+        时会抛 'dictionary changed size during iteration'。修复后在锁内做快照。
+        """
+        config_path = tmp_path / "project_config.py"
+        config_path.write_text("PROJECT_CONFIG = {}", encoding="utf-8")
+        s = TaskScheduler(max_workers=2, state_dir=str(tmp_path / "scheduler"))
+
+        stop = threading.Event()
+        errors = []
+
+        def writer():
+            i = 0
+            while not stop.is_set():
+                try:
+                    s.submit(str(config_path), priority=5)
+                except Exception as e:  # noqa: BLE001
+                    errors.append(e)
+                    return
+                i += 1
+                if i > 200:
+                    return
+
+        def reader():
+            while not stop.is_set():
+                try:
+                    s.list_tasks()
+                except Exception as e:  # noqa: BLE001
+                    errors.append(e)
+                    return
+
+        w = threading.Thread(target=writer)
+        r = threading.Thread(target=reader)
+        w.start()
+        r.start()
+        w.join(timeout=3)
+        stop.set()
+        r.join(timeout=3)
+        assert not errors, f"并发访问抛异常: {errors!r}"
+
+    def test_global_risk_summary_does_not_raise_under_concurrent_finish(self, tmp_path):
+        """回归测试：worker 并发写 risk_summaries 时读侧不应抛 RuntimeError."""
+        s = TaskScheduler(max_workers=2, state_dir=str(tmp_path / "scheduler"))
+
+        stop = threading.Event()
+        errors = []
+
+        def finisher():
+            i = 0
+            while not stop.is_set() and i < 100:
+                try:
+                    task = TaskState(
+                        task_id=f"TASK-{i}",
+                        run_id=f"RUN-{i}",
+                        config_path="x",
+                        status=TaskStatus.COMPLETED,
+                    )
+                    s.tasks[task.task_id] = task
+                    s._finish_task(task, {"milestones": {"risks": {"open_count": 1, "critical_count": 0}}})
+                except Exception as e:  # noqa: BLE001
+                    errors.append(e)
+                    return
+                i += 1
+
+        def reader():
+            while not stop.is_set():
+                try:
+                    s.get_global_risk_summary()
+                    s.get_global_milestone_summary()
+                except Exception as e:  # noqa: BLE001
+                    errors.append(e)
+                    return
+
+        f = threading.Thread(target=finisher)
+        r = threading.Thread(target=reader)
+        f.start()
+        r.start()
+        f.join(timeout=3)
+        stop.set()
+        r.join(timeout=3)
+        assert not errors, f"并发读写 risk/milestone summaries 抛异常: {errors!r}"

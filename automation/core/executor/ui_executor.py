@@ -31,11 +31,14 @@ class UIExecutor(TestExecutor):
         try:
             import subprocess
 
+            # 必须设置超时：playwright install chromium 会下载较大的浏览器二进制，
+            # 在网络卡顿、代理劫持或镜像源失效时会无限阻塞，导致整个 UI 执行器挂死。
             subprocess.run(
                 ["playwright", "install", "chromium"],
                 check=True,
                 capture_output=True,
                 text=True,
+                timeout=300,
             )
             return True
         except Exception:

@@ -49,16 +49,36 @@ class VersionManager:
         if self.manifest_path.exists():
             try:
                 self._manifest = json.loads(self.manifest_path.read_text(encoding="utf-8"))
-            except Exception:
+            except Exception as e:
+                # 不要静默清空 manifest：直接 write 会用默认空对象覆盖已损坏
+                # 但仍可能包含可恢复数据的文件，造成版本注册表整体丢失。
+                # 这里保留磁盘原文件，仅在内存初始化为空，并打印告警以便排查。
+                print(f"[VersionManager] manifest 解析失败，保留磁盘原文件以便恢复: {e}")
                 self._manifest = {"versions": []}
         else:
             self._manifest = {"versions": []}
 
     def _save_manifest(self):
-        self.manifest_path.write_text(
-            json.dumps(self._manifest, ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
+        # 原子写：先写临时文件再 os.replace，避免写过程中被中断
+        # (OOM/断电/磁盘满/信号) 导致 manifest.json 被截断为空，
+        # 进而在下一次 _load_manifest 时丢失全部版本注册信息。
+        import os
+        import tempfile
+
+        self.base_dir.mkdir(parents=True, exist_ok=True)
+        content = json.dumps(self._manifest, ensure_ascii=False, indent=2)
+        fd, tmp_path = tempfile.mkstemp(prefix=".manifest-", suffix=".tmp", dir=str(self.base_dir))
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                f.write(content)
+            os.replace(tmp_path, self.manifest_path)
+        except Exception:
+            # 清理临时文件，避免残留
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+            raise
 
     def list_versions(self) -> List[str]:
         """返回所有已注册版本号."""

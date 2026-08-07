@@ -27,9 +27,11 @@ class TfidfKnowledgeStore(BaseRetriever):
         self.idf = {}
 
     def add_documents(self, documents: List[Document]) -> None:
-        start_idx = len(self.documents)
         for doc in documents:
-            idx = start_idx + len(self.documents)
+            # idx 必须取 append 之前的当前长度（即新文档将要落入的位置），
+            # 不能使用 start_idx + len(self.documents)：当 store 非空时
+            # 会让索引整体偏移 start_idx，导致 search 取到错误文档或 IndexError。
+            idx = len(self.documents)
             self.documents.append(doc)
             terms = self._tokenize(doc.content)
             for term in set(terms):

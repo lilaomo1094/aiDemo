@@ -3,7 +3,7 @@
 
 from typing import Dict, List
 
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.engine import Engine
 
 
@@ -23,22 +23,29 @@ class DBSchemaCollector:
             tables = []
             for table_name in inspector.get_table_names():
                 columns = []
-                pks = {c["name"] for c in inspector.get_pk_constraint(table_name).get("constrained_columns", [])}
-                fks = []
+                # SQLAlchemy Inspector.get_pk_constraint 返回的 constrained_columns
+                # 是列名字符串列表（不是列字典），直接用 set 即可。旧实现写成
+                # c["name"] 会在任何真实数据库上抛 "string indices must be integers".
+                pks = set(inspector.get_pk_constraint(table_name).get("constrained_columns", []))
+                # 记录每个外键列对应的引用（col_name -> referred_table.referred_col）。
+                # 之前的实现把 ref 当作循环变量泄漏出内层循环，导致同一表内多个外键列
+                # 全部被记录为指向最后一个外键的引用。
+                fk_refs: Dict[str, str] = {}
                 for fk in inspector.get_foreign_keys(table_name):
+                    ref_cols = fk.get("referred_columns", [])
                     for i, col in enumerate(fk.get("constrained_columns", [])):
-                        ref_cols = fk.get("referred_columns", [])
-                        ref = f"{fk['referred_table']}.{ref_cols[i] if i < len(ref_cols) else ''}"
-                        fks.append(col)
+                        ref_col = ref_cols[i] if i < len(ref_cols) else ""
+                        fk_refs[col] = f"{fk['referred_table']}.{ref_col}"
 
                 for col in inspector.get_columns(table_name):
+                    ref = fk_refs.get(col["name"])
                     columns.append({
                         "name": col["name"],
                         "type": str(col["type"]),
                         "nullable": col.get("nullable", True),
                         "default": col.get("default", None),
                         "primary_key": col["name"] in pks,
-                        "foreign_key": f"{self.config.database}.{ref}" if col["name"] in fks else None,
+                        "foreign_key": f"{self.config.database}.{ref}" if ref else None,
                     })
 
                 tables.append({
@@ -70,7 +77,10 @@ class DBSchemaCollector:
         engine = self._create_engine()
         try:
             with engine.connect() as conn:
-                conn.execute("SELECT 1")
+                # SQLAlchemy 2.0 的 Connection.execute 不再接受裸字符串，
+                # 必须用 text() 包装，否则抛 ObjectNotExecutableError 并被
+                # 下面的 except 静默吞掉，导致 test_connection 永远返回 False。
+                conn.execute(text("SELECT 1"))
             return True
         except Exception:
             return False

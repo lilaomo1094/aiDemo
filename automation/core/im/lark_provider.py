@@ -78,8 +78,37 @@ class LarkProvider(IMProvider):
             raw=payload,
         )
 
-    def verify_webhook(self, payload: Dict[str, Any], signature: str = None) -> bool:
+    def verify_webhook(self, body: bytes, headers: Dict[str, str]) -> bool:
+        """校验飞书事件回调签名 (X-Lark-Signature).
+
+        未配置 encrypt_key 时放行（兼容明文模式与既有测试）。
+        配置了 encrypt_key 时必须校验，否则任何能访问端口的请求都可伪造
+        sender_id 冒充 admin_users 触发 /run / /cancel 等高危命令。
+        """
         if not self.encrypt_key:
             return True
-        # 简化：实际应使用 challenge/token 校验
-        return True
+
+        import hashlib
+        import hmac
+
+        signature = (
+            headers.get("X-Lark-Signature")
+            or headers.get("x-lark-signature")
+            or ""
+        )
+        if not signature:
+            return False
+        timestamp = (
+            headers.get("X-Lark-Request-Timestamp")
+            or headers.get("x-lark-request-timestamp")
+            or ""
+        )
+        nonce = (
+            headers.get("X-Lark-Request-Nonce")
+            or headers.get("x-lark-request-nonce")
+            or ""
+        )
+        # 飞书 v1 签名算法：sha256(timestamp + nonce + encrypt_key + body)
+        signed = f"{timestamp}{nonce}{self.encrypt_key}".encode("utf-8") + body
+        expected = hashlib.sha256(signed).hexdigest()
+        return hmac.compare_digest(expected, signature)

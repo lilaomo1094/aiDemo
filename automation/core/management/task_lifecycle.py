@@ -82,10 +82,15 @@ class TaskLifecycleManager:
             return None
         if task.status not in {TaskStatus.FAILED, TaskStatus.CANCELLED, TaskStatus.BLOCKED}:
             return None
+        # 重试任务必须保留原任务的依赖与资源约束，否则会绕过依赖门控
+        # （可能在依赖未完成前先跑）以及资源槽位限制（超过 resource_limits）。
         new_id = self.scheduler.submit(
             config_path=task.config_path,
             priority=max(1, task.priority - 1),
             callback_info=task.callback_info,
+            depends_on=task.depends_on,
+            resources=task.resources,
+            preemptible=task.preemptible,
         )
         self._emit("task_retried", {"old_task_id": task_id, "new_task_id": new_id})
         return new_id
